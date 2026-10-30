@@ -1,0 +1,9 @@
+{
+  "name": "ShowMyMeds",
+  "short_name": "ShowMyMeds",
+  "start_url": "/today",
+  "display": "standalone",
+  "background_color": "#FAF9F6",
+  "theme_color": "#2F4F4F",
+  "icons": [{ "src": "/favicon.ico", "sizes": "64x64", "type": "image/x-icon" }]
+}
