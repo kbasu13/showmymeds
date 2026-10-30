@@ -14,16 +14,200 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      caregiver_links: {
+        Row: {
+          caregiver_id: string | null
+          created_at: string
+          id: string
+          invite_token: string
+          patient_id: string
+          status: string
+        }
+        Insert: {
+          caregiver_id?: string | null
+          created_at?: string
+          id?: string
+          invite_token?: string
+          patient_id: string
+          status?: string
+        }
+        Update: {
+          caregiver_id?: string | null
+          created_at?: string
+          id?: string
+          invite_token?: string
+          patient_id?: string
+          status?: string
+        }
+        Relationships: []
+      }
+      dose_logs: {
+        Row: {
+          id: string
+          medicine_id: string
+          scheduled_date: string
+          scheduled_time: string
+          taken_at: string
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          medicine_id: string
+          scheduled_date: string
+          scheduled_time: string
+          taken_at?: string
+          user_id?: string
+        }
+        Update: {
+          id?: string
+          medicine_id?: string
+          scheduled_date?: string
+          scheduled_time?: string
+          taken_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "dose_logs_medicine_id_fkey"
+            columns: ["medicine_id"]
+            isOneToOne: false
+            referencedRelation: "medicines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      medicines: {
+        Row: {
+          composition: string | null
+          created_at: string
+          dosage: string | null
+          dose_qty: number
+          end_date: string | null
+          form: string
+          id: string
+          image_url: string | null
+          name: string
+          notes: string | null
+          prescription_path: string | null
+          start_date: string
+          stock: number
+          times: string[]
+          user_id: string
+        }
+        Insert: {
+          composition?: string | null
+          created_at?: string
+          dosage?: string | null
+          dose_qty?: number
+          end_date?: string | null
+          form?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          notes?: string | null
+          prescription_path?: string | null
+          start_date?: string
+          stock?: number
+          times?: string[]
+          user_id?: string
+        }
+        Update: {
+          composition?: string | null
+          created_at?: string
+          dosage?: string | null
+          dose_qty?: number
+          end_date?: string | null
+          form?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          notes?: string | null
+          prescription_path?: string | null
+          start_date?: string
+          stock?: number
+          times?: string[]
+          user_id?: string
+        }
+        Relationships: []
+      }
+      premium_users: {
+        Row: {
+          expires_at: string | null
+          granted_at: string
+          user_id: string
+        }
+        Insert: {
+          expires_at?: string | null
+          granted_at?: string
+          user_id: string
+        }
+        Update: {
+          expires_at?: string | null
+          granted_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          display_name: string | null
+          id: string
+          referral_code: string | null
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string | null
+          id: string
+          referral_code?: string | null
+        }
+        Update: {
+          created_at?: string
+          display_name?: string | null
+          id?: string
+          referral_code?: string | null
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      accept_invite: { Args: { _token: string }; Returns: string }
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
+      is_caregiver_of: { Args: { _patient: string }; Returns: boolean }
+      take_dose: {
+        Args: { _date: string; _medicine: string; _time: string }
+        Returns: undefined
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +334,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
