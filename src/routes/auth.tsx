@@ -54,12 +54,12 @@ function AuthPage() {
       });
       setBusy(false);
       if (error) return toast.error(error.message);
-      toast.success("Check your email to confirm your account");
+      return toast.success("Check your email to confirm your account");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setBusy(false);
       if (error) return toast.error(error.message);
-      navigate({ to: dest() });
+      return navigate({ to: dest() });
     }
   };
 
@@ -74,14 +74,14 @@ function AuthPage() {
     setBusy(false);
     if (error) return toast.error(error.message);
     setCodeSent(true);
-    toast.success("We sent a code to your phone");
+    return toast.success("We sent a code to your phone");
   };
   const verifyCode = async (): Promise<unknown> => {
     setBusy(true);
     const { error } = await supabase.auth.verifyOtp({ phone: phone.replace(/[^\d+]/g, ""), token: code.trim(), type: "sms" });
     setBusy(false);
     if (error) return toast.error(error.message);
-    navigate({ to: dest() });
+    return navigate({ to: dest() });
   };
 
   const google = (provider: "google" | "apple") => async (): Promise<unknown> => {
@@ -90,7 +90,7 @@ function AuthPage() {
     const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
     if (r.error) return toast.error(r.error.message ?? "Sign-in failed");
     if (r.redirected) return;
-    navigate({ to: dest() });
+    return navigate({ to: dest() });
   };
 
   return (

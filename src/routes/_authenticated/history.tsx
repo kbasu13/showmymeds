@@ -62,7 +62,7 @@ function HistoryPage() {
   return (
     <div className="space-y-5">
       <h1 className="text-4xl font-bold text-primary">History</h1>
-      {user && <AdherenceView userId={user.id} patientName={user.user_metadata?.full_name || user.email || user.phone} />}
+      {user && <AdherenceView userId={user.id} patientName={user.user_metadata?.['full_name'] || user.email || user.phone} />}
     </div>
   );
 }

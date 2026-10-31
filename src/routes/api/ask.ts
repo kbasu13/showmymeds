@@ -20,8 +20,8 @@ export const Route = createFileRoute("/api/ask")({
       POST: async ({ request }) => {
         const token = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
         if (!token) return Response.json({ error: "Please sign in." }, { status: 401 });
-        const key = process.env.SUPABASE_PUBLISHABLE_KEY!;
-        const db = createClient<Database>(process.env.SUPABASE_URL!, key, {
+        const key = process.env['SUPABASE_PUBLISHABLE_KEY']!;
+        const db = createClient<Database>(process.env['SUPABASE_URL']!, key, {
           auth: { storage: undefined, persistSession: false, autoRefreshToken: false },
           global: {
             fetch: (input, init) => {
@@ -51,7 +51,7 @@ export const Route = createFileRoute("/api/ask")({
         ]);
         const context = `Today is ${new Date().toISOString().slice(0, 10)}.\nMedicines: ${JSON.stringify(meds ?? [])}\nDoses taken in last 30 days: ${JSON.stringify(logs ?? [])}`;
 
-        const apiKey = process.env.LOVABLE_API_KEY;
+        const apiKey = process.env['LOVABLE_API_KEY'];
         if (!apiKey) return Response.json({ error: "The assistant is not set up yet." }, { status: 500 });
         const runIdFetch = createLovableAiGatewayRunIdFetch(getLovableAiGatewayRunId(request));
         const provider = createOpenAI({
