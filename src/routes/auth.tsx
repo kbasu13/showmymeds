@@ -54,22 +54,43 @@ function AuthPage() {
       });
       setBusy(false);
       if (error) return toast.error(error.message);
-      toast.success("Check your email to confirm your account");
+      return toast.success("Check your email to confirm your account");
     } else {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
       setBusy(false);
       if (error) return toast.error(error.message);
-      navigate({ to: dest() });
+      return navigate({ to: dest() });
     }
   };
 
-  const google = async (): Promise<unknown> => {
+  const [phone, setPhone] = useState("");
+  const [code, setCode] = useState("");
+  const [codeSent, setCodeSent] = useState(false);
+  const sendCode = async (): Promise<unknown> => {
+    const p = phone.replace(/[^\d+]/g, "");
+    if (!/^\+\d{8,15}$/.test(p)) return toast.error("Enter your mobile number with country code, e.g. +91 98765 43210");
+    setBusy(true);
+    const { error } = await supabase.auth.signInWithOtp({ phone: p });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setCodeSent(true);
+    return toast.success("We sent a code to your phone");
+  };
+  const verifyCode = async (): Promise<unknown> => {
+    setBusy(true);
+    const { error } = await supabase.auth.verifyOtp({ phone: phone.replace(/[^\d+]/g, ""), token: code.trim(), type: "sms" });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    return navigate({ to: dest() });
+  };
+
+  const google = (provider: "google" | "apple") => async (): Promise<unknown> => {
     sessionStorage.setItem("smm-after-login", dest());
     if (referral) sessionStorage.setItem("smm-referral", referral);
-    const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });
-    if (r.error) return toast.error(r.error.message ?? "Google sign-in failed");
+    const r = await lovable.auth.signInWithOAuth(provider, { redirect_uri: window.location.origin });
+    if (r.error) return toast.error(r.error.message ?? "Sign-in failed");
     if (r.redirected) return;
-    navigate({ to: dest() });
+    return navigate({ to: dest() });
   };
 
   return (
@@ -81,7 +102,21 @@ function AuthPage() {
         </div>
         <p className="mb-6 text-xl">{mode === "signup" ? "Create your free account" : "Welcome back"}</p>
 
-        <Button variant="outline" size="lg" className="w-full" onClick={google}>Continue with Google</Button>
+        <div className="space-y-3">
+          <Button variant="outline" size="lg" className="w-full" onClick={google("google")}>Continue with Google</Button>
+          <Button variant="outline" size="lg" className="w-full" onClick={google("apple")}>Continue with Apple</Button>
+        </div>
+        <div className="my-5 text-center text-muted-foreground">or use your mobile number</div>
+        <div className="space-y-3">
+          <Label className="text-base font-bold" htmlFor="ph">Mobile number</Label>
+          <Input id="ph" type="tel" inputMode="tel" placeholder="+91 98765 43210" className="h-12 text-lg" value={phone} onChange={(e) => setPhone(e.target.value)} />
+          {codeSent && (
+            <Input aria-label="Code from text message" inputMode="numeric" placeholder="6-digit code" className="h-12 text-lg" value={code} onChange={(e) => setCode(e.target.value)} />
+          )}
+          <Button size="lg" variant="secondary" className="w-full" disabled={busy} onClick={codeSent ? verifyCode : sendCode}>
+            {codeSent ? "Sign in with code" : "Send me a code"}
+          </Button>
+        </div>
         <div className="my-5 text-center text-muted-foreground">or use your email</div>
 
         <form onSubmit={submit} className="space-y-4">
