@@ -84,7 +84,7 @@ function AskPage() {
       </div>
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
         <Input className="h-12 text-lg" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type your question" />
-        <Button type="submit" size="icon" aria-label="Send"><Send /></Button>
+        <Button type="submit" size="icon" aria-label="Send" disabled={busy}><Send /></Button>
       </form>
     </div>
   );

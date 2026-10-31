@@ -60,14 +60,12 @@ export const Route = createFileRoute("/api/ask")({
           headers: { "Lovable-API-Key": apiKey, "X-Lovable-AIG-SDK": "vercel-ai-sdk" },
           fetch: runIdFetch.fetch,
         });
-        let failure: string | undefined;
         const result = streamText({
           model: provider.responses("openai/gpt-6-astra"),
           instructions: `${INSTRUCTIONS}\n\n${context}`,
           messages,
           abortSignal: request.signal,
           onError: ({ error }) => {
-            failure = (error as Error)?.message;
             console.error("Ask failed", error);
           },
           providerOptions: {
@@ -80,7 +78,6 @@ export const Route = createFileRoute("/api/ask")({
             },
           },
         });
-        void failure;
         return withLovableAiGatewayRunIdHeader(result.toTextStreamResponse(), runIdFetch);
       },
     },
