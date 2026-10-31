@@ -25,6 +25,7 @@ function AskPage() {
     { role: "assistant", text: "Hello! Ask me about your dose history or possible side effects." },
   ]);
   const [q, setQ] = useState("");
+  const [busy, setBusy] = useState(false);
 
   if (isLoading) return <p>Loading…</p>;
   if (!premium) {
@@ -37,13 +38,40 @@ function AskPage() {
     );
   }
 
-  const send = () => {
-    if (!q.trim()) return;
-    setMsgs((m) => [...m, { role: "user", text: q }, {
-      role: "assistant",
-      text: "Thanks for your question. The assistant is coming soon — for medical advice please speak to your doctor or pharmacist.",
-    }]);
+  const send = async () => {
+    if (!q.trim() || busy) return;
+    const history = [...msgs.slice(1), { role: "user" as const, text: q }];
+    setMsgs((m) => [...m, { role: "user", text: q }, { role: "assistant", text: "…" }]);
     setQ("");
+    setBusy(true);
+    const put = (text: string) => setMsgs((m) => [...m.slice(0, -1), { role: "assistant", text }]);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const r = await fetch("/api/ask", {
+        method: "POST",
+        headers: { "content-type": "application/json", authorization: `Bearer ${data.session?.access_token ?? ""}` },
+        body: JSON.stringify({ messages: history }),
+      });
+      if (!r.ok || !r.body) {
+        const j = await r.json().catch(() => ({}));
+        put(j.error ?? j.message ?? "Sorry, something went wrong. Please try again later.");
+        return;
+      }
+      const reader = r.body.getReader();
+      const dec = new TextDecoder();
+      let text = "";
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        text += dec.decode(value, { stream: true });
+        put(text);
+      }
+      if (!text) put("Sorry, I couldn't answer that right now. Please try again later.");
+    } catch {
+      put("Sorry, something went wrong. Please try again later.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   return (
@@ -56,7 +84,7 @@ function AskPage() {
       </div>
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
         <Input className="h-12 text-lg" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type your question" />
-        <Button type="submit" size="icon" aria-label="Send"><Send /></Button>
+        <Button type="submit" size="icon" aria-label="Send" disabled={busy}><Send /></Button>
       </form>
     </div>
   );
