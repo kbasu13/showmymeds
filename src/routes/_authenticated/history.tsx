@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
 import { useUser, useMeds, useLogs } from "@/lib/meds";
+import { downloadDoctorReport } from "@/lib/report";
 import { adherenceByDay, ymd, type Med, type Log } from "@/lib/schedule";
 
 export const Route = createFileRoute("/_authenticated/history")({
@@ -10,7 +11,7 @@ export const Route = createFileRoute("/_authenticated/history")({
   component: HistoryPage,
 });
 
-export function AdherenceView({ userId }: { userId: string }) {
+export function AdherenceView({ userId, patientName }: { userId: string; patientName?: string }) {
   const [range, setRange] = useState<7 | 30>(7);
   const days = Array.from({ length: range }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (range - 1 - i)); return ymd(d);
@@ -29,6 +30,9 @@ export function AdherenceView({ userId }: { userId: string }) {
         <Button variant={range === 7 ? "default" : "outline"} onClick={() => setRange(7)}>Last 7 days</Button>
         <Button variant={range === 30 ? "default" : "outline"} onClick={() => setRange(30)}>Last month</Button>
       </div>
+      <Button size="lg" variant="secondary" className="w-full" onClick={() =>
+        downloadDoctorReport({ patientName: patientName ?? "Patient", meds, logs, days: range })
+      }>Download PDF report for doctor</Button>
       <div className="rounded-2xl bg-hero p-5">
         <p className="text-lg">Average doses taken</p>
         <p className="font-display text-5xl font-bold text-primary">{avg}%</p>
@@ -58,7 +62,7 @@ function HistoryPage() {
   return (
     <div className="space-y-5">
       <h1 className="text-4xl font-bold text-primary">History</h1>
-      {user && <AdherenceView userId={user.id} />}
+      {user && <AdherenceView userId={user.id} patientName={user.user_metadata?.full_name || user.email || user.phone} />}
     </div>
   );
 }

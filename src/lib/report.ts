@@ -23,7 +23,7 @@ export async function downloadDoctorReport(opts: { patientName: string; meds: Me
   autoTable(doc, {
     startY: 46,
     head: [["Medicine", "Dose", "Form", "Times", "Started", "Ends"]],
-    body: opts.meds.map((m) => [m.name, m.dosage ?? "", m.form ?? "", [...m.times].sort().join(", "), m.start_date, m.end_date ?? "Ongoing"]),
+    body: opts.meds.map((m) => [m.name, m.dosage ?? "", m.form, [...m.times].sort().join(", "), m.start_date, m.end_date ?? "Ongoing"]),
     headStyles: { fillColor: [40, 90, 70] },
   });
 
@@ -31,7 +31,7 @@ export async function downloadDoctorReport(opts: { patientName: string; meds: Me
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     startY: (doc as any).lastAutoTable.finalY + 10,
     head: [["Date", "Doses taken", "Doses due", "% taken"]],
-    body: rows.map((r) => [r.date, String(r.taken), String(r.due), r.pct === null ? "—" : `${r.pct}%`]),
+    body: rows.map((r) => [r.date, String(r.taken), String(r.total), r.pct === null ? "—" : `${r.pct}%`]),
     headStyles: { fillColor: [40, 90, 70] },
   });
 
