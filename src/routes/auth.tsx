@@ -43,7 +43,7 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const dest = () => safePath(redirect);
 
-  const submit = async (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent): Promise<unknown> => {
     e.preventDefault();
     setBusy(true);
     if (mode === "signup") {
@@ -63,7 +63,7 @@ function AuthPage() {
     }
   };
 
-  const google = async () => {
+  const google = async (): Promise<unknown> => {
     sessionStorage.setItem("smm-after-login", dest());
     if (referral) sessionStorage.setItem("smm-referral", referral);
     const r = await lovable.auth.signInWithOAuth("google", { redirect_uri: window.location.origin });

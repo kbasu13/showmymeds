@@ -19,7 +19,7 @@ describe("adherence", () => {
     const r = adherenceByDay([med()], [
       { medicine_id: "m1", scheduled_date: "2026-02-01", scheduled_time: "08:00", taken_at: "" },
     ], ["2026-02-01"]);
-    expect(r[0].pct).toBe(50);
+    expect(r[0]!.pct).toBe(50);
   });
 });
 

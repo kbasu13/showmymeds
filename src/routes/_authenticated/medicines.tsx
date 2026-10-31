@@ -93,18 +93,18 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
   const [busy, setBusy] = useState(false);
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }));
 
-  const listen = () => {
+  const listen = (): void => {
     const SR = (window as unknown as { SpeechRecognition?: new () => SpeechRec; webkitSpeechRecognition?: new () => SpeechRec })
       .SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => SpeechRec }).webkitSpeechRecognition;
-    if (!SR) return toast.error("Voice input isn't supported on this browser");
+    if (!SR) { toast.error("Voice input isn't supported on this browser");  return; }
     const r = new SR();
     r.lang = navigator.language;
-    r.onresult = (e) => set("name", e.results[0][0].transcript);
+    r.onresult = (e) => set("name", e.results[0]![0].transcript);
     r.start();
     toast("Listening… say the medicine name");
   };
 
-  const findImage = async () => {
+  const findImage = async (): Promise<unknown> => {
     if (!f.name) return toast.error("Enter a name first");
     const url = await lookupMedicineImage(f.name);
     if (url) { set("image_url", url); toast.success("Picture found"); }
@@ -120,7 +120,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     } catch (e) { toast.error((e as Error).message); }
   };
 
-  const save = async () => {
+  const save = async (): Promise<unknown> => {
     if (!f.name.trim()) return toast.error("Please enter the medicine name");
     setBusy(true);
     let image_url = f.image_url;

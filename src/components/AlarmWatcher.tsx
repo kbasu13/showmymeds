@@ -68,7 +68,7 @@ export function AlarmWatcher({ userId }: { userId: string }) {
   }, [due.length]);
 
   if (!due.length) return null;
-  const cur = due[0];
+  const cur = due[0]!;
   const dismiss = () => setDue((p) => p.slice(1));
 
   return (
