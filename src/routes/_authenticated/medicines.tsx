@@ -109,6 +109,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     const url = await lookupMedicineImage(f.name);
     if (url) { set("image_url", url); toast.success("Picture found"); }
     else toast("No picture found — a simple icon will be shown");
+    return undefined;
   };
 
   const upload = async (file: File | undefined, kind: "image" | "rx") => {
@@ -137,7 +138,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     setBusy(false);
     if (error) return toast.error(error.message);
     toast.success("Saved");
-    onSaved();
+    return onSaved();
   };
 
   return (
