@@ -16,7 +16,7 @@ export function AdherenceView({ userId }: { userId: string }) {
     const d = new Date(); d.setDate(d.getDate() - (range - 1 - i)); return ymd(d);
   });
   const { data: meds = [] } = useMeds(userId);
-  const { data: logs = [] } = useLogs(userId, days[0]);
+  const { data: logs = [] } = useLogs(userId, days[0]!);
   const data = adherenceByDay(meds as unknown as Med[], logs as unknown as Log[], days).map((d) => ({
     ...d, label: new Date(d.date + "T00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" }), value: d.pct ?? 0,
   }));

@@ -83,7 +83,7 @@ export function buildIcs(meds: Med[], from: Date = new Date()) {
       if (isActiveOn(med, date)) {
         for (const t of [...med.times].sort()) {
           if (remaining <= 0) break;
-          const [h, mi] = t.split(":").map(Number);
+          const [h = 0, mi = 0] = t.split(":").map(Number);
           const start = new Date(day);
           start.setHours(h, mi, 0, 0);
           if (start < from) continue;

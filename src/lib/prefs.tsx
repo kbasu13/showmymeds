@@ -24,7 +24,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme;
+    document.documentElement.dataset["theme"] = theme;
     localStorage.setItem("smm-theme", theme);
   }, [theme]);
 
