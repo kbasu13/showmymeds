@@ -7,3 +7,4 @@
 - [x] Mobile number sign-in screen — texts need an SMS service set up in Auth settings
 - [ ] Facebook sign-in — not supported by Lovable Cloud
 - [ ] Several family profiles — on hold, waiting for the user to confirm it's wanted
+- [ ] Shrink oversized buttons and tidy spacing in Normal display mode
