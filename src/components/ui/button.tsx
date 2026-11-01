@@ -19,10 +19,10 @@ const buttonVariants = cva(
         take: "bg-success text-success-foreground shadow-soft hover:bg-success/90",
       },
       size: {
-        default: "min-h-12 px-5 py-2",
-        sm: "min-h-10 px-4 text-sm",
-        lg: "min-h-14 px-8 text-lg",
-        icon: "h-12 w-12",
+        default: "min-h-11 px-4 py-2",
+        sm: "min-h-9 px-3 text-sm",
+        lg: "min-h-12 px-6 text-base",
+        icon: "h-11 w-11",
       },
     },
     defaultVariants: {
