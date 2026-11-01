@@ -185,7 +185,7 @@ html.size-large {
     border-color: var(--color-border);
   }
   html {
-    font-size: 112.5%;
+    font-size: 100%;
   }
   body {
     background-color: var(--color-background);
