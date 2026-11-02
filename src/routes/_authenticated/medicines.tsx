@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MedImage } from "@/components/MedImage";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, uploadFile, type Medicine,
+  FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, uploadFile, type Medicine,
 } from "@/lib/meds";
 import { buildIcs, daysOfStockLeft, ymd, type Med } from "@/lib/schedule";
 
@@ -106,9 +106,10 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
 
   const findImage = async (): Promise<unknown> => {
     if (!f.name) return toast.error("Enter a name first");
-    const url = await lookupMedicineImage(f.name);
-    if (url) { set("image_url", url); toast.success("Picture found"); }
-    else toast("No picture found — a simple icon will be shown");
+    const [url, comp] = await Promise.all([lookupMedicineImage(f.name), f.composition ? null : lookupComposition(f.name)]);
+    if (comp) set("composition", comp);
+    if (url) { set("image_url", url); toast.success(comp ? "Picture and composition found" : "Picture found"); }
+    else toast(comp ? "Composition found — no picture, a simple icon will be shown" : "No picture found — a simple icon will be shown");
     return undefined;
   };
 
@@ -126,8 +127,10 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     setBusy(true);
     let image_url = f.image_url;
     if (!image_url && !med) image_url = await lookupMedicineImage(f.name);
+    let composition = f.composition;
+    if (!composition.trim()) composition = (await lookupComposition(f.name)) ?? "";
     const row = {
-      name: f.name.trim(), composition: f.composition || null, form: f.form, dosage: f.dosage || null,
+      name: f.name.trim(), composition: composition || null, form: f.form, dosage: f.dosage || null,
       dose_qty: Number(f.dose_qty) || 1, times: f.times.filter(Boolean), start_date: f.start_date,
       end_date: f.end_date || null, stock: Number(f.stock) || 0, image_url,
       prescription_path: f.prescription_path, notes: f.notes || null,
@@ -149,7 +152,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
           <div className="flex items-center gap-3">
             <MedImage src={f.image_url} form={f.form} name={f.name} className="h-24 w-24" />
             <div className="flex flex-col gap-2">
-              <Button variant="outline" size="sm" onClick={findImage}><Search /> Find picture</Button>
+              <Button variant="outline" size="sm" onClick={findImage}><Search /> Find picture & composition</Button>
               <Button variant="outline" size="sm" asChild>
                 <label><ImagePlus /> Use my photo
                   <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0], "image")} /></label>
@@ -158,12 +161,18 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
           </div>
           <Field label="Medicine name">
             <div className="flex gap-2">
-              <Input className="h-12 text-lg" value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Metformin" />
+              <Input className="h-10" value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Metformin" />
               <Button variant="secondary" size="icon" onClick={listen} aria-label="Speak the name"><Mic /></Button>
             </div>
           </Field>
-          <Field label="Main composition (salt)">
-            <Input className="h-12 text-lg" value={f.composition} onChange={(e) => set("composition", e.target.value)} placeholder="e.g. Metformin Hydrochloride 500mg" />
+          <Field label="Composition (active ingredients)">
+            <div className="flex gap-2">
+              <Textarea rows={2} value={f.composition} onChange={(e) => set("composition", e.target.value)} placeholder="Filled in automatically, e.g. Paracetamol 500mg + Caffeine 30mg" />
+              <Button variant="secondary" size="icon" aria-label="Look up composition" onClick={async () => {
+                const c = await lookupComposition(f.name);
+                if (c) { set("composition", c); toast.success("Composition found"); } else toast("Couldn't find the composition — please type it");
+              }}><Search /></Button>
+            </div>
           </Field>
           <Field label="Type">
             <div className="flex flex-wrap gap-2">
@@ -173,14 +182,14 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
             </div>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Dosage"><Input className="h-12 text-lg" value={f.dosage} onChange={(e) => set("dosage", e.target.value)} placeholder="1 tablet" /></Field>
-            <Field label="Units per dose"><Input className="h-12 text-lg" type="number" min="0.25" step="0.25" value={f.dose_qty} onChange={(e) => set("dose_qty", e.target.value)} /></Field>
+            <Field label="Dosage"><Input className="h-10" value={f.dosage} onChange={(e) => set("dosage", e.target.value)} placeholder="1 tablet" /></Field>
+            <Field label="Units per dose"><Input className="h-10" type="number" min="0.25" step="0.25" value={f.dose_qty} onChange={(e) => set("dose_qty", e.target.value)} /></Field>
           </div>
           <Field label={`Times per day (${f.times.length})`}>
             <div className="space-y-2">
               {f.times.map((t, i) => (
                 <div key={i} className="flex gap-2">
-                  <Input type="time" className="h-12 text-lg" value={t}
+                  <Input type="time" className="h-10" value={t}
                     onChange={(e) => set("times", f.times.map((x, j) => (j === i ? e.target.value : x)))} />
                   {f.times.length > 1 && (
                     <Button variant="ghost" size="icon" aria-label="Remove time" onClick={() => set("times", f.times.filter((_, j) => j !== i))}><X /></Button>
@@ -191,10 +200,10 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
             </div>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Course starts"><Input type="date" className="h-12" value={f.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
-            <Field label="Course ends"><Input type="date" className="h-12" value={f.end_date} onChange={(e) => set("end_date", e.target.value)} /></Field>
+            <Field label="Course starts"><Input type="date" className="h-10" value={f.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
+            <Field label="Course ends"><Input type="date" className="h-10" value={f.end_date} onChange={(e) => set("end_date", e.target.value)} /></Field>
           </div>
-          <Field label="Stock in hand (units)"><Input type="number" className="h-12 text-lg" value={f.stock} onChange={(e) => set("stock", e.target.value)} /></Field>
+          <Field label="Stock in hand (units)"><Input type="number" className="h-10" value={f.stock} onChange={(e) => set("stock", e.target.value)} /></Field>
           <Field label="Prescription photo">
             <Button variant="outline" asChild className="w-full">
               <label><Camera /> {f.prescription_path ? "Replace prescription" : "Upload prescription"}

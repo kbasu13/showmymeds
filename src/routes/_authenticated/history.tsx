@@ -37,14 +37,14 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
         <p className="text-lg">Average doses taken</p>
         <p className="font-display text-4xl font-semibold text-primary">{avg}%</p>
       </div>
-      <div className="overflow-x-auto rounded-xl border bg-card p-3">
-        <div style={{ width: Math.max(range * 56, 320), height: 280 }}>
-          <ResponsiveContainer>
-            <BarChart data={data} margin={{ top: 24, right: 8, left: -16, bottom: 0 }}>
-              <XAxis dataKey="label" tick={{ fontSize: 13 }} interval={0} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 13 }} />
+      <div className="w-full min-w-0 overflow-hidden rounded-xl border bg-card p-2">
+        <div className="h-64 w-full">
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} margin={{ top: 20, right: 4, left: -24, bottom: 0 }}>
+              <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={range === 7 ? 0 : "preserveStartEnd"} minTickGap={8} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={40} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
-                <LabelList dataKey="value" position="top" formatter={(v: number) => `${v}%`} style={{ fontSize: 12, fontWeight: 700 }} />
+                {range === 7 && <LabelList dataKey="value" position="top" formatter={(v: number) => `${v}%`} style={{ fontSize: 12, fontWeight: 600 }} />}
                 {data.map((d) => (
                   <Cell key={d.date} fill={d.value >= 80 ? "var(--chart-1)" : d.value >= 50 ? "var(--chart-3)" : "var(--chart-4)"} />
                 ))}
