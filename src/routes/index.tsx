@@ -39,12 +39,12 @@ function Index() {
   return (
     <div className="flex min-h-screen flex-col bg-hero">
       <main className="mx-auto w-full max-w-xl flex-1 px-5 py-12">
-        <span className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand text-primary"><Pill className="h-9 w-9" /></span>
-        <h1 className="mt-6 text-5xl font-bold leading-tight text-primary">Your medicines, made simple.</h1>
+        <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-brand text-primary"><Pill className="h-9 w-9" /></span>
+        <h1 className="mt-6 text-4xl font-semibold leading-tight text-primary">Your medicines, made simple.</h1>
         <p className="mt-4 text-xl">ShowMyMeds reminds you when to take each medicine, in big clear letters.</p>
         <ul className="mt-8 space-y-3">
           {features.map(({ icon: Icon, t }) => (
-            <li key={t} className="flex items-center gap-4 rounded-2xl bg-card p-4 text-lg shadow-soft">
+            <li key={t} className="flex items-center gap-4 rounded-xl bg-card p-4 text-lg shadow-soft">
               <Icon className="h-8 w-8 shrink-0 text-primary" /> {t}
             </li>
           ))}

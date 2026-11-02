@@ -97,8 +97,8 @@ function AuthPage() {
     <div className="flex min-h-screen flex-col bg-hero">
       <main className="mx-auto w-full max-w-md flex-1 px-5 py-10">
         <div className="mb-6 flex items-center gap-3">
-          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand text-primary"><Pill className="h-8 w-8" /></span>
-          <h1 className="text-4xl font-bold text-primary">ShowMyMeds</h1>
+          <span className="flex h-14 w-14 items-center justify-center rounded-xl bg-brand text-primary"><Pill className="h-8 w-8" /></span>
+          <h1 className="text-2xl font-semibold text-primary">ShowMyMeds</h1>
         </div>
         <p className="mb-6 text-xl">{mode === "signup" ? "Create your free account" : "Welcome back"}</p>
 

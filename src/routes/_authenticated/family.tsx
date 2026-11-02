@@ -74,10 +74,10 @@ function FamilyPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-4xl font-bold text-primary">Family</h1>
+      <h1 className="text-2xl font-semibold text-primary">Family</h1>
 
-      <section className="space-y-3 rounded-2xl border bg-card p-4 shadow-soft">
-        <h2 className="text-2xl font-bold">Invite a caregiver</h2>
+      <section className="space-y-3 rounded-xl border bg-card p-4 shadow-soft">
+        <h2 className="text-lg font-semibold">Invite a caregiver</h2>
         <p className="text-muted-foreground">They'll only see your medicines and doses — nothing else. You can remove them anytime.</p>
         <label className="block font-bold" htmlFor="msg">Your message (you can change it)</label>
         <Textarea id="msg" rows={4} className="text-lg" value={msg} onChange={(e) => setMsg(e.target.value)} />
@@ -92,7 +92,7 @@ function FamilyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-bold">People who can see my medicines</h2>
+        <h2 className="text-lg font-semibold">People who can see my medicines</h2>
         {mine.filter((l) => l.status === "accepted").length === 0 && <p className="text-muted-foreground">No one yet.</p>}
         {mine.map((l) => (
           <div key={l.id} className="flex items-center justify-between rounded-xl border bg-card p-3">
@@ -103,7 +103,7 @@ function FamilyPage() {
       </section>
 
       <section className="space-y-3">
-        <h2 className="text-2xl font-bold">People I care for</h2>
+        <h2 className="text-lg font-semibold">People I care for</h2>
         {caring.length === 0 && <p className="text-muted-foreground">When someone invites you, they'll appear here.</p>}
         {caring.map((c) => (
           <Link key={c.id} to="/family/$patientId" params={{ patientId: c.patient_id }}

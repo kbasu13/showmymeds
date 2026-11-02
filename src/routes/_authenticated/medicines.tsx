@@ -44,7 +44,7 @@ function MedicinesPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-3">
-        <h1 className="text-4xl font-bold text-primary">Medicines</h1>
+        <h1 className="text-2xl font-semibold text-primary">Medicines</h1>
         <Button size="lg" onClick={() => setEditing("new")}><Plus /> Add</Button>
       </div>
       {meds.length > 0 && (
@@ -54,11 +54,11 @@ function MedicinesPage() {
       )}
       <ul className="space-y-3">
         {meds.map((m) => (
-          <li key={m.id} className="rounded-2xl border bg-card p-4 shadow-soft">
+          <li key={m.id} className="rounded-xl border bg-card p-4 shadow-soft">
             <div className="flex gap-4">
               <MedImage src={m.image_url} form={m.form} name={m.name} />
               <div className="min-w-0 flex-1">
-                <p className="text-2xl font-bold text-primary">{m.name}</p>
+                <p className="text-lg font-semibold text-primary">{m.name}</p>
                 <p className="text-muted-foreground">{m.composition || "Composition not added"}</p>
                 <p className="mt-1">{m.dosage} · {m.times.join(", ")}</p>
                 <p className="text-sm text-muted-foreground">
@@ -72,7 +72,7 @@ function MedicinesPage() {
             </div>
           </li>
         ))}
-        {meds.length === 0 && <p className="rounded-2xl bg-hero p-8 text-center text-xl">No medicines yet. Tap “Add” to begin.</p>}
+        {meds.length === 0 && <p className="rounded-xl bg-hero p-8 text-center text-xl">No medicines yet. Tap “Add” to begin.</p>}
       </ul>
       {editing && user && (
         <MedForm userId={user.id} med={editing === "new" ? null : editing}

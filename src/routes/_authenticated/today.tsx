@@ -36,11 +36,11 @@ function TodayPage() {
     <div className="space-y-5">
       <div>
         <p className="text-lg text-muted-foreground">{dateLabel}</p>
-        <h1 className="text-4xl font-bold text-primary">Today</h1>
+        <h1 className="text-2xl font-semibold text-primary">Today</h1>
       </div>
 
       {low.length > 0 && (
-        <div role="alert" className="flex gap-3 rounded-2xl border-2 border-warning bg-warning/30 p-4 text-warning-foreground">
+        <div role="alert" className="flex gap-3 rounded-xl border-2 border-warning bg-warning/30 p-4 text-warning-foreground">
           <AlertTriangle className="mt-1 h-8 w-8 shrink-0" />
           <div>
             <p className="text-xl font-bold">Running low — please refill soon</p>
@@ -56,7 +56,7 @@ function TodayPage() {
       {isLoading ? (
         <p className="text-lg">Loading…</p>
       ) : doses.length === 0 ? (
-        <div className="rounded-2xl bg-hero p-8 text-center">
+        <div className="rounded-xl bg-hero p-8 text-center">
           <p className="text-xl">No medicines scheduled today.</p>
           <Button asChild size="lg" className="mt-4"><Link to="/medicines"><Plus /> Add a medicine</Link></Button>
         </div>
@@ -66,10 +66,10 @@ function TodayPage() {
             const m = meds.find((x) => x.id === med.id)!;
             const log = logs.find((l) => l.medicine_id === med.id && l.scheduled_time === time);
             return (
-              <li key={`${med.id}-${time}`} className="flex items-center gap-4 rounded-2xl border bg-card p-4 shadow-soft">
+              <li key={`${med.id}-${time}`} className="flex items-center gap-4 rounded-xl border bg-card p-4 shadow-soft">
                 <MedImage src={m.image_url} form={m.form} name={m.name} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-2xl font-bold">{time}</p>
+                  <p className="text-lg font-semibold">{time}</p>
                   <p className="truncate text-xl font-bold text-primary">{m.name}</p>
                   {m.dosage && <p className="text-muted-foreground">{m.dosage}</p>}
                 </div>

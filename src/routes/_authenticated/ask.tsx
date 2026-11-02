@@ -30,7 +30,7 @@ function AskPage() {
   if (isLoading) return <p>Loading…</p>;
   if (!premium) {
     return (
-      <div className="space-y-4 rounded-2xl bg-hero p-8 text-center">
+      <div className="space-y-4 rounded-xl bg-hero p-8 text-center">
         <Lock className="mx-auto h-12 w-12 text-primary" />
         <h1 className="text-3xl font-bold text-primary">Ask is a Premium feature</h1>
         <p className="text-lg">Chat about your medicines, dose history and side effects. Ask the app administrator to turn on Premium for your account.</p>
@@ -76,10 +76,10 @@ function AskPage() {
 
   return (
     <div className="flex h-[70vh] flex-col gap-3">
-      <h1 className="text-4xl font-bold text-primary">Ask</h1>
-      <div className="flex-1 space-y-3 overflow-y-auto rounded-2xl border bg-card p-4">
+      <h1 className="text-2xl font-semibold text-primary">Ask</h1>
+      <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border bg-card p-4">
         {msgs.map((m, i) => (
-          <p key={i} className={`max-w-[85%] rounded-2xl p-3 text-lg ${m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-secondary"}`}>{m.text}</p>
+          <p key={i} className={`max-w-[85%] rounded-xl p-3 text-lg ${m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-secondary"}`}>{m.text}</p>
         ))}
       </div>
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>

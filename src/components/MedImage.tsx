@@ -21,7 +21,7 @@ export function MedImage({ src, form, name, className }: { src: string | null; f
 
   const Icon = ICONS[form] ?? Pill;
   return (
-    <div className={cn("flex shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-secondary text-primary", className ?? "h-20 w-20")}>
+    <div className={cn("flex shrink-0 items-center justify-center overflow-hidden rounded-xl bg-secondary text-primary", className ?? "h-20 w-20")}>
       {url && !failed ? (
         <img src={url} alt={name} className="h-full w-full object-cover" onError={() => setFailed(true)} />
       ) : (
