@@ -16,6 +16,7 @@ import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/as
 import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated/family'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedMedicinesRouteImport } from './routes/_authenticated/medicines'
+import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAskRouteImport } from './routes/api/ask'
 import { Route as ApiCompositionRouteImport } from './routes/api/composition'
@@ -56,6 +57,11 @@ const AuthenticatedMedicinesRoute = AuthenticatedMedicinesRouteImport.update({
   path: '/medicines',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedPremiumRoute = AuthenticatedPremiumRouteImport.update({
+  id: '/premium',
+  path: '/premium',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTodayRoute = AuthenticatedTodayRouteImport.update({
   id: '/today',
   path: '/today',
@@ -90,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/family': typeof AuthenticatedFamilyRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
+  '/premium': typeof AuthenticatedPremiumRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -103,6 +110,7 @@ export interface FileRoutesByTo {
   '/family': typeof AuthenticatedFamilyRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
+  '/premium': typeof AuthenticatedPremiumRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -118,6 +126,7 @@ export interface FileRoutesById {
   '/_authenticated/family': typeof AuthenticatedFamilyRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/medicines': typeof AuthenticatedMedicinesRoute
+  '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/family'
     | '/history'
     | '/medicines'
+    | '/premium'
     | '/today'
     | '/api/ask'
     | '/api/composition'
@@ -146,6 +156,7 @@ export interface FileRouteTypes {
     | '/family'
     | '/history'
     | '/medicines'
+    | '/premium'
     | '/today'
     | '/api/ask'
     | '/api/composition'
@@ -160,6 +171,7 @@ export interface FileRouteTypes {
     | '/_authenticated/family'
     | '/_authenticated/history'
     | '/_authenticated/medicines'
+    | '/_authenticated/premium'
     | '/_authenticated/today'
     | '/api/ask'
     | '/api/composition'
@@ -227,6 +239,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMedicinesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/premium': {
+      id: '/_authenticated/premium'
+      path: '/premium'
+      fullPath: '/premium'
+      preLoaderRoute: typeof AuthenticatedPremiumRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/today': {
       id: '/_authenticated/today'
       path: '/today'
@@ -270,6 +289,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFamilyRoute: typeof AuthenticatedFamilyRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedMedicinesRoute: typeof AuthenticatedMedicinesRoute
+  AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
   AuthenticatedFamilyPatientIdRoute: typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -279,6 +299,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFamilyRoute: AuthenticatedFamilyRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedMedicinesRoute: AuthenticatedMedicinesRoute,
+  AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
   AuthenticatedFamilyPatientIdRoute: AuthenticatedFamilyPatientIdRoute,
 }
