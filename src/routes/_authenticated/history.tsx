@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { usePremium, PremiumBadge } from "@/components/Premium";
 import { useState } from "react";
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,9 @@ export const Route = createFileRoute("/_authenticated/history")({
 
 export function AdherenceView({ userId, patientName }: { userId: string; patientName?: string }) {
   const [range, setRange] = useState<7 | 30>(7);
+  const { data: me } = useUser();
+  const { data: premium } = usePremium(me?.id);
+  const navigate = useNavigate();
   const days = Array.from({ length: range }, (_, i) => {
     const d = new Date(); d.setDate(d.getDate() - (range - 1 - i)); return ymd(d);
   });
@@ -30,9 +34,9 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
         <Button variant={range === 7 ? "default" : "outline"} onClick={() => setRange(7)}>Last 7 days</Button>
         <Button variant={range === 30 ? "default" : "outline"} onClick={() => setRange(30)}>Last month</Button>
       </div>
-      <Button size="lg" variant="secondary" className="w-full" onClick={() =>
+      <Button size="lg" variant="secondary" className="w-full" onClick={() => !premium ? navigate({ to: "/premium" }) :
         downloadDoctorReport({ patientName: patientName ?? "Patient", meds, logs, days: range })
-      }>Download PDF report for doctor</Button>
+      }>Download PDF report for doctor <PremiumBadge /></Button>
       <div className="rounded-xl bg-hero p-5">
         <p className="text-lg">Average doses taken</p>
         <p className="font-display text-4xl font-semibold text-primary">{avg}%</p>

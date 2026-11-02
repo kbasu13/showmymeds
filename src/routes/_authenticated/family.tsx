@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
+import { usePremium, PremiumBadge, UpgradeCard } from "@/components/Premium";
 
 export const Route = createFileRoute("/_authenticated/family")({
   head: () => ({ meta: [{ title: "Family & caregivers — ShowMyMeds" }, { name: "description", content: "Invite family to help with your medicines." }] }),
@@ -19,6 +20,7 @@ const DEFAULT_MSG =
 function FamilyPage() {
   const { data: user } = useUser();
   const qc = useQueryClient();
+  const { data: premium } = usePremium(user?.id);
   const [msg, setMsg] = useState(DEFAULT_MSG);
   const [link, setLink] = useState<string | null>(null);
 
@@ -74,9 +76,9 @@ function FamilyPage() {
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-semibold text-primary">Family</h1>
+      <h1 className="flex items-center gap-2 text-2xl font-semibold text-primary">Family <PremiumBadge /></h1>
 
-      <section className="space-y-3 rounded-xl border bg-card p-4 shadow-soft">
+      {!premium ? <UpgradeCard feature="Family sharing" text="Invite family members to see whether you have taken your medicines." /> : <section className="space-y-3 rounded-xl border bg-card p-4 shadow-soft">
         <h2 className="text-lg font-semibold">Invite a caregiver</h2>
         <p className="text-muted-foreground">They'll only see your medicines and doses — nothing else. You can remove them anytime.</p>
         <label className="block font-bold" htmlFor="msg">Your message (you can change it)</label>
@@ -89,7 +91,7 @@ function FamilyPage() {
           <Button variant="outline" onClick={() => send("share")}><Share2 /> More…</Button>
         </div>
         <Button variant="ghost" size="sm" onClick={() => send("copy")}><Copy /> Copy message</Button>
-      </section>
+      </section>}
 
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">People who can see my medicines</h2>
