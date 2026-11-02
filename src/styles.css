@@ -5,6 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+  --color-premium: var(--premium);
+  --color-premium-foreground: var(--premium-foreground);
   --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif;
   --font-display: "Fraunces", Georgia, serif;
   --radius-sm: calc(var(--radius) - 4px);
@@ -157,6 +159,8 @@
 }
 
 :root {
+  --premium: oklch(0.62 0.15 230);
+  --premium-foreground: oklch(0.99 0 0);
   --shadow-soft: 0 8px 24px -12px color-mix(in oklab, var(--primary) 35%, transparent);
   --gradient-hero: linear-gradient(160deg, var(--secondary), var(--background) 70%);
 }

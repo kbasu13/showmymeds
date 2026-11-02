@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { Lock, Send } from "lucide-react";
+import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
+import { usePremium, UpgradeCard } from "@/components/Premium";
 
 export const Route = createFileRoute("/_authenticated/ask")({
   head: () => ({ meta: [{ title: "Ask — ShowMyMeds" }, { name: "description", content: "Ask questions about your doses and side effects." }] }),
@@ -16,11 +16,7 @@ type Msg = { role: "user" | "assistant"; text: string };
 
 function AskPage() {
   const { data: user } = useUser();
-  const { data: premium, isLoading } = useQuery({
-    queryKey: ["premium", user?.id],
-    enabled: !!user,
-    queryFn: async () => !!(await supabase.from("premium_users").select("user_id").maybeSingle()).data,
-  });
+  const { data: premium, isLoading } = usePremium(user?.id);
   const [msgs, setMsgs] = useState<Msg[]>([
     { role: "assistant", text: "Hello! Ask me about your dose history or possible side effects." },
   ]);
@@ -29,13 +25,7 @@ function AskPage() {
 
   if (isLoading) return <p>Loading…</p>;
   if (!premium) {
-    return (
-      <div className="space-y-4 rounded-xl bg-hero p-8 text-center">
-        <Lock className="mx-auto h-12 w-12 text-primary" />
-        <h1 className="text-3xl font-bold text-primary">Ask is a Premium feature</h1>
-        <p className="text-lg">Chat about your medicines, dose history and side effects. Ask the app administrator to turn on Premium for your account.</p>
-      </div>
-    );
+    return <UpgradeCard feature="Ask" text="Chat about your medicines, dose history and side effects." />;
   }
 
   const send = async () => {
