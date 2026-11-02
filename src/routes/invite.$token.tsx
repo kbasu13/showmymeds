@@ -37,7 +37,7 @@ function InvitePage() {
   return (
     <div className="flex min-h-screen flex-col bg-hero">
       <main className="mx-auto max-w-md flex-1 space-y-4 px-5 py-16 text-center">
-        <h1 className="text-4xl font-bold text-primary">Caregiver invite</h1>
+        <h1 className="text-2xl font-semibold text-primary">Caregiver invite</h1>
         {state === "loading" && <p className="text-xl">Opening your invite…</p>}
         {state === "signedout" && (
           <>

@@ -18,6 +18,7 @@ import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticate
 import { Route as AuthenticatedMedicinesRouteImport } from './routes/_authenticated/medicines'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAskRouteImport } from './routes/api/ask'
+import { Route as ApiCompositionRouteImport } from './routes/api/composition'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AuthenticatedFamilyPatientIdRouteImport } from './routes/_authenticated/family_.$patientId'
 
@@ -65,6 +66,11 @@ const ApiAskRoute = ApiAskRouteImport.update({
   path: '/api/ask',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiCompositionRoute = ApiCompositionRouteImport.update({
+  id: '/api/composition',
+  path: '/api/composition',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/medicines': typeof AuthenticatedMedicinesRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
+  '/api/composition': typeof ApiCompositionRoute
   '/invite/$token': typeof InviteTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -98,6 +105,7 @@ export interface FileRoutesByTo {
   '/medicines': typeof AuthenticatedMedicinesRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
+  '/api/composition': typeof ApiCompositionRoute
   '/invite/$token': typeof InviteTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -112,6 +120,7 @@ export interface FileRoutesById {
   '/_authenticated/medicines': typeof AuthenticatedMedicinesRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
+  '/api/composition': typeof ApiCompositionRoute
   '/invite/$token': typeof InviteTokenRoute
   '/_authenticated/family_/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -126,6 +135,7 @@ export interface FileRouteTypes {
     | '/medicines'
     | '/today'
     | '/api/ask'
+    | '/api/composition'
     | '/invite/$token'
     | '/family/$patientId'
   fileRoutesByTo: FileRoutesByTo
@@ -138,6 +148,7 @@ export interface FileRouteTypes {
     | '/medicines'
     | '/today'
     | '/api/ask'
+    | '/api/composition'
     | '/invite/$token'
     | '/family/$patientId'
   id:
@@ -151,6 +162,7 @@ export interface FileRouteTypes {
     | '/_authenticated/medicines'
     | '/_authenticated/today'
     | '/api/ask'
+    | '/api/composition'
     | '/invite/$token'
     | '/_authenticated/family_/$patientId'
   fileRoutesById: FileRoutesById
@@ -160,6 +172,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   ApiAskRoute: typeof ApiAskRoute
+  ApiCompositionRoute: typeof ApiCompositionRoute
   InviteTokenRoute: typeof InviteTokenRoute
 }
 
@@ -228,6 +241,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/composition': {
+      id: '/api/composition'
+      path: '/api/composition'
+      fullPath: '/api/composition'
+      preLoaderRoute: typeof ApiCompositionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/invite/$token': {
       id: '/invite/$token'
       path: '/invite/$token'
@@ -271,6 +291,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   ApiAskRoute: ApiAskRoute,
+  ApiCompositionRoute: ApiCompositionRoute,
   InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport

@@ -87,3 +87,20 @@ export async function signedUrl(path: string) {
   const { data } = await supabase.storage.from("prescriptions").createSignedUrl(path, 3600);
   return data?.signedUrl ?? null;
 }
+
+/** Look up the full active composition of a medicine online. Returns null when unknown. */
+export async function lookupComposition(name: string): Promise<string | null> {
+  if (!name.trim()) return null;
+  const { data } = await supabase.auth.getSession();
+  try {
+    const r = await fetch("/api/composition", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` },
+      body: JSON.stringify({ name }),
+    });
+    if (!r.ok) return null;
+    return ((await r.json()) as { composition: string | null }).composition;
+  } catch {
+    return null;
+  }
+}

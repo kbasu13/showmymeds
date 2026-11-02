@@ -75,9 +75,9 @@ export function AlarmWatcher({ userId }: { userId: string }) {
     <div role="alertdialog" aria-modal="true" aria-label="Medicine alarm"
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center gap-6 bg-primary p-6 text-center text-primary-foreground">
       <BellRing className="alarm-pulse h-24 w-24" />
-      <p className="text-2xl font-bold">It's {cur.time} — time for your medicine</p>
+      <p className="text-lg font-semibold">It's {cur.time} — time for your medicine</p>
       <MedImage src={cur.med.image_url} form={cur.med.form} name={cur.med.name} className="h-32 w-32" />
-      <h2 className="text-4xl font-bold">{cur.med.name}</h2>
+      <h2 className="text-2xl font-semibold">{cur.med.name}</h2>
       {cur.med.dosage && <p className="text-xl">{cur.med.dosage}</p>}
       <div className="flex w-full max-w-sm flex-col gap-3">
         <Button size="lg" variant="take" onClick={async () => {

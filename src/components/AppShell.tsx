@@ -39,7 +39,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-40 flex items-center justify-between border-b bg-background/95 px-4 py-3 backdrop-blur">
         <Link to="/today" className="flex items-center gap-2">
           <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand text-primary"><Pill /></span>
-          <span className="font-display text-2xl font-bold text-primary">ShowMyMeds</span>
+          <span className="font-display text-lg font-semibold text-primary">ShowMyMeds</span>
         </Link>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -23,7 +23,7 @@ function PatientView() {
       <Link to="/family" className="inline-flex items-center gap-2 text-lg font-bold text-primary"><ArrowLeft /> Family</Link>
       <h1 className="text-3xl font-bold text-primary">Today's doses</h1>
       {low.length > 0 && (
-        <div className="flex gap-2 rounded-2xl border-2 border-warning bg-warning/30 p-3 text-warning-foreground">
+        <div className="flex gap-2 rounded-xl border-2 border-warning bg-warning/30 p-3 text-warning-foreground">
           <AlertTriangle /> Low stock: {low.map((m) => m.name).join(", ")}
         </div>
       )}
@@ -32,7 +32,7 @@ function PatientView() {
           const m = meds.find((x) => x.id === med.id)!;
           const log = logs.find((l) => l.medicine_id === med.id && l.scheduled_time === time);
           return (
-            <li key={`${med.id}-${time}`} className="flex items-center gap-3 rounded-2xl border bg-card p-3">
+            <li key={`${med.id}-${time}`} className="flex items-center gap-3 rounded-xl border bg-card p-3">
               <MedImage src={m.image_url} form={m.form} name={m.name} className="h-14 w-14" />
               <div className="flex-1"><b className="text-xl">{time}</b> · {m.name}</div>
               {log ? <CheckCircle2 className="h-8 w-8 text-success" aria-label="Taken" /> : <Circle className="h-8 w-8 text-muted-foreground" aria-label="Not taken" />}
@@ -41,7 +41,7 @@ function PatientView() {
         })}
         {doses.length === 0 && <p className="text-muted-foreground">Nothing scheduled today.</p>}
       </ul>
-      <h2 className="text-2xl font-bold">Adherence</h2>
+      <h2 className="text-lg font-semibold">Adherence</h2>
       <AdherenceView userId={patientId} />
     </div>
   );
