@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { MedImage } from "@/components/MedImage";
 import { supabase } from "@/integrations/supabase/client";
 import {
-  FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, uploadFile, type Medicine,
+  FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, lookupMedInfo, uploadFile, type Medicine,
 } from "@/lib/meds";
 import { buildIcs, daysOfStockLeft, ymd, type Med } from "@/lib/schedule";
 
@@ -59,6 +59,7 @@ function MedicinesPage() {
               <MedImage src={m.image_url} form={m.form} name={m.name} />
               <div className="min-w-0 flex-1">
                 <p className="text-lg font-semibold text-primary">{m.name}</p>
+                {m.manufacturer && <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">by {m.manufacturer}</p>}
                 <p className="text-muted-foreground">{m.composition || "Composition not added"}</p>
                 <p className="mt-1">{m.dosage} · {m.times.join(", ")}</p>
                 <p className="text-sm text-muted-foreground">
@@ -84,7 +85,7 @@ function MedicinesPage() {
 
 function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medicine | null; onClose: () => void; onSaved: () => void }) {
   const [f, setF] = useState({
-    name: med?.name ?? "", composition: med?.composition ?? "", form: med?.form ?? "tablet",
+    name: med?.name ?? "", composition: med?.composition ?? "", manufacturer: med?.manufacturer ?? "", form: med?.form ?? "tablet",
     dosage: med?.dosage ?? "", dose_qty: String(med?.dose_qty ?? 1), times: med?.times ?? ["08:00"],
     start_date: med?.start_date ?? ymd(new Date()), end_date: med?.end_date ?? "",
     stock: String(med?.stock ?? 30), image_url: med?.image_url ?? null as string | null,
@@ -106,8 +107,10 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
 
   const findImage = async (): Promise<unknown> => {
     if (!f.name) return toast.error("Enter a name first");
-    const comp = f.composition ? null : await lookupComposition(f.name);
+    const info = f.composition && f.manufacturer ? null : await lookupMedInfo(f.name);
+    const comp = f.composition ? null : info?.composition ?? null;
     if (comp) set("composition", comp);
+    if (!f.manufacturer && info?.manufacturer) set("manufacturer", info.manufacturer);
     const url = await lookupMedicineImage(f.name, comp ?? f.composition);
     if (url) { set("image_url", url); toast.success(comp ? "Picture and composition found" : "Picture found"); }
     else toast(comp ? "Composition found — no picture, a simple icon will be shown" : "No picture found — a simple icon will be shown");
@@ -127,11 +130,16 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     if (!f.name.trim()) return toast.error("Please enter the medicine name");
     setBusy(true);
     let composition = f.composition;
-    if (!composition.trim()) composition = (await lookupComposition(f.name)) ?? "";
+    let manufacturer = f.manufacturer;
+    if (!composition.trim() || !manufacturer.trim()) {
+      const info = await lookupMedInfo(f.name);
+      if (!composition.trim()) composition = info.composition ?? "";
+      if (!manufacturer.trim()) manufacturer = info.manufacturer ?? "";
+    }
     let image_url = f.image_url;
     if (!image_url) image_url = await lookupMedicineImage(f.name, composition);
     const row = {
-      name: f.name.trim(), composition: composition || null, form: f.form, dosage: f.dosage || null,
+      name: f.name.trim(), composition: composition || null, manufacturer: manufacturer.trim() || null, form: f.form, dosage: f.dosage || null,
       dose_qty: Number(f.dose_qty) || 1, times: f.times.filter(Boolean), start_date: f.start_date,
       end_date: f.end_date || null, stock: Number(f.stock) || 0, image_url,
       prescription_path: f.prescription_path, notes: f.notes || null,
@@ -164,6 +172,15 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
             <div className="flex gap-2">
               <Input className="h-10" value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="e.g. Metformin" />
               <Button variant="secondary" size="icon" onClick={listen} aria-label="Speak the name"><Mic /></Button>
+            </div>
+          </Field>
+          <Field label="Manufacturer (company)">
+            <div className="flex gap-2">
+              <Input className="h-10" value={f.manufacturer} onChange={(e) => set("manufacturer", e.target.value)} placeholder="Filled in automatically, e.g. Cipla, Abbott" />
+              <Button variant="secondary" size="icon" aria-label="Look up manufacturer" onClick={async () => {
+                const m = (await lookupMedInfo(f.name)).manufacturer;
+                if (m) { set("manufacturer", m); toast.success("Manufacturer found"); } else toast("Couldn't find the company — please type it");
+              }}><Search /></Button>
             </div>
           </Field>
           <Field label="Composition (active ingredients)">

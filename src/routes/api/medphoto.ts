@@ -10,7 +10,7 @@ async function askGemini(name: string, composition: string, apiKey: string): Pro
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3.8-flash",
         messages: [
           { role: "system", content: "You find product photos of medicines. Reply ONLY with a JSON array of up to 5 direct image URLs (ending in .jpg/.jpeg/.png/.webp) showing the medicine pack or tablets. Prefer Wikimedia Commons (upload.wikimedia.org), the manufacturer's website, or large pharmacy product pages (pharmeasy, apollopharmacy, netmeds, 1mg). Only include URLs you are confident exist. Reply [] if unsure." },
           { role: "user", content: `${name}${composition ? ` (${composition})` : ""}` },
