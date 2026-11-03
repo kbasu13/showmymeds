@@ -344,7 +344,7 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
               {found.map((it, i) => (
                 <li key={i}>
                   <label className="flex items-start gap-3 rounded-lg border p-3">
-                    <Checkbox className="mt-1 h-5 w-5" checked={picked[i]} onCheckedChange={(c) => setPicked((p) => p.map((x, j) => (j === i ? !!c : x)))} />
+                    <Checkbox className="mt-1 h-5 w-5" checked={!!picked[i]} onCheckedChange={(c) => setPicked((p) => p.map((x, j) => (j === i ? !!c : x)))} />
                     <span className="min-w-0">
                       <span className="block font-semibold">{it.name}</span>
                       {it.composition && <span className="block text-sm text-muted-foreground">{it.composition}</span>}
