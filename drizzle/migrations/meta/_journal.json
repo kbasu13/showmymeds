@@ -36,6 +36,13 @@
       "when": 1793724384044,
       "tag": "0004_add_warn_days",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1793738902930,
+      "tag": "0005_self_activate_premium",
+      "breakpoints": true
     }
   ]
 }

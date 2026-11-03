@@ -264,6 +264,10 @@ export type Database = {
     }
     Functions: {
       accept_invite: { Args: { _token: string }; Returns: string }
+      activate_premium_paid: {
+        Args: { _code: string; _plan: string }
+        Returns: string
+      }
       admin_grant_premium: {
         Args: { _email: string; _expires: string }
         Returns: undefined

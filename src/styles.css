@@ -167,7 +167,7 @@
 
 /* Large display mode scales all text and controls */
 html.size-large {
-  font-size: 125%;
+  font-size: 112.5%;
 }
 
 @utility shadow-soft {
@@ -189,7 +189,7 @@ html.size-large {
     border-color: var(--color-border);
   }
   html {
-    font-size: 87.5%;
+    font-size: 93.75%;
   }
   body {
     background-color: var(--color-background);

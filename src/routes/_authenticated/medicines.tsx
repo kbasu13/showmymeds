@@ -15,7 +15,8 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, lookupMedInfo, uploadFile, type Medicine,
 } from "@/lib/meds";
-import { buildIcs, daysOfStockLeft, ymd, type Med } from "@/lib/schedule";
+import { buildIcs, daysOfStockLeft, ymd, time12, doseText, dmyDay, titleCase, type Med } from "@/lib/schedule";
+import type { RxItem } from "@/routes/api/rxscan";
 
 export const Route = createFileRoute("/_authenticated/medicines")({
   head: () => ({ meta: [{ title: "My medicines — ShowMyMeds" }, { name: "description", content: "Add and manage your medicines." }] }),
@@ -27,6 +28,15 @@ function MedicinesPage() {
   const { data: meds = [] } = useMeds(user?.id);
   const refresh = useRefreshMeds();
   const [editing, setEditing] = useState<Medicine | "new" | null>(null);
+  const [queue, setQueue] = useState<RxItem[]>([]);
+  const [prefill, setPrefill] = useState<RxItem | null>(null);
+  const [formKey, setFormKey] = useState(0);
+  const next = (q: RxItem[]) => {
+    const [first, ...rest] = q;
+    setQueue(rest);
+    if (first) { setPrefill(first); setEditing("new"); setFormKey((k) => k + 1); }
+    else { setPrefill(null); setEditing(null); }
+  };
 
   const exportCalendar = () => {
     const ics = buildIcs(meds as unknown as Med[]);
@@ -51,51 +61,85 @@ function MedicinesPage() {
         <Button size="lg" onClick={() => setEditing("new")}><Plus /> Add</Button>
       </div>
       {meds.length > 0 && (
-        <Button variant="outline" className="w-full" onClick={exportCalendar}>
+        <Button variant="outline" size="lg" className="w-full text-base" onClick={exportCalendar}>
           <CalendarPlus /> Add schedule to phone calendar
         </Button>
       )}
       <ul className="space-y-3">
         {meds.map((m) => (
           <li key={m.id} className="rounded-xl border bg-card p-4 shadow-soft">
-            <div className="flex gap-4">
+            <div className="flex gap-3 sm:gap-4">
               <MedImage src={m.image_url} form={m.form} name={m.name} />
-              <div className="min-w-0 flex-1">
-                <p className="text-lg font-semibold text-primary">{m.name}</p>
-                {m.manufacturer && <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">by {m.manufacturer}</p>}
-                <p className="text-muted-foreground">{m.composition || "Composition not added"}</p>
-                <p className="mt-1">{m.dosage} · {m.times.join(", ")}</p>
-                <p className="text-sm text-muted-foreground">
-                  Stock: {Number(m.stock)} ({daysOfStockLeft(m as unknown as Med)} days) · {m.start_date}{m.end_date ? ` → ${m.end_date}` : ""}
-                </p>
+              <div className="grid min-w-0 flex-1 gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_auto]">
+                <div className="min-w-0">
+                  <p className="break-words text-lg font-semibold leading-tight text-primary">{m.name}</p>
+                  {m.manufacturer && <p className="text-muted-foreground">By {titleCase(m.manufacturer)}</p>}
+                  <p className="break-words text-sm text-muted-foreground">{m.composition || "Composition not added"}</p>
+                  <p className="mt-1 font-medium">{doseText(Number(m.dose_qty), m.form)} each time</p>
+                </div>
+                <div className="min-w-0 sm:text-right">
+                  <p className="font-medium">at {[...m.times].sort().map(time12).join(", ")}</p>
+                  <p className="text-sm">Available stock: {Number(m.stock)} ({daysOfStockLeft(m as unknown as Med)} days)</p>
+                  <p className="text-sm text-muted-foreground">Dose started on {dmyDay(m.start_date)}</p>
+                  {m.end_date && <p className="text-sm text-muted-foreground">Ends on {dmyDay(m.end_date)}</p>}
+                </div>
               </div>
             </div>
             <div className="mt-3 flex gap-2">
-              <Button variant="outline" size="sm" onClick={() => setEditing(m)}><Pencil /> Edit</Button>
-              <Button variant="ghost" size="sm" onClick={() => remove(m)}><Trash2 /> Delete</Button>
+              <Button variant="secondary" className="text-base" onClick={() => setEditing(m)}><Pencil /> Edit</Button>
+              <Button variant="ghost" className="text-base text-destructive" onClick={() => remove(m)}><Trash2 /> Delete</Button>
             </div>
           </li>
         ))}
         {meds.length === 0 && <p className="rounded-xl bg-hero p-8 text-center text-xl">No medicines yet. Tap “Add” to begin.</p>}
       </ul>
       {editing && user && (
-        <MedForm userId={user.id} med={editing === "new" ? null : editing}
-          onClose={() => setEditing(null)} onSaved={() => { setEditing(null); refresh(); }} />
+        <MedForm key={formKey} userId={user.id} med={editing === "new" ? null : editing} prefill={editing === "new" ? prefill : null}
+          remaining={queue.length}
+          onQueue={(items) => next(items)}
+          onClose={() => { setQueue([]); setPrefill(null); setEditing(null); }}
+          onSaved={() => { refresh(); next(queue); }} />
       )}
     </div>
   );
 }
 
-function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medicine | null; onClose: () => void; onSaved: () => void }) {
+function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }: {
+  userId: string; med: Medicine | null; prefill: RxItem | null; remaining: number;
+  onQueue: (items: RxItem[]) => void; onClose: () => void; onSaved: () => void;
+}) {
+  const endFromDays = (d: number | null) => { if (!d) return ""; const x = new Date(); x.setDate(x.getDate() + d - 1); return ymd(x); };
   const [f, setF] = useState({
-    name: med?.name ?? "", composition: med?.composition ?? "", manufacturer: med?.manufacturer ?? "", form: med?.form ?? "tablet",
-    dosage: med?.dosage ?? "", dose_qty: String(med?.dose_qty ?? 1), times: med?.times ?? ["08:00"],
-    start_date: med?.start_date ?? ymd(new Date()), end_date: med?.end_date ?? "",
+    name: med?.name ?? prefill?.name ?? "", composition: med?.composition ?? prefill?.composition ?? "", manufacturer: med?.manufacturer ?? prefill?.manufacturer ?? "", form: med?.form ?? prefill?.form ?? "tablet",
+    dosage: med?.dosage ?? "", dose_qty: String(med?.dose_qty ?? prefill?.dose_qty ?? 1), times: med?.times ?? prefill?.times ?? ["08:00"],
+    start_date: med?.start_date ?? ymd(new Date()), end_date: med?.end_date ?? endFromDays(prefill?.days ?? null),
     stock: String(med?.stock ?? 30), image_url: med?.image_url ?? null as string | null,
-    prescription_path: med?.prescription_path ?? null as string | null, notes: med?.notes ?? "",
+    prescription_path: med?.prescription_path ?? null as string | null, notes: med?.notes ?? prefill?.notes ?? "",
     warn_days: med?.warn_days ?? 7,
   });
-  const [ongoing, setOngoing] = useState(!med?.end_date);
+  const [ongoing, setOngoing] = useState(med ? !med.end_date : !prefill?.days);
+  const [scanning, setScanning] = useState(false);
+  const [found, setFound] = useState<RxItem[] | null>(null);
+  const [picked, setPicked] = useState<boolean[]>([]);
+
+  const scan = async (file: File | undefined): Promise<unknown> => {
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Please take a photo of the prescription (not a PDF).");
+    setScanning(true);
+    try {
+      const path = await uploadFile(userId, file, "rx");
+      set("prescription_path", path);
+      const { data } = await supabase.auth.getSession();
+      const r = await fetch("/api/rxscan", { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` }, body: JSON.stringify({ path }) });
+      const j = (await r.json()) as { items?: RxItem[]; error?: string };
+      if (!r.ok) return toast.error(j.error ?? "Could not read the prescription.");
+      const items = j.items ?? [];
+      if (items.length === 0) return toast("We couldn't read any medicines. Please type them in.");
+      setFound(items); setPicked(items.map(() => true));
+    } catch (e) { toast.error((e as Error).message); }
+    finally { setScanning(false); }
+    return undefined;
+  };
   const { data: me } = useQuery({ queryKey: ["profile", userId], queryFn: async () => (await supabase.from("profiles").select("display_name").eq("id", userId).maybeSingle()).data });
   const [busy, setBusy] = useState(false);
   const [photoCleared, setPhotoCleared] = useState(false);
@@ -171,26 +215,27 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     <Dialog open onOpenChange={(o) => !o && onClose()}>
       <DialogContent className="max-h-[92vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">{med ? "Edit medicine" : "Add a medicine"}</DialogTitle>
-          <p className="text-sm text-muted-foreground">This will be {med ? "saved" : "added"} for {me?.display_name || "you"}.</p>
+          <DialogTitle className="text-xl">{med ? "Edit medicine" : prefill ? "Check this medicine" : "Add a medicine"}</DialogTitle>
+          {prefill && <p className="text-sm font-medium text-primary">From your prescription — please review before saving.{remaining > 0 ? ` ${remaining} more after this.` : ""}</p>}
+          <p className="text-base text-muted-foreground">This will be {med ? "saved" : "added"} for {me?.display_name || "you"}.</p>
         </DialogHeader>
         <div className="space-y-5">
           <div className="space-y-2 rounded-xl border bg-secondary/50 p-3">
-            <p className="text-sm font-semibold">Faster ways to add it</p>
+            <p className="text-base font-semibold">Faster ways to add it</p>
             <Button className="w-full" asChild>
-              <label><Camera /> {f.prescription_path ? "Replace prescription photo" : "Scan prescription"}
-                <input type="file" accept="image/*,application/pdf" capture="environment" className="sr-only"
-                  onChange={(e) => upload(e.target.files?.[0], "rx")} /></label>
+              <label><Camera /> {scanning ? "Reading prescription…" : f.prescription_path ? "Scan another prescription" : "Scan prescription"}
+                <input type="file" accept="image/*" capture="environment" className="sr-only" disabled={scanning}
+                  onChange={(e) => { scan(e.target.files?.[0]); e.target.value = ""; }} /></label>
             </Button>
             <Button variant="outline" className="w-full" onClick={listen}><Mic /> Say it out loud</Button>
-            <p className="text-xs text-muted-foreground">Prescription photos are stored privately (no public link). Always check the details before saving.</p>
+            <p className="text-sm text-muted-foreground">We read the prescription (even handwriting) and suggest every medicine on it. Prescription photos are stored privately. Always check the details before saving.</p>
           </div>
 
           <Field label="Medicine name">
             <Input value={f.name} onChange={(e) => set("name", e.target.value)} placeholder="For example Paracetamol" />
           </Field>
 
-          <Field label="Manufacturer (optional)" hint="We fill this in from the internet if you leave it empty.">
+          <Field label="Manufacturer (optional)" hint="We look this up if you leave it empty.">
             <div className="flex gap-2">
               <Input value={f.manufacturer} onChange={(e) => set("manufacturer", e.target.value)} placeholder="For example Cipla" />
               <Button variant="secondary" size="icon" aria-label="Look up manufacturer" onClick={async () => {
@@ -210,7 +255,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
             </div>
           </Field>
 
-          <Field label="How much each time">
+          <Field label="How much/many each time?">
             <div className="flex items-center gap-2">
               <Button variant="outline" size="icon" aria-label="Less" onClick={() => set("dose_qty", String(Math.max(0.25, Number(f.dose_qty) - (Number(f.dose_qty) > 1 ? 1 : 0.25))))}>−</Button>
               <span className="w-12 text-center text-lg font-semibold">{Number(f.dose_qty)}</span>
@@ -224,9 +269,6 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
             </Select>
           </Field>
 
-          <Field label="Strength (optional)" hint="For example 500 mg">
-            <Input value={f.dosage} onChange={(e) => set("dosage", e.target.value)} placeholder="500 mg" />
-          </Field>
 
           <Field label="How many times a day?" hint="Tap a number, then adjust each time if you need to.">
             <div className="grid grid-cols-4 gap-2">
@@ -280,16 +322,49 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
                 )}
               </div>
             </div>
-            <p className="text-xs text-muted-foreground">Photos are stored privately in your account.</p>
+            <p className="text-sm text-muted-foreground">Photos are stored privately in your account.</p>
           </Field>
 
           <Field label="Notes (optional)" hint="Anything the doctor said, like 'after food'.">
             <Textarea value={f.notes} onChange={(e) => set("notes", e.target.value)} />
           </Field>
 
-          <Button size="lg" className="w-full" disabled={busy} onClick={save}>{busy ? "Saving…" : "Save medicine"}</Button>
+          <Button size="lg" className="w-full" disabled={busy} onClick={save}>{busy ? "Saving…" : remaining > 0 ? "Save and check next" : "Save medicine"}</Button>
+          {prefill && <Button variant="ghost" className="w-full" onClick={onSaved}>Skip this one</Button>}
         </div>
       </DialogContent>
+      {found && (
+        <Dialog open onOpenChange={(o) => !o && setFound(null)}>
+          <DialogContent className="max-h-[85vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle className="text-xl">We found {found.length} medicine{found.length > 1 ? "s" : ""}</DialogTitle>
+              <p className="text-base text-muted-foreground">Choose which to add. You'll check each one before it's saved.</p>
+            </DialogHeader>
+            <ul className="space-y-2">
+              {found.map((it, i) => (
+                <li key={i}>
+                  <label className="flex items-start gap-3 rounded-lg border p-3">
+                    <Checkbox className="mt-1 h-5 w-5" checked={!!picked[i]} onCheckedChange={(c) => setPicked((p) => p.map((x, j) => (j === i ? !!c : x)))} />
+                    <span className="min-w-0">
+                      <span className="block font-semibold">{it.name}</span>
+                      {it.composition && <span className="block text-sm text-muted-foreground">{it.composition}</span>}
+                      <span className="block text-sm">{doseText(it.dose_qty, it.form)} at {it.times.map(time12).join(", ")}{it.days ? ` for ${it.days} days` : ""}</span>
+                    </span>
+                  </label>
+                </li>
+              ))}
+            </ul>
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setPicked(found.map(() => true))}>Select all</Button>
+              <Button className="flex-1" disabled={!picked.some(Boolean)} onClick={() => {
+                const sel = found.filter((_, i) => picked[i]);
+                setFound(null);
+                onQueue(sel);
+              }}>Review {picked.filter(Boolean).length} selected</Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </Dialog>
   );
 }
@@ -297,7 +372,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
 type SpeechRec = { lang: string; start: () => void; onresult: (e: { results: { 0: { transcript: string } }[] }) => void };
 
 function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
-  return <div className="space-y-1.5"><Label className="text-sm font-semibold">{label}</Label>{children}{hint && <p className="text-xs text-muted-foreground">{hint}</p>}</div>;
+  return <div className="space-y-1.5"><Label className="text-base font-semibold">{label}</Label>{children}{hint && <p className="text-sm text-muted-foreground">{hint}</p>}</div>;
 }
 
 const UNITS: Record<string, string> = {

@@ -113,3 +113,33 @@ export function buildIcs(meds: Med[], from: Date = new Date()) {
   lines.push("END:VCALENDAR");
   return lines.join("\r\n");
 }
+
+/** "14:30" -> "2:30 PM" */
+export function time12(t: string) {
+  const [h = 0, m = 0] = t.split(":").map(Number);
+  return `${h % 12 || 12}:${String(m).padStart(2, "0")} ${h < 12 ? "AM" : "PM"}`;
+}
+
+const UNIT: Record<string, [string, string]> = {
+  tablet: ["tablet", "tablets"], capsule: ["capsule", "capsules"], syrup: ["ml", "ml"], drops: ["drop", "drops"],
+  injection: ["injection", "injections"], inhaler: ["puff", "puffs"], cream: ["application", "applications"],
+};
+/** 1 + "tablet" -> "1 tablet", 2 -> "2 tablets", 0.5 -> "½ tablet" */
+export function doseText(qty: number, form: string) {
+  const q = Number(qty) || 1;
+  const [one, many] = UNIT[form] ?? ["unit", "units"];
+  const n = q === 0.5 ? "½" : q === 0.25 ? "¼" : String(q);
+  return `${n} ${q > 1 ? many : one}`;
+}
+
+/** "2026-11-01" -> "01-11-2026, Sun" */
+export function dmyDay(date: string) {
+  const [y, m, d] = date.split("-");
+  const wd = new Date(date + "T00:00").toLocaleDateString("en-US", { weekday: "short" });
+  return `${d}-${m}-${y}, ${wd}`;
+}
+
+/** "Sun Pharma" stays, "CIPLA LTD" -> "Cipla Ltd" */
+export function titleCase(s: string) {
+  return s.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
+}
