@@ -1,14 +1,14 @@
 import { dosesForDay, doseText, time12, ymd, type Log, type Med } from "@/lib/schedule";
 import type { Medicine, DoseLog } from "@/lib/meds";
 
-type Opts = { patientName: string; meds: Medicine[]; logs: DoseLog[]; days: number };
+type Opts = { patientName: string; meds: Medicine[]; logs: DoseLog[]; days: number; to?: string };
 
 /** Doctor-friendly PDF: medicine list, then each day (newest first) with doses taken vs due. */
 export async function buildDoctorReport(opts: Opts) {
   const { jsPDF } = await import("jspdf");
   const autoTable = (await import("jspdf-autotable")).default;
   const dates = Array.from({ length: opts.days }, (_, i) => {
-    const d = new Date(); d.setDate(d.getDate() - i); return ymd(d);
+    const d = opts.to ? new Date(opts.to + "T00:00") : new Date(); d.setDate(d.getDate() - i); return ymd(d);
   });
   const meds = opts.meds as unknown as Med[];
   const logs = opts.logs as unknown as Log[];
