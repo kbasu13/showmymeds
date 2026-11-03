@@ -4,12 +4,24 @@ import { Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { isPremiumActive } from "@/lib/plans";
 
 export function usePremium(userId: string | undefined) {
   return useQuery({
     queryKey: ["premium", userId],
     enabled: !!userId,
-    queryFn: async () => !!(await supabase.from("premium_users").select("user_id").eq("user_id", userId!).maybeSingle()).data,
+    queryFn: async () => {
+      const { data } = await supabase.from("premium_users").select("expires_at").eq("user_id", userId!).maybeSingle();
+      return !!data && isPremiumActive(data.expires_at);
+    },
+  });
+}
+
+export function useIsAdmin(userId: string | undefined) {
+  return useQuery({
+    queryKey: ["is-admin", userId],
+    enabled: !!userId,
+    queryFn: async () => !!(await supabase.from("user_roles").select("id").eq("user_id", userId!).eq("role", "admin").maybeSingle()).data,
   });
 }
 

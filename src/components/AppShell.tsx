@@ -66,6 +66,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/premium">💎 Go Premium</Link></DropdownMenuItem>
+            {isAdmin && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/admin">🛠 Admin</Link></DropdownMenuItem>}
             <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base">Sign out</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
