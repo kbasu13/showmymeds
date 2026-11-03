@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { usePremium, PremiumBadge } from "@/components/Premium";
 import { useState } from "react";
+import { CheckCircle2, Circle } from "lucide-react";
+import { toast } from "sonner";
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
-import { useUser, useMeds, useLogs } from "@/lib/meds";
+import { useUser, useMeds, useLogs, takeDose, untakeDose, useRefreshMeds } from "@/lib/meds";
 import { downloadDoctorReport } from "@/lib/report";
-import { adherenceByDay, ymd, type Med, type Log } from "@/lib/schedule";
+import { adherenceByDay, dosesForDay, ymd, type Med, type Log } from "@/lib/schedule";
 
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({ meta: [{ title: "History & insights — ShowMyMeds" }, { name: "description", content: "How well you kept to your medicine schedule." }] }),
