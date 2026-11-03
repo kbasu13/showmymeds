@@ -1,0 +1,1 @@
+ALTER TABLE public.medicines ADD COLUMN IF NOT EXISTS warn_days integer NOT NULL DEFAULT 7;

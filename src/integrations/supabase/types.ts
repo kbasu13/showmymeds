@@ -159,6 +159,7 @@ export type Database = {
           stock: number
           times: string[]
           user_id: string
+          warn_days: number
         }
         Insert: {
           composition?: string | null
@@ -177,6 +178,7 @@ export type Database = {
           stock?: number
           times?: string[]
           user_id?: string
+          warn_days?: number
         }
         Update: {
           composition?: string | null
@@ -195,6 +197,7 @@ export type Database = {
           stock?: number
           times?: string[]
           user_id?: string
+          warn_days?: number
         }
         Relationships: []
       }
