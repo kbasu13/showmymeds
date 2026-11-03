@@ -66,18 +66,29 @@ export async function untakeDose(medicineId: string, date: string, time: string)
   if (error) throw error;
 }
 
-/** Look up a picture of the medicine online (Wikipedia). Returns null when nothing is found. */
-export async function lookupMedicineImage(name: string): Promise<string | null> {
-  const q = name.trim().split(/\s+/)[0];
-  if (!q) return null;
+async function wikiImage(q: string): Promise<string | null> {
+  if (!q.trim()) return null;
   try {
-    const r = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`);
+    const u = `https://en.wikipedia.org/w/api.php?action=query&format=json&origin=*&generator=search&gsrlimit=3&gsrsearch=${encodeURIComponent(q)}&prop=pageimages&piprop=thumbnail&pithumbsize=400`;
+    const r = await fetch(u);
     if (!r.ok) return null;
-    const j = await r.json();
-    return j?.thumbnail?.source ?? j?.originalimage?.source ?? null;
+    const j = (await r.json()) as { query?: { pages?: Record<string, { index: number; thumbnail?: { source: string } }> } };
+    const pages = Object.values(j.query?.pages ?? {}).sort((a, b) => a.index - b.index);
+    return pages.find((p) => p.thumbnail)?.thumbnail?.source ?? null;
   } catch {
     return null;
   }
+}
+
+/** Look up a picture of the medicine online: brand name first, then its main ingredient. */
+export async function lookupMedicineImage(name: string, composition?: string | null): Promise<string | null> {
+  const n = name.trim();
+  const ingredient = (composition ?? "").split("+")[0]?.replace(/[\d.]+\s*(mg|mcg|g|ml|iu|%).*$/i, "").trim() ?? "";
+  return (
+    (await wikiImage(`${n} medicine`)) ??
+    (await wikiImage(n.split(/\s+/)[0] ?? "")) ??
+    (ingredient ? await wikiImage(ingredient) : null)
+  );
 }
 
 export async function uploadFile(userId: string, file: File, kind: "image" | "rx") {
