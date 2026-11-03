@@ -119,7 +119,7 @@ function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: 
         </div>
         <div className="flex flex-col items-center gap-2">
           {qr ? <img src={qr} alt={`UPI QR code for ₹${total.toFixed(2)}`} className="h-64 w-64 rounded-lg border bg-white p-2" /> : <div className="h-64 w-64 animate-pulse rounded-lg bg-muted" />}
-          <p className="text-center text-sm text-muted-foreground">Scan with any UPI app (GPay, PhonePe, Paytm, BHIM…).<br />Paying to <b>{UPI_NAME}</b> · {UPI_ID}</p>
+          <p className="text-center text-sm text-muted-foreground">Scan with any UPI app (GPay, PhonePe, Paytm, BHIM…).<br />Paying to <b>EMC (ShowMyMeds)</b> · {UPI_ID}</p>
           <Button variant="outline" className="w-full sm:hidden" asChild><a href={link}>Open my UPI app</a></Button>
         </div>
         <Button size="lg" className="w-full" disabled={busy} onClick={paid}>{busy ? "Please wait…" : "I have paid"}</Button>

@@ -143,3 +143,14 @@ export function dmyDay(date: string) {
 export function titleCase(s: string) {
   return s.toLowerCase().replace(/\b\p{L}/gu, (c) => c.toUpperCase());
 }
+
+/** ["08:00","14:00","22:00"] -> "8:00 AM, 2:00 PM and 10:00 PM" */
+export function joinTimes(times: string[]) {
+  const t = [...times].sort().map(time12);
+  return t.length <= 1 ? (t[0] ?? "") : `${t.slice(0, -1).join(", ")} and ${t[t.length - 1]}`;
+}
+
+/** "2026-11-03" -> "Tue, Nov 3" */
+export function shortDay(date: string) {
+  return new Date(date + "T00:00").toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+}

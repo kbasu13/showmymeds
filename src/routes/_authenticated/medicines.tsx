@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, lookupMedInfo, uploadFile, type Medicine,
 } from "@/lib/meds";
-import { buildIcs, daysOfStockLeft, ymd, time12, doseText, dmyDay, titleCase, type Med } from "@/lib/schedule";
+import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, titleCase, type Med } from "@/lib/schedule";
 import type { RxItem } from "@/routes/api/rxscan";
 
 export const Route = createFileRoute("/_authenticated/medicines")({
@@ -58,7 +58,7 @@ function MedicinesPage() {
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-3">
         <h1 className="text-2xl font-semibold text-primary">Medicines</h1>
-        <Button size="lg" onClick={() => setEditing("new")}><Plus /> Add</Button>
+        <Button onClick={() => setEditing("new")}><Plus /> Add</Button>
       </div>
       {meds.length > 0 && (
         <Button variant="outline" size="lg" className="w-full text-base" onClick={exportCalendar}>
@@ -78,10 +78,10 @@ function MedicinesPage() {
                   <p className="mt-1 font-medium">{doseText(Number(m.dose_qty), m.form)} each time</p>
                 </div>
                 <div className="min-w-0 sm:text-right">
-                  <p className="font-medium">at {[...m.times].sort().map(time12).join(", ")}</p>
+                  <p className="font-medium">at {joinTimes(m.times)}</p>
                   <p className="text-sm">Available stock: {Number(m.stock)} ({daysOfStockLeft(m as unknown as Med)} days)</p>
-                  <p className="text-sm text-muted-foreground">Dose started on {dmyDay(m.start_date)}</p>
-                  {m.end_date && <p className="text-sm text-muted-foreground">Ends on {dmyDay(m.end_date)}</p>}
+                  <p className="text-sm text-muted-foreground">Started on {shortDay(m.start_date)}</p>
+                  {m.end_date && <p className="text-sm text-muted-foreground">Ends on {shortDay(m.end_date)}</p>}
                 </div>
               </div>
             </div>

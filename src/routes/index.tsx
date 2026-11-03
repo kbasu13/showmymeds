@@ -54,7 +54,7 @@ function Index() {
             </li>
           ))}
         </ul>
-        <Button asChild size="lg" className="mt-8 w-full"><Link to="/auth">Get started — it's free</Link></Button>
+        <Button asChild size="lg" className="mt-8 w-full text-lg"><Link to="/auth">Get started for free</Link></Button>
         {signedIn && (
           <Button asChild variant="outline" size="lg" className="mt-3 w-full">
             <Link to="/today">Go to my medicines</Link>

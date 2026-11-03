@@ -33,3 +33,13 @@ import { time12, doseText, dmyDay } from "./schedule";
 test("times show in AM/PM", () => { expect(time12("08:00")).toBe("8:00 AM"); expect(time12("20:30")).toBe("8:30 PM"); expect(time12("00:15")).toBe("12:15 AM"); });
 test("dose shows full unit", () => { expect(doseText(1, "tablet")).toBe("1 tablet"); expect(doseText(2, "capsule")).toBe("2 capsules"); expect(doseText(5, "syrup")).toBe("5 ml"); });
 test("start date as dd-mm-yyyy, day", () => expect(dmyDay("2026-11-01")).toBe("01-11-2026, Sun"));
+
+import { joinTimes, shortDay } from "./schedule";
+import { describe as d2, it as i2, expect as e2 } from "vitest";
+d2("joinTimes", () => {
+  i2("uses 'and' before the last time", () => {
+    e2(joinTimes(["22:00", "08:00"])).toBe("8:00 AM and 10:00 PM");
+    e2(joinTimes(["08:00", "14:00", "22:00"])).toBe("8:00 AM, 2:00 PM and 10:00 PM");
+  });
+  i2("formats short day", () => e2(shortDay("2026-11-03")).toBe("Tue, Nov 3"));
+});
