@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Pencil, Trash2, X, Search } from "lucide-react";
+import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Pencil, Trash2, X, Search, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -92,6 +92,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     prescription_path: med?.prescription_path ?? null as string | null, notes: med?.notes ?? "",
   });
   const [busy, setBusy] = useState(false);
+  const [photoCleared, setPhotoCleared] = useState(false);
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }));
 
   const listen = (): void => {
@@ -112,9 +113,15 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     if (comp) set("composition", comp);
     if (!f.manufacturer && info?.manufacturer) set("manufacturer", info.manufacturer);
     const url = await lookupMedicineImage(f.name, comp ?? f.composition);
-    if (url) { set("image_url", url); toast.success(comp ? "Picture and composition found" : "Picture found"); }
+    if (url) { set("image_url", url); setPhotoCleared(false); toast.success(comp ? "Picture and composition found" : "Picture found"); }
     else toast(comp ? "Composition found — no picture, a simple icon will be shown" : "No picture found — a simple icon will be shown");
     return undefined;
+  };
+
+  const clearPhoto = () => {
+    set("image_url", null);
+    setPhotoCleared(true);
+    toast("Photo removed — a simple icon will be shown");
   };
 
   const upload = async (file: File | undefined, kind: "image" | "rx") => {
@@ -122,6 +129,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     try {
       const path = await uploadFile(userId, file, kind);
       set(kind === "image" ? "image_url" : "prescription_path", path);
+      if (kind === "image") setPhotoCleared(false);
       toast.success(kind === "image" ? "Picture uploaded" : "Prescription uploaded");
     } catch (e) { toast.error((e as Error).message); }
   };
@@ -137,7 +145,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
       if (!manufacturer.trim()) manufacturer = info.manufacturer ?? "";
     }
     let image_url = f.image_url;
-    if (!image_url) image_url = await lookupMedicineImage(f.name, composition);
+    if (!image_url && !photoCleared) image_url = await lookupMedicineImage(f.name, composition);
     const row = {
       name: f.name.trim(), composition: composition || null, manufacturer: manufacturer.trim() || null, form: f.form, dosage: f.dosage || null,
       dose_qty: Number(f.dose_qty) || 1, times: f.times.filter(Boolean), start_date: f.start_date,
@@ -166,6 +174,9 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
                 <label><ImagePlus /> Use my photo
                   <input type="file" accept="image/*" className="sr-only" onChange={(e) => upload(e.target.files?.[0], "image")} /></label>
               </Button>
+              {f.image_url && (
+                <Button variant="ghost" size="sm" className="text-destructive" onClick={clearPhoto}><ImageOff /> Remove photo</Button>
+              )}
             </div>
           </div>
           <Field label="Medicine name">

@@ -8,3 +8,5 @@
 - [ ] Facebook sign-in — not supported by Lovable Cloud
 - [ ] Several family profiles — on hold, waiting for the user to confirm it's wanted
 - [x] Shrink oversized buttons and tidy spacing in Normal display mode
+- [x] Option to remove an existing medicine photo in the edit form
+- [x] Tap a medicine photo to enlarge it in a pop-out view
