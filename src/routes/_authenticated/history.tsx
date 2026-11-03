@@ -55,11 +55,6 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-5 gap-1.5">
-        {[7, 15, 30, 45, 60].map((n) => (
-          <Button key={n} size="sm" variant={range === n ? "default" : "outline"} onClick={() => setRange(n)}>{n} days</Button>
-        ))}
-      </div>
       <div className="space-y-3 rounded-xl border bg-card p-4">
         <p className="flex flex-wrap items-center gap-2 text-lg font-semibold">Report for your doctor (PDF) <PremiumBadge /></p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
@@ -85,6 +80,11 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
       <div className="rounded-xl bg-hero p-5">
         <p className="text-lg">Average doses taken</p>
         <p className="font-display text-4xl font-semibold text-primary">{avg}%</p>
+      </div>
+      <div className="grid grid-cols-5 gap-1.5">
+        {[7, 15, 30, 45, 60].map((n) => (
+          <Button key={n} size="sm" variant={range === n ? "default" : "outline"} onClick={() => setRange(n)}>{n} days</Button>
+        ))}
       </div>
       <div className="w-full min-w-0 overflow-hidden rounded-xl border bg-card p-2">
         <div className="h-64 w-full">
