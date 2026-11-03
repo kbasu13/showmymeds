@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { BellRing, CalendarCheck, Users, Pill } from "lucide-react";
+import { useEffect, useState } from "react";
+import { BellRing, CalendarCheck, Users, Pill, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
@@ -19,13 +19,16 @@ export const Route = createFileRoute("/")({
 
 function Index() {
   const navigate = useNavigate();
+  const [signedIn, setSignedIn] = useState(false);
+
   useEffect(() => {
+    // The homepage always opens. Only a sign-in that is already in progress
+    // (Google/Apple come back to "/") carries the visitor on to their page.
+    const next = sessionStorage.getItem("smm-after-login");
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) {
-        const next = sessionStorage.getItem("smm-after-login");
-        sessionStorage.removeItem("smm-after-login");
-        navigate({ to: next && next.startsWith("/") ? next : "/today", replace: true });
-      }
+      setSignedIn(!!data.session);
+      if (!next || !data.session) return;
+      navigate({ to: next.startsWith("/") ? next : "/today", replace: true });
     });
   }, [navigate]);
 
@@ -34,6 +37,7 @@ function Index() {
     { icon: BellRing, t: "Loud alarm so you never miss one" },
     { icon: Pill, t: "Warns you before medicine runs out" },
     { icon: Users, t: "Family can check in on you" },
+    { icon: Share2, t: "Share a doctor-ready report in one tap" },
   ];
 
   return (
@@ -50,6 +54,11 @@ function Index() {
           ))}
         </ul>
         <Button asChild size="lg" className="mt-8 w-full"><Link to="/auth">Get started — it's free</Link></Button>
+        {signedIn && (
+          <Button asChild variant="outline" size="lg" className="mt-3 w-full">
+            <Link to="/today">Go to my medicines</Link>
+          </Button>
+        )}
       </main>
       <Footer />
     </div>
