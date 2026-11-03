@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_authenticated/history")({
 });
 
 export function AdherenceView({ userId, patientName }: { userId: string; patientName?: string }) {
-  const [range, setRange] = useState<7 | 30>(7);
+  const [range, setRange] = useState<number>(7);
   const { data: me } = useUser();
   const { data: premium } = usePremium(me?.id);
   const navigate = useNavigate();
@@ -27,17 +27,24 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
   const data = adherenceByDay(meds as unknown as Med[], logs as unknown as Log[], days).map((d) => ({
     ...d, label: new Date(d.date + "T00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" }), value: d.pct ?? 0,
   }));
-  const [reportDays, setReportDays] = useState<7 | 15 | 30>(7);
-  const from30 = (() => { const d = new Date(); d.setDate(d.getDate() - 29); return ymd(d); })();
-  const { data: reportLogs } = useLogs(userId, from30);
+  const today = ymd(new Date());
+  const [reportDays, setReportDays] = useState<number | "custom">(7);
+  const [cFrom, setCFrom] = useState(() => { const d = new Date(); d.setDate(d.getDate() - 6); return ymd(d); });
+  const [cTo, setCTo] = useState(today);
+  const span = (() => {
+    if (reportDays !== "custom") { const d = new Date(); d.setDate(d.getDate() - (reportDays - 1)); return { from: ymd(d), to: today }; }
+    return cFrom <= cTo ? { from: cFrom, to: cTo } : { from: cTo, to: cFrom };
+  })();
+  const spanDays = Math.round((new Date(span.to + "T00:00").getTime() - new Date(span.from + "T00:00").getTime()) / 864e5) + 1;
+  const { data: reportLogs } = useLogs(userId, span.from);
   const [report, setReport] = useState<{ blob: Blob; filename: string } | null>(null);
   useEffect(() => {
     if (!premium || !reportLogs) return;
     let live = true;
     setReport(null);
-    buildDoctorReport({ patientName: patientName ?? "Patient", meds, logs: reportLogs, days: reportDays }).then((r) => live && setReport(r));
+    buildDoctorReport({ patientName: patientName ?? "Patient", meds, logs: reportLogs, days: spanDays, to: span.to }).then((r) => live && setReport(r));
     return () => { live = false; };
-  }, [premium, reportLogs, meds, reportDays, patientName]);
+  }, [premium, reportLogs, meds, spanDays, span.to, patientName]);
   const share = async () => {
     if (!report) return;
     try { if (!(await shareBlob(report.blob, report.filename))) { downloadBlob(report.blob, report.filename); toast("Sharing isn't supported here, so the report was downloaded instead."); } }
@@ -48,19 +55,26 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
 
   return (
     <div className="space-y-4">
-      <div className="flex gap-2">
-        <Button variant={range === 7 ? "default" : "outline"} onClick={() => setRange(7)}>Last 7 days</Button>
-        <Button variant={range === 30 ? "default" : "outline"} onClick={() => setRange(30)}>Last month</Button>
+      <div className="grid grid-cols-5 gap-1.5">
+        {[7, 15, 30, 45, 60].map((n) => (
+          <Button key={n} size="sm" variant={range === n ? "default" : "outline"} onClick={() => setRange(n)}>{n} days</Button>
+        ))}
       </div>
       <div className="space-y-3 rounded-xl border bg-card p-4">
         <p className="flex flex-wrap items-center gap-2 text-lg font-semibold">Report for your doctor (PDF) <PremiumBadge /></p>
-        <div className="grid grid-cols-3 gap-2">
-          {([7, 15, 30] as const).map((d) => (
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {([7, 15, 30, "custom"] as const).map((d) => (
             <Button key={d} variant={reportDays === d ? "default" : "outline"} onClick={() => setReportDays(d)}>
-              {d === 30 ? "Last 1 month" : `Last ${d} days`}
+              {d === "custom" ? "Choose dates" : d === 30 ? "Last 1 month" : `Last ${d} days`}
             </Button>
           ))}
         </div>
+        {reportDays === "custom" && (
+          <div className="grid grid-cols-2 gap-2">
+            <label className="text-sm font-medium">From<input type="date" max={today} value={cFrom} onChange={(e) => setCFrom(e.target.value)} className="mt-1 h-10 w-full rounded-md border bg-background px-2" /></label>
+            <label className="text-sm font-medium">To<input type="date" max={today} value={cTo} onChange={(e) => setCTo(e.target.value)} className="mt-1 h-10 w-full rounded-md border bg-background px-2" /></label>
+          </div>
+        )}
         <div className="grid grid-cols-2 gap-2">
           <Button size="lg" variant="secondary" disabled={!!premium && !report}
             onClick={() => (!premium ? navigate({ to: "/premium" }) : report && downloadBlob(report.blob, report.filename))}><Download /> Download report</Button>

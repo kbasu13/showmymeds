@@ -39,6 +39,12 @@ function MedicinesPage() {
   };
 
   const exportCalendar = () => {
+    const missing = meds.find((m) => !(Number(m.stock) > 0));
+    if (missing) {
+      toast.error(`Stock is not updated for ${missing.name}. Please add how many you have.`);
+      setEditing(missing);
+      return;
+    }
     const ics = buildIcs(meds as unknown as Med[]);
     const blob = new Blob([ics], { type: "text/calendar" });
     const a = document.createElement("a");
