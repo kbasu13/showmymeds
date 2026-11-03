@@ -29,6 +29,13 @@
       "when": 1793723628855,
       "tag": "0003_admin_premium_and_discounts",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1793724384044,
+      "tag": "0004_add_warn_days",
+      "breakpoints": true
     }
   ]
 }
