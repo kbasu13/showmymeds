@@ -31,12 +31,13 @@ export const Route = createFileRoute("/api/composition")({
             model: provider.responses("openai/gpt-6-astra"),
             providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
             system:
-              "You are a pharmacist database. Given a medicine brand or generic name (any country, including India), reply with ONLY its full active composition: every active ingredient with strength, separated by ' + ', e.g. 'Paracetamol 500mg + Caffeine 30mg'. If several strengths exist, give the most common one. If you do not recognise it, reply exactly UNKNOWN.",
+              "You are a pharmacist database. Given a medicine brand or generic name (any country, including India), reply with ONE line: its full active composition (every active ingredient with strength, separated by ' + ', e.g. 'Paracetamol 500mg + Caffeine 30mg'; most common strength if several), then ' || ', then the manufacturer/marketing company short name (e.g. 'GSK', 'Cipla', 'Abbott', 'Sun Pharma'). Use UNKNOWN for any part you do not know. Example: 'Paracetamol 650mg || GSK'.",
             prompt: name,
           });
           const text = await result.text;
-          const c = text.trim().replace(/^["']|["']$/g, "");
-          return Response.json({ composition: !c || /^UNKNOWN/i.test(c) ? null : c.slice(0, 300) });
+          const [compRaw = "", mfrRaw = ""] = text.trim().replace(/^["']|["']$/g, "").split("||");
+          const clean = (s: string, n: number) => { const t = s.trim(); return !t || /^UNKNOWN/i.test(t) ? null : t.slice(0, n); };
+          return Response.json({ composition: clean(compRaw, 300), manufacturer: clean(mfrRaw, 80) });
         } catch (e) {
           console.error("composition lookup failed", e);
           return Response.json({ error: "Lookup failed, please try again." }, { status: 502 });
