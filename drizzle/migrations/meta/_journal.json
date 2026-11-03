@@ -15,6 +15,13 @@
       "when": 1793395995642,
       "tag": "0001_migration",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1793711610114,
+      "tag": "0002_add_manufacturer",
+      "breakpoints": true
     }
   ]
 }
