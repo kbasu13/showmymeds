@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { Send } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,7 +19,7 @@ function AskPage() {
   const { data: user } = useUser();
   const { data: premium, isLoading } = usePremium(user?.id);
   const [msgs, setMsgs] = useState<Msg[]>([
-    { role: "assistant", text: "Hello! Ask me about your dose history or possible side effects." },
+    { role: "assistant", text: "Hello! Ask me about your dose history, possible side effects, or check medicines your doctor has prescribed before you take them." },
   ]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
@@ -69,7 +70,9 @@ function AskPage() {
       <h1 className="text-2xl font-semibold text-primary">Ask</h1>
       <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border bg-card p-4">
         {msgs.map((m, i) => (
-          <p key={i} className={`max-w-[85%] rounded-xl p-3 text-lg ${m.role === "user" ? "ml-auto bg-primary text-primary-foreground" : "bg-secondary"}`}>{m.text}</p>
+          m.role === "user"
+            ? <p key={i} className="ml-auto max-w-[85%] rounded-xl bg-primary p-3 text-lg text-primary-foreground">{m.text}</p>
+            : <div key={i} className="max-w-[90%] space-y-2 rounded-xl bg-secondary p-3 text-base leading-relaxed [&_h3]:mt-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-primary [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1"><ReactMarkdown>{m.text}</ReactMarkdown></div>
         ))}
       </div>
       <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
