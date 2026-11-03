@@ -20,7 +20,7 @@ function TodayPage() {
 
   const doses = dosesForDay(meds as unknown as Med[], today);
   const low = meds.filter((m) => isLowStock(m as unknown as Med, today));
-  const dateLabel = new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" });
+  const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
   const take = async (id: string, time: string, name: string) => {
     try {

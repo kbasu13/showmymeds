@@ -4,7 +4,7 @@ import { createClient } from "@supabase/supabase-js";
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36";
 const MAX_BYTES = 3 * 1024 * 1024;
 
-async function askGemini(name: string, composition: string, apiKey: string): Promise<string[]> {
+async function askGemini(name: string, composition: string, kind: string, apiKey: string): Promise<string[]> {
   try {
     const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -12,8 +12,8 @@ async function askGemini(name: string, composition: string, apiKey: string): Pro
       body: JSON.stringify({
         model: "google/gemini-3.8-flash",
         messages: [
-          { role: "system", content: "You find product photos of medicines. Reply ONLY with a JSON array of up to 5 direct image URLs (ending in .jpg/.jpeg/.png/.webp) showing the medicine pack or tablets. Prefer Wikimedia Commons (upload.wikimedia.org), the manufacturer's website, or large pharmacy product pages (pharmeasy, apollopharmacy, netmeds, 1mg). Only include URLs you are confident exist. Reply [] if unsure." },
-          { role: "user", content: `${name}${composition ? ` (${composition})` : ""}` },
+          { role: "system", content: "You find product photos of medicines. Reply ONLY with a JSON array of up to 5 direct image URLs (ending in .jpg/.jpeg/.png/.webp) showing the medicine pack in the GIVEN dosage form (e.g. a syrup bottle for syrups — never tablets for a liquid). Prefer Wikimedia Commons (upload.wikimedia.org), the manufacturer's website, or large pharmacy product pages (pharmeasy, apollopharmacy, netmeds, 1mg). Only include URLs you are confident exist. Reply [] if unsure." },
+          { role: "user", content: `${name}${composition ? ` (${composition})` : ""} — dosage form: ${kind}` },
         ],
       }),
     });
@@ -70,18 +70,20 @@ export const Route = createFileRoute("/api/medphoto")({
         const { data: u } = await db.auth.getUser(token);
         if (!u.user) return Response.json({ error: "Please sign in." }, { status: 401 });
 
-        const body = (await request.json().catch(() => null)) as { name?: string; composition?: string } | null;
+        const body = (await request.json().catch(() => null)) as { name?: string; composition?: string; form?: string } | null;
         const name = (body?.name ?? "").trim().slice(0, 80);
         const composition = (body?.composition ?? "").trim().slice(0, 200);
         if (!name) return Response.json({ path: null });
         const ingredient = composition.split("+")[0]?.replace(/[\d.]+\s*(mg|mcg|g|ml|iu|%).*$/i, "").trim() ?? "";
 
+        const form = (body?.form ?? "").toLowerCase();
+        const kind = /syrup|suspension|liquid/i.test(name) || form === "syrup" ? "syrup" : /drop/i.test(name) || form === "drops" ? "drops" : /cream|gel|ointment/i.test(name) || form === "cream" ? "cream" : form === "capsule" || /\bcap/i.test(name) ? "capsules" : form === "injection" ? "injection" : form === "inhaler" ? "inhaler" : "tablets";
         const apiKey = process.env["LOVABLE_API_KEY"];
-        const [ai, ph] = await Promise.all([apiKey ? askGemini(name, composition, apiKey) : [], pharmeasy(name)]);
+        const [ai, ph] = await Promise.all([apiKey ? askGemini(name, composition, kind, apiKey) : [], pharmeasy(kind === "tablets" || /syrup|drop|cream|gel/i.test(name) ? name : `${name} ${kind}`)]);
         const sources: (() => Promise<string[]>)[] = [
           async () => ai, async () => ph,
-          () => commons(`${name} tablets`),
-          () => (ingredient ? commons(`${ingredient} tablets`) : Promise.resolve([])),
+          () => commons(`${name} ${kind}`),
+          () => (ingredient ? commons(`${ingredient} ${kind}`) : Promise.resolve([])),
         ];
         for (const src of sources) {
           for (const url of await src()) {

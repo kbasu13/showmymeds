@@ -64,7 +64,7 @@ function MedicinesPage() {
     <div className="space-y-5">
       <div className="flex items-end justify-between gap-3">
         <h1 className="text-2xl font-semibold text-primary">Medicines</h1>
-        <Button onClick={() => setEditing("new")}><Plus /> Add</Button>
+        <Button size="sm" className="h-9" onClick={() => setEditing("new")}><Plus /> Add</Button>
       </div>
       {meds.length > 0 && (
         <Button variant="outline" size="lg" className="w-full text-base" onClick={exportCalendar}>
@@ -168,7 +168,7 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
     const comp = f.composition ? null : info?.composition ?? null;
     if (comp) set("composition", comp);
     if (!f.manufacturer && info?.manufacturer) set("manufacturer", info.manufacturer);
-    const url = await lookupMedicineImage(f.name, comp ?? f.composition);
+    const url = await lookupMedicineImage(f.name, comp ?? f.composition, f.form);
     if (url) { set("image_url", url); setPhotoCleared(false); toast.success(comp ? "Picture and composition found" : "Picture found"); }
     else toast(comp ? "Composition found — no picture, a simple icon will be shown" : "No picture found — a simple icon will be shown");
     return undefined;
@@ -201,7 +201,7 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
       if (!manufacturer.trim()) manufacturer = info.manufacturer ?? "";
     }
     let image_url = f.image_url;
-    if (!image_url && !photoCleared) image_url = await lookupMedicineImage(f.name, composition);
+    if (!image_url && !photoCleared) image_url = await lookupMedicineImage(f.name, composition, f.form);
     const row = {
       name: f.name.trim(), composition: composition || null, manufacturer: manufacturer.trim() || null, form: f.form, dosage: f.dosage || null,
       dose_qty: Number(f.dose_qty) || 1, times: f.times.filter(Boolean), start_date: f.start_date,
@@ -251,7 +251,7 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
             </div>
           </Field>
 
-          <Field label="What's in it (optional)" hint="Active ingredients. We look these up if you leave it empty.">
+          <Field label="What's in it (optional)" hint="We look these up if you leave it empty.">
             <div className="flex gap-2">
               <Textarea rows={2} value={f.composition} onChange={(e) => set("composition", e.target.value)} placeholder="For example Paracetamol 500mg + Caffeine 30mg" />
               <Button variant="secondary" size="icon" aria-label="Look up composition" onClick={async () => {

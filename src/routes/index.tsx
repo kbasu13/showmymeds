@@ -44,8 +44,8 @@ function Index() {
   return (
     <div className="flex min-h-screen flex-col bg-hero">
       <main className="mx-auto w-full max-w-xl flex-1 px-5 py-12">
-        <span className="flex h-16 w-16 items-center justify-center rounded-xl bg-brand text-primary"><Pill className="h-9 w-9" /></span>
-        <h1 className="mt-6 text-4xl font-semibold leading-tight text-primary">Your medicines, made simple.</h1>
+        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-brand text-primary"><Pill className="h-9 w-9" /></span>
+        <h1 className="mt-6 text-center text-4xl font-semibold leading-tight text-primary">Never miss your medicines again</h1>
         <p className="mt-4 text-xl">ShowMyMeds reminds you when to take each medicine, in big clear letters.</p>
         <ul className="mt-8 space-y-3">
           {features.map(({ icon: Icon, t }) => (
@@ -54,12 +54,7 @@ function Index() {
             </li>
           ))}
         </ul>
-        <Button asChild size="lg" className="mt-8 w-full text-lg"><Link to="/auth">Get started for free</Link></Button>
-        {signedIn && (
-          <Button asChild variant="outline" size="lg" className="mt-3 w-full">
-            <Link to="/today">Go to my medicines</Link>
-          </Button>
-        )}
+        <Button asChild size="lg" className="mt-8 w-full text-lg">{signedIn ? <Link to="/today">Go to my medicines</Link> : <Link to="/auth">Get started for free</Link>}</Button>
       </main>
       <Footer />
     </div>
