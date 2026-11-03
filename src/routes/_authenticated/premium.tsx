@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import { PREMIUM_PLANS, discountedPrice, withGst, upiLink, GST_PERCENT, UPI_ID, UPI_NAME } from "@/lib/plans";
 import { supabase } from "@/integrations/supabase/client";
+import { savePendingPayment, clearPendingPayment } from "@/components/PendingPayment";
 
 export const Route = createFileRoute("/_authenticated/premium")({
   head: () => ({ meta: [{ title: "Go Premium — ShowMyMeds" }, { name: "description", content: "Unlock the AI helper, doctor PDF reports, family caregivers and WhatsApp reminders." }] }),
@@ -96,6 +97,9 @@ function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: 
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
   const navigate = useNavigate();
+  useEffect(() => {
+    supabase.auth.getUser().then(({ data }) => data.user && savePendingPayment({ userId: data.user.id, plan, label, code, total, at: Date.now() }));
+  }, [plan, label, code, total]);
   useEffect(() => { QRCode.toDataURL(link, { width: 280, margin: 1 }).then(setQr); }, [link]);
 
   const paid = async () => {
@@ -103,6 +107,7 @@ function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: 
     const { error } = await supabase.rpc("activate_premium_paid", { _plan: plan, _code: code ?? "" });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
+    clearPendingPayment();
     await qc.invalidateQueries({ queryKey: ["premium"] });
     toast.success("Thank you! Premium is now on.");
     navigate({ to: "/today" });
