@@ -92,6 +92,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     prescription_path: med?.prescription_path ?? null as string | null, notes: med?.notes ?? "",
   });
   const [busy, setBusy] = useState(false);
+  const [photoCleared, setPhotoCleared] = useState(false);
   const set = (k: keyof typeof f, v: unknown) => setF((p) => ({ ...p, [k]: v }));
 
   const listen = (): void => {
