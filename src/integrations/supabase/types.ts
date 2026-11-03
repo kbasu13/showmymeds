@@ -41,6 +41,71 @@ export type Database = {
         }
         Relationships: []
       }
+      discount_codes: {
+        Row: {
+          active: boolean
+          code: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          percent: number
+          used_count: number
+        }
+        Insert: {
+          active?: boolean
+          code: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          percent: number
+          used_count?: number
+        }
+        Update: {
+          active?: boolean
+          code?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          max_uses?: number | null
+          percent?: number
+          used_count?: number
+        }
+        Relationships: []
+      }
+      discount_redemptions: {
+        Row: {
+          code_id: string
+          id: string
+          plan: string | null
+          redeemed_at: string
+          user_id: string
+        }
+        Insert: {
+          code_id: string
+          id?: string
+          plan?: string | null
+          redeemed_at?: string
+          user_id: string
+        }
+        Update: {
+          code_id?: string
+          id?: string
+          plan?: string | null
+          redeemed_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discount_redemptions_code_id_fkey"
+            columns: ["code_id"]
+            isOneToOne: false
+            referencedRelation: "discount_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       dose_logs: {
         Row: {
           id: string
@@ -196,6 +261,22 @@ export type Database = {
     }
     Functions: {
       accept_invite: { Args: { _token: string }; Returns: string }
+      admin_grant_premium: {
+        Args: { _email: string; _expires: string }
+        Returns: undefined
+      }
+      admin_list_premium: {
+        Args: never
+        Returns: {
+          display_name: string
+          email: string
+          expires_at: string
+          granted_at: string
+          user_id: string
+        }[]
+      }
+      admin_revoke_premium: { Args: { _user: string }; Returns: undefined }
+      check_discount: { Args: { _code: string }; Returns: number }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -204,6 +285,10 @@ export type Database = {
         Returns: boolean
       }
       is_caregiver_of: { Args: { _patient: string }; Returns: boolean }
+      redeem_discount: {
+        Args: { _code: string; _plan: string }
+        Returns: number
+      }
       take_dose: {
         Args: { _date: string; _medicine: string; _time: string }
         Returns: undefined

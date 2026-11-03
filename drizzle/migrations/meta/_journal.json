@@ -22,6 +22,13 @@
       "when": 1793711610114,
       "tag": "0002_add_manufacturer",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1793723628855,
+      "tag": "0003_admin_premium_and_discounts",
+      "breakpoints": true
     }
   ]
 }
