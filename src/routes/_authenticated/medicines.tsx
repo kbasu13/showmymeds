@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Pencil, Trash2, X, Search } from "lucide-react";
+import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Pencil, Trash2, X, Search, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -129,6 +129,7 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
     try {
       const path = await uploadFile(userId, file, kind);
       set(kind === "image" ? "image_url" : "prescription_path", path);
+      if (kind === "image") setPhotoCleared(false);
       toast.success(kind === "image" ? "Picture uploaded" : "Prescription uploaded");
     } catch (e) { toast.error((e as Error).message); }
   };
