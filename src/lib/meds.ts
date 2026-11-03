@@ -80,15 +80,6 @@ async function wikiImage(q: string): Promise<string | null> {
   }
 }
 
-async function pharmacyImage(q: string): Promise<string | null> {
-  try {
-    const r = await fetch(`/api/medimage?q=${encodeURIComponent(q)}`);
-    if (!r.ok) return null;
-    return ((await r.json()) as { url: string | null }).url;
-  } catch {
-    return null;
-  }
-}
 
 /** Find a medicine photo online and copy it into the user's own storage; returns the stored path. */
 export async function lookupMedicineImage(name: string, composition?: string | null): Promise<string | null> {
@@ -100,11 +91,15 @@ export async function lookupMedicineImage(name: string, composition?: string | n
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` },
       body: JSON.stringify({ name, composition: composition ?? "" }),
     });
-    if (!r.ok) return null;
-    return ((await r.json()) as { path: string | null }).path;
+    if (r.ok) {
+      const path = ((await r.json()) as { path: string | null }).path;
+      if (path) return path;
+    }
   } catch {
-    return null;
+    /* fall through to Wikipedia */
   }
+  const ingredient = (composition ?? "").split("+")[0]?.replace(/[\d.]+\s*(mg|mcg|g|ml|iu|%).*$/i, "").trim() ?? "";
+  return (await wikiImage(`${name} medicine`)) ?? (ingredient ? await wikiImage(ingredient) : null);
 }
 
 export async function uploadFile(userId: string, file: File, kind: "image" | "rx") {
