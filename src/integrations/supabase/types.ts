@@ -86,6 +86,7 @@ export type Database = {
           form: string
           id: string
           image_url: string | null
+          manufacturer: string | null
           name: string
           notes: string | null
           prescription_path: string | null
@@ -103,6 +104,7 @@ export type Database = {
           form?: string
           id?: string
           image_url?: string | null
+          manufacturer?: string | null
           name: string
           notes?: string | null
           prescription_path?: string | null
@@ -120,6 +122,7 @@ export type Database = {
           form?: string
           id?: string
           image_url?: string | null
+          manufacturer?: string | null
           name?: string
           notes?: string | null
           prescription_path?: string | null

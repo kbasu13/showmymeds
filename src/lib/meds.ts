@@ -80,13 +80,23 @@ async function wikiImage(q: string): Promise<string | null> {
   }
 }
 
-/** Look up a picture of the medicine online: brand name first, then its main ingredient. */
+async function pharmacyImage(q: string): Promise<string | null> {
+  try {
+    const r = await fetch(`/api/medimage?q=${encodeURIComponent(q)}`);
+    if (!r.ok) return null;
+    return ((await r.json()) as { url: string | null }).url;
+  } catch {
+    return null;
+  }
+}
+
+/** Look up a picture of the medicine online: pharmacy pack photo first, then Wikipedia. */
 export async function lookupMedicineImage(name: string, composition?: string | null): Promise<string | null> {
   const n = name.trim();
   const ingredient = (composition ?? "").split("+")[0]?.replace(/[\d.]+\s*(mg|mcg|g|ml|iu|%).*$/i, "").trim() ?? "";
   return (
+    (await pharmacyImage(n)) ??
     (await wikiImage(`${n} medicine`)) ??
-    (await wikiImage(n.split(/\s+/)[0] ?? "")) ??
     (ingredient ? await wikiImage(ingredient) : null)
   );
 }
@@ -104,9 +114,12 @@ export async function signedUrl(path: string) {
   return data?.signedUrl ?? null;
 }
 
-/** Look up the full active composition of a medicine online. Returns null when unknown. */
-export async function lookupComposition(name: string): Promise<string | null> {
-  if (!name.trim()) return null;
+export type MedInfo = { composition: string | null; manufacturer: string | null };
+
+/** Look up composition and manufacturer of a medicine online. */
+export async function lookupMedInfo(name: string): Promise<MedInfo> {
+  const empty = { composition: null, manufacturer: null };
+  if (!name.trim()) return empty;
   const { data } = await supabase.auth.getSession();
   try {
     const r = await fetch("/api/composition", {
@@ -114,9 +127,14 @@ export async function lookupComposition(name: string): Promise<string | null> {
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` },
       body: JSON.stringify({ name }),
     });
-    if (!r.ok) return null;
-    return ((await r.json()) as { composition: string | null }).composition;
+    if (!r.ok) return empty;
+    const j = (await r.json()) as Partial<MedInfo>;
+    return { composition: j.composition ?? null, manufacturer: j.manufacturer ?? null };
   } catch {
-    return null;
+    return empty;
   }
+}
+
+export async function lookupComposition(name: string): Promise<string | null> {
+  return (await lookupMedInfo(name)).composition;
 }
