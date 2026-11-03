@@ -106,8 +106,9 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
 
   const findImage = async (): Promise<unknown> => {
     if (!f.name) return toast.error("Enter a name first");
-    const [url, comp] = await Promise.all([lookupMedicineImage(f.name), f.composition ? null : lookupComposition(f.name)]);
+    const comp = f.composition ? null : await lookupComposition(f.name);
     if (comp) set("composition", comp);
+    const url = await lookupMedicineImage(f.name, comp ?? f.composition);
     if (url) { set("image_url", url); toast.success(comp ? "Picture and composition found" : "Picture found"); }
     else toast(comp ? "Composition found — no picture, a simple icon will be shown" : "No picture found — a simple icon will be shown");
     return undefined;
@@ -125,10 +126,10 @@ function MedForm({ userId, med, onClose, onSaved }: { userId: string; med: Medic
   const save = async (): Promise<unknown> => {
     if (!f.name.trim()) return toast.error("Please enter the medicine name");
     setBusy(true);
-    let image_url = f.image_url;
-    if (!image_url && !med) image_url = await lookupMedicineImage(f.name);
     let composition = f.composition;
     if (!composition.trim()) composition = (await lookupComposition(f.name)) ?? "";
+    let image_url = f.image_url;
+    if (!image_url) image_url = await lookupMedicineImage(f.name, composition);
     const row = {
       name: f.name.trim(), composition: composition || null, form: f.form, dosage: f.dosage || null,
       dose_qty: Number(f.dose_qty) || 1, times: f.times.filter(Boolean), start_date: f.start_date,
