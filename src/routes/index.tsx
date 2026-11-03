@@ -45,12 +45,12 @@ function Index() {
     <div className="flex min-h-screen flex-col bg-hero">
       <main className="mx-auto w-full max-w-xl flex-1 px-5 py-12">
         <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-brand text-primary"><Pill className="h-9 w-9" /></span>
-        <h1 className="mt-6 text-center text-4xl font-semibold leading-tight text-primary">Never miss your medicines again</h1>
-        <p className="mt-4 text-xl">ShowMyMeds reminds you when to take each medicine, in big clear letters.</p>
+        <h1 className="mt-6 text-center text-4xl font-semibold leading-tight text-primary">Your medicines,<br />Made simple</h1>
+        <p className="mt-4 text-center text-xl">One tap to stay on track. ShowMyMeds remembers every dose, so you don't have to.</p>
         <ul className="mt-8 space-y-3">
           {features.map(({ icon: Icon, t }) => (
-            <li key={t} className="flex items-center gap-4 rounded-xl bg-card p-4 text-lg shadow-soft">
-              <Icon className="h-8 w-8 shrink-0 text-primary" /> {t}
+            <li key={t} className="flex items-center justify-center gap-3 rounded-xl bg-card/80 p-4 text-center text-lg shadow-soft">
+              <Icon className="h-7 w-7 shrink-0 text-primary" /> <span>{t}</span>
             </li>
           ))}
         </ul>
