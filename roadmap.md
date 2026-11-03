@@ -10,3 +10,11 @@
 - [x] Shrink oversized buttons and tidy spacing in Normal display mode
 - [x] Option to remove an existing medicine photo in the edit form
 - [x] Tap a medicine photo to enlarge it in a pop-out view
+- [x] App link always opens the homepage; sign-in reached from the "Get started" button
+- [x] Homepage 5th line: share a doctor-ready report in one tap
+- [x] Premium payment page: UPI QR with 18% GST, discount codes, "I have paid" activates Premium
+- [x] Doctor report: download/share for last 7, 15 or 30 days
+- [x] Prescription photo scan with AI review before adding
+- [x] Own app icon, centered branding, footer wording, larger text on every page
+- [ ] WhatsApp reminders — still needs WhatsApp Business connected
+- [ ] SMS codes for mobile sign-in — still needs an SMS provider in Auth settings
