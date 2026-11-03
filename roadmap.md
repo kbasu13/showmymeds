@@ -13,7 +13,7 @@
 - [x] App link always opens the homepage; sign-in reached from the "Get started" button
 - [x] Homepage 5th line: share a doctor-ready report in one tap
 - [x] Premium payment page: UPI QR with 18% GST, discount codes, "I have paid" activates Premium
-- [x] Doctor report: download/share for last 7, 15 or 30 days
+- [x] Doctor report: download/share for last 7, 15, 30 days or a chosen date range
 - [x] Prescription photo scan with AI review before adding
 - [x] Own app icon, centered branding, footer wording, larger text on every page
 - [ ] WhatsApp reminders — still needs WhatsApp Business connected
