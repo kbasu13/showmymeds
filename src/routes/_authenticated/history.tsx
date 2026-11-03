@@ -46,9 +46,9 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
       <div className="w-full min-w-0 overflow-hidden rounded-xl border bg-card p-2">
         <div className="h-64 w-full">
           <ResponsiveContainer width="100%" height="100%">
-            <BarChart data={data} margin={{ top: 20, right: 4, left: -24, bottom: 0 }}>
+            <BarChart data={data} margin={{ top: 20, right: 8, left: 0, bottom: 0 }}>
               <XAxis dataKey="label" tick={{ fontSize: 11 }} interval={range === 7 ? 0 : "preserveStartEnd"} minTickGap={8} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={40} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} width={36} tickFormatter={(v) => `${v}%`} />
               <Bar dataKey="value" radius={[8, 8, 0, 0]}>
                 {range === 7 && <LabelList dataKey="value" position="top" formatter={(v: number) => `${v}%`} style={{ fontSize: 12, fontWeight: 600 }} />}
                 {data.map((d) => (

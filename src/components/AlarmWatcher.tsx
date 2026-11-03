@@ -16,11 +16,18 @@ export function AlarmWatcher({ userId }: { userId: string }) {
   const refresh = useRefreshMeds();
   const [due, setDue] = useState<Due[]>([]);
   const rung = useRef(new Set<string>());
+  const snoozed = useRef<{ d: Due; at: number }[]>([]);
   const audio = useRef<{ ctx: AudioContext; timer: number } | null>(null);
 
   useEffect(() => {
     const check = () => {
       const now = new Date();
+      const ready = snoozed.current.filter((s) => s.at <= now.getTime());
+      if (ready.length) {
+        snoozed.current = snoozed.current.filter((s) => s.at > now.getTime());
+        const pending = ready.filter(({ d }) => !logs.some((l) => l.medicine_id === d.med.id && l.scheduled_date === d.date && l.scheduled_time === d.time));
+        if (pending.length) setDue((p) => [...p, ...pending.map((s) => s.d)]);
+      }
       const date = ymd(now);
       const hm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
       const fresh = dosesForDay(meds as never, date)
@@ -85,7 +92,11 @@ export function AlarmWatcher({ userId }: { userId: string }) {
           catch (e) { toast.error((e as Error).message); }
           dismiss();
         }}>I've taken it</Button>
-        <Button size="lg" variant="secondary" onClick={dismiss}>Remind me later</Button>
+        <Button size="lg" variant="secondary" onClick={() => {
+          snoozed.current.push({ d: cur, at: Date.now() + 10 * 60 * 1000 });
+          toast(`We'll remind you again in 10 minutes`);
+          dismiss();
+        }}>Snooze 10 minutes</Button>
       </div>
     </div>
   );
