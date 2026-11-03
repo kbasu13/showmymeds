@@ -25,6 +25,7 @@ function Index() {
     // The homepage always opens. Only a sign-in that is already in progress
     // (Google/Apple come back to "/") carries the visitor on to their page.
     const next = sessionStorage.getItem("smm-after-login");
+    sessionStorage.removeItem("smm-after-login");
     supabase.auth.getSession().then(({ data }) => {
       setSignedIn(!!data.session);
       if (!next || !data.session) return;
