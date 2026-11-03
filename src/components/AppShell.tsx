@@ -9,6 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Footer } from "./Footer";
 import { AlarmWatcher } from "./AlarmWatcher";
+import { PendingPayment } from "./PendingPayment";
 import { THEMES, usePrefs } from "@/lib/prefs";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
@@ -101,6 +102,7 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
 
       {user && <AlarmWatcher userId={user.id} />}
+      {user && premium !== undefined && <PendingPayment userId={user.id} premium={!!premium} />}
     </div>
   );
 }
