@@ -56,7 +56,7 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
   return (
     <div className="space-y-4">
       <div className="space-y-3 rounded-xl border bg-card p-4">
-        <p className="flex flex-wrap items-center gap-2 text-lg font-semibold">Report for your doctor (PDF) <PremiumBadge /></p>
+        <p className="flex flex-wrap items-center justify-center gap-2 text-center text-lg font-semibold">Report for your doctor (PDF) <PremiumBadge /></p>
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
           {([7, 15, 30, "custom"] as const).map((d) => (
             <Button key={d} variant={reportDays === d ? "default" : "outline"} onClick={() => setReportDays(d)}>
@@ -70,7 +70,7 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
             <label className="text-sm font-medium">To<input type="date" max={today} value={cTo} onChange={(e) => setCTo(e.target.value)} className="mt-1 h-10 w-full rounded-md border bg-background px-2" /></label>
           </div>
         )}
-        <div className="grid grid-cols-2 gap-2">
+        <div className="flex flex-wrap items-center justify-center gap-2">
           <Button size="lg" variant="secondary" disabled={!!premium && !report}
             onClick={() => (!premium ? navigate({ to: "/premium" }) : report && downloadBlob(report.blob, report.filename))}><Download /> Download report</Button>
           <Button size="lg" variant="secondary" disabled={!!premium && !report}

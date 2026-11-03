@@ -162,7 +162,7 @@
   --premium: oklch(0.62 0.15 230);
   --premium-foreground: oklch(0.99 0 0);
   --shadow-soft: 0 8px 24px -12px color-mix(in oklab, var(--primary) 35%, transparent);
-  --gradient-hero: linear-gradient(160deg, var(--secondary), var(--background) 70%);
+  --gradient-hero: linear-gradient(160deg, color-mix(in oklab, var(--secondary) 72%, transparent), color-mix(in oklab, var(--background) 72%, transparent) 70%);
 }
 
 /* Large display mode scales all text and controls */
@@ -193,6 +193,17 @@ html.size-large {
   }
   body {
     background-color: var(--color-background);
+    /* Washed health-leaf backdrop, softened by a translucent layer of the theme colour. */
+    background-image:
+      linear-gradient(
+        color-mix(in oklab, var(--color-background) 86%, transparent),
+        color-mix(in oklab, var(--color-background) 86%, transparent)
+      ),
+      url("/leaf-bg.jpg");
+    background-repeat: no-repeat, no-repeat;
+    background-position: center top, center top;
+    background-size: cover, cover;
+    background-attachment: fixed, fixed;
     color: var(--color-foreground);
     font-family: var(--font-sans);
     line-height: 1.5;
