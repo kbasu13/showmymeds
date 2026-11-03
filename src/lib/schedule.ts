@@ -6,6 +6,7 @@ export type Med = {
   end_date: string | null;
   stock: number;
   dose_qty: number;
+  warn_days?: number | null;
 };
 
 export type Log = { medicine_id: string; scheduled_date: string; scheduled_time: string; taken_at: string };
@@ -43,7 +44,7 @@ export function daysOfStockLeft(med: Pick<Med, "times" | "dose_qty" | "stock">) 
 /** Low stock = less than a 7-day buffer remaining, for medicines still in course. */
 export function isLowStock(med: Med, today: string) {
   if (med.end_date && med.end_date < today) return false;
-  return daysOfStockLeft(med) < LOW_STOCK_DAYS;
+  return daysOfStockLeft(med) < (med.warn_days ?? LOW_STOCK_DAYS);
 }
 
 /** Adherence % per day: taken scheduled doses / scheduled doses. Null when nothing was scheduled. */
