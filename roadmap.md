@@ -9,4 +9,4 @@
 - [ ] Several family profiles — on hold, waiting for the user to confirm it's wanted
 - [x] Shrink oversized buttons and tidy spacing in Normal display mode
 - [x] Option to remove an existing medicine photo in the edit form
-- [ ] Tap a medicine photo to enlarge it in a pop-out view
+- [x] Tap a medicine photo to enlarge it in a pop-out view
