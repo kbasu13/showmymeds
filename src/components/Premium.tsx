@@ -26,6 +26,9 @@ export function useIsAdmin(userId: string | undefined) {
 }
 
 export function PremiumBadge({ className }: { className?: string }) {
+  const { data: user } = useQuery({ queryKey: ["me"], queryFn: async () => (await supabase.auth.getUser()).data.user });
+  const { data: premium } = usePremium(user?.id);
+  if (premium) return null;
   return (
     <span className={cn("inline-flex items-center gap-1 rounded-full bg-premium px-2 py-0.5 text-xs font-semibold text-premium-foreground", className)}>
       <Gem className="h-3.5 w-3.5" /> Premium
