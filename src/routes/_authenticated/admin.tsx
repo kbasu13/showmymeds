@@ -49,13 +49,13 @@ function FreePremium() {
     const d = DURATIONS.find((x) => x.id === dur)!;
     const expires = d.days ? new Date(Date.now() + d.days * 864e5).toISOString() : null;
     const { error } = await supabase.rpc("admin_grant_premium", { _email: email, _expires: expires as string });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     toast.success(`Premium given to ${email}`); setEmail("");
     qc.invalidateQueries({ queryKey: ["admin-premium"] }); qc.invalidateQueries({ queryKey: ["premium"] });
   }
   async function remove(id: string) {
     const { error } = await supabase.rpc("admin_revoke_premium", { _user: id });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     qc.invalidateQueries({ queryKey: ["admin-premium"] }); qc.invalidateQueries({ queryKey: ["premium"] });
   }
   return (
@@ -105,7 +105,7 @@ function Codes() {
       code, percent, max_uses: maxUses ? Number(maxUses) : null,
       expires_at: expires ? new Date(`${expires}T23:59:59`).toISOString() : null,
     });
-    if (error) return toast.error(error.message);
+    if (error) { toast.error(error.message); return; }
     navigator.clipboard?.writeText(code).catch(() => {});
     toast.success(`Code ${code} created and copied`); refresh();
   }

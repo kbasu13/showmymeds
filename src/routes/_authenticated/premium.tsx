@@ -25,7 +25,7 @@ function PremiumPage() {
     setChecking(true);
     const { data, error } = await supabase.rpc("check_discount", { _code: code });
     setChecking(false);
-    if (error) return toast.error(error.message.includes("not valid") || error.message.includes("expired") || error.message.includes("used") ? error.message : "This code is not valid.");
+    if (error) { toast.error(error.message.includes("not valid") || error.message.includes("expired") || error.message.includes("used") ? error.message : "This code is not valid."); return; }
     setApplied({ code: code.trim().toUpperCase(), percent: data });
     toast.success(`${data}% off applied`);
   }
