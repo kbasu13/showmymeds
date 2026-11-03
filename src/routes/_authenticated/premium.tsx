@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
+import QRCode from "qrcode";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import { Check, Gem, Ticket, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { PREMIUM_PLANS, discountedPrice } from "@/lib/plans";
+import { PREMIUM_PLANS, discountedPrice, withGst, upiLink, GST_PERCENT, UPI_ID, UPI_NAME } from "@/lib/plans";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/premium")({
@@ -20,6 +24,7 @@ function PremiumPage() {
   const [code, setCode] = useState("");
   const [applied, setApplied] = useState<{ code: string; percent: number } | null>(null);
   const [checking, setChecking] = useState(false);
+  const [paying, setPaying] = useState(false);
 
   async function apply() {
     setChecking(true);
@@ -44,12 +49,11 @@ function PremiumPage() {
           <button key={p.id} onClick={() => setPlan(p.id)}
             className={cn("rounded-xl border-2 bg-card p-4 text-left transition-colors", plan === p.id ? "border-primary" : "border-border")}>
             <p className="font-semibold">{p.label}</p>
-            {applied ? (
-              <p className="text-2xl font-semibold text-primary">
-                <span className="mr-2 text-base font-normal text-muted-foreground line-through">₹{p.price}</span>
-                ₹{discountedPrice(p.price, applied.percent)}
-              </p>
-            ) : <p className="text-2xl font-semibold text-primary">₹{p.price}</p>}
+            {applied && <p className="text-sm text-muted-foreground line-through">₹{p.price}</p>}
+            <p className="text-primary">
+              <span className="text-2xl font-bold">₹{applied ? discountedPrice(p.price, applied.percent) : p.price}</span>
+              <span className="ml-1 text-sm font-normal text-muted-foreground">+ GST as applicable</span>
+            </p>
             <p className="text-sm text-muted-foreground">{p.note}</p>
           </button>
         ))}
@@ -72,9 +76,54 @@ function PremiumPage() {
           </div>
         )}
       </div>
-      <Button size="lg" className="w-full" onClick={() => toast("Online payment is being set up — coming very soon.")}>
+      <Button size="lg" className="w-full" onClick={() => setPaying(true)}>
         Continue to payment
       </Button>
+      {paying && (() => {
+        const chosen = PREMIUM_PLANS.find((p) => p.id === plan)!;
+        const base = applied ? discountedPrice(chosen.price, applied.percent) : chosen.price;
+        return <PayDialog plan={chosen.id} label={chosen.label} base={base} code={applied?.code ?? null} onClose={() => setPaying(false)} />;
+      })()}
     </div>
+  );
+}
+
+function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: string; base: number; code: string | null; onClose: () => void }) {
+  const total = withGst(base);
+  const gst = Math.round((total - base) * 100) / 100;
+  const link = upiLink(total, `ShowMyMeds Premium ${label}`);
+  const [qr, setQr] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
+  const qc = useQueryClient();
+  const navigate = useNavigate();
+  useEffect(() => { QRCode.toDataURL(link, { width: 280, margin: 1 }).then(setQr); }, [link]);
+
+  const paid = async () => {
+    setBusy(true);
+    const { error } = await supabase.rpc("activate_premium_paid", { _plan: plan, _code: code ?? "" });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    await qc.invalidateQueries({ queryKey: ["premium"] });
+    toast.success("Thank you! Premium is now on.");
+    navigate({ to: "/today" });
+  };
+
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-h-[92vh] overflow-y-auto">
+        <DialogHeader><DialogTitle className="text-xl">Pay with UPI</DialogTitle></DialogHeader>
+        <div className="space-y-1 rounded-lg bg-secondary/50 p-3 text-base">
+          <div className="flex justify-between"><span>{label} plan{code ? ` (code ${code})` : ""}</span><span>₹{base.toFixed(2)}</span></div>
+          <div className="flex justify-between text-muted-foreground"><span>GST {GST_PERCENT}%</span><span>₹{gst.toFixed(2)}</span></div>
+          <div className="flex justify-between border-t pt-1 text-lg font-bold"><span>Total</span><span>₹{total.toFixed(2)}</span></div>
+        </div>
+        <div className="flex flex-col items-center gap-2">
+          {qr ? <img src={qr} alt={`UPI QR code for ₹${total.toFixed(2)}`} className="h-64 w-64 rounded-lg border bg-white p-2" /> : <div className="h-64 w-64 animate-pulse rounded-lg bg-muted" />}
+          <p className="text-center text-sm text-muted-foreground">Scan with any UPI app (GPay, PhonePe, Paytm, BHIM…).<br />Paying to <b>{UPI_NAME}</b> · {UPI_ID}</p>
+          <Button variant="outline" className="w-full sm:hidden" asChild><a href={link}>Open my UPI app</a></Button>
+        </div>
+        <Button size="lg" className="w-full" disabled={busy} onClick={paid}>{busy ? "Please wait…" : "I have paid"}</Button>
+      </DialogContent>
+    </Dialog>
   );
 }
