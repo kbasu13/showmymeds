@@ -90,15 +90,21 @@ async function pharmacyImage(q: string): Promise<string | null> {
   }
 }
 
-/** Look up a picture of the medicine online: pharmacy pack photo first, then Wikipedia. */
+/** Find a medicine photo online and copy it into the user's own storage; returns the stored path. */
 export async function lookupMedicineImage(name: string, composition?: string | null): Promise<string | null> {
-  const n = name.trim();
-  const ingredient = (composition ?? "").split("+")[0]?.replace(/[\d.]+\s*(mg|mcg|g|ml|iu|%).*$/i, "").trim() ?? "";
-  return (
-    (await pharmacyImage(n)) ??
-    (await wikiImage(`${n} medicine`)) ??
-    (ingredient ? await wikiImage(ingredient) : null)
-  );
+  if (!name.trim()) return null;
+  const { data } = await supabase.auth.getSession();
+  try {
+    const r = await fetch("/api/medphoto", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${data.session?.access_token ?? ""}` },
+      body: JSON.stringify({ name, composition: composition ?? "" }),
+    });
+    if (!r.ok) return null;
+    return ((await r.json()) as { path: string | null }).path;
+  } catch {
+    return null;
+  }
 }
 
 export async function uploadFile(userId: string, file: File, kind: "image" | "rx") {

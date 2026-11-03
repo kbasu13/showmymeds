@@ -21,6 +21,7 @@ import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/
 import { Route as ApiAskRouteImport } from './routes/api/ask'
 import { Route as ApiCompositionRouteImport } from './routes/api/composition'
 import { Route as ApiMedimageRouteImport } from './routes/api/medimage'
+import { Route as ApiMedphotoRouteImport } from './routes/api/medphoto'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as AuthenticatedFamilyPatientIdRouteImport } from './routes/_authenticated/family_.$patientId'
 
@@ -83,6 +84,11 @@ const ApiMedimageRoute = ApiMedimageRouteImport.update({
   path: '/api/medimage',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiMedphotoRoute = ApiMedphotoRouteImport.update({
+  id: '/api/medphoto',
+  path: '/api/medphoto',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InviteTokenRoute = InviteTokenRouteImport.update({
   id: '/invite/$token',
   path: '/invite/$token',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
   '/api/medimage': typeof ApiMedimageRoute
+  '/api/medphoto': typeof ApiMedphotoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
   '/api/medimage': typeof ApiMedimageRoute
+  '/api/medphoto': typeof ApiMedphotoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
   '/api/medimage': typeof ApiMedimageRoute
+  '/api/medphoto': typeof ApiMedphotoRoute
   '/invite/$token': typeof InviteTokenRoute
   '/_authenticated/family_/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/api/ask'
     | '/api/composition'
     | '/api/medimage'
+    | '/api/medphoto'
     | '/invite/$token'
     | '/family/$patientId'
   fileRoutesByTo: FileRoutesByTo
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/api/ask'
     | '/api/composition'
     | '/api/medimage'
+    | '/api/medphoto'
     | '/invite/$token'
     | '/family/$patientId'
   id:
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/api/ask'
     | '/api/composition'
     | '/api/medimage'
+    | '/api/medphoto'
     | '/invite/$token'
     | '/_authenticated/family_/$patientId'
   fileRoutesById: FileRoutesById
@@ -198,6 +210,7 @@ export interface RootRouteChildren {
   ApiAskRoute: typeof ApiAskRoute
   ApiCompositionRoute: typeof ApiCompositionRoute
   ApiMedimageRoute: typeof ApiMedimageRoute
+  ApiMedphotoRoute: typeof ApiMedphotoRoute
   InviteTokenRoute: typeof InviteTokenRoute
 }
 
@@ -287,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiMedimageRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/medphoto': {
+      id: '/api/medphoto'
+      path: '/api/medphoto'
+      fullPath: '/api/medphoto'
+      preLoaderRoute: typeof ApiMedphotoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/invite/$token': {
       id: '/invite/$token'
       path: '/invite/$token'
@@ -334,6 +354,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAskRoute: ApiAskRoute,
   ApiCompositionRoute: ApiCompositionRoute,
   ApiMedimageRoute: ApiMedimageRoute,
+  ApiMedphotoRoute: ApiMedphotoRoute,
   InviteTokenRoute: InviteTokenRoute,
 }
 export const routeTree = rootRouteImport
