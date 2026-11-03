@@ -12,6 +12,7 @@ import { AlarmWatcher } from "./AlarmWatcher";
 import { THEMES, usePrefs } from "@/lib/prefs";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
+import { useIsAdmin } from "./Premium";
 
 const NAV = [
   { to: "/today", label: "Today", icon: CalendarCheck },
@@ -24,6 +25,7 @@ const NAV = [
 export function AppShell({ children }: { children: ReactNode }) {
   const { theme, size, setTheme, setSize } = usePrefs();
   const { data: user } = useUser();
+  const { data: isAdmin } = useIsAdmin(user?.id);
   const navigate = useNavigate();
   const qc = useQueryClient();
 
