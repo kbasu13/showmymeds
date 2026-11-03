@@ -61,6 +61,11 @@ export async function takeDose(medicineId: string, date: string, time: string) {
   if (error) throw error;
 }
 
+export async function untakeDose(medicineId: string, date: string, time: string) {
+  const { error } = await supabase.rpc("untake_dose", { _medicine: medicineId, _date: date, _time: time });
+  if (error) throw error;
+}
+
 /** Look up a picture of the medicine online (Wikipedia). Returns null when nothing is found. */
 export async function lookupMedicineImage(name: string): Promise<string | null> {
   const q = name.trim().split(/\s+/)[0];

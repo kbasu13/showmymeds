@@ -1,11 +1,13 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { usePremium, PremiumBadge } from "@/components/Premium";
 import { useState } from "react";
+import { CheckCircle2, Circle } from "lucide-react";
+import { toast } from "sonner";
 import { Bar, BarChart, Cell, LabelList, ResponsiveContainer, XAxis, YAxis } from "recharts";
 import { Button } from "@/components/ui/button";
-import { useUser, useMeds, useLogs } from "@/lib/meds";
+import { useUser, useMeds, useLogs, takeDose, untakeDose, useRefreshMeds } from "@/lib/meds";
 import { downloadDoctorReport } from "@/lib/report";
-import { adherenceByDay, ymd, type Med, type Log } from "@/lib/schedule";
+import { adherenceByDay, dosesForDay, ymd, type Med, type Log } from "@/lib/schedule";
 
 export const Route = createFileRoute("/_authenticated/history")({
   head: () => ({ meta: [{ title: "History & insights — ShowMyMeds" }, { name: "description", content: "How well you kept to your medicine schedule." }] }),
@@ -57,6 +59,70 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
           </ResponsiveContainer>
         </div>
       </div>
+      <DoseChecklist meds={meds} logs={logs} days={days} readOnly={userId !== me?.id} />
+    </div>
+  );
+}
+
+/** Per-day list of scheduled doses for the selected range, with taken/not-taken toggles. */
+function DoseChecklist({ meds, logs, days, readOnly }: { meds: Med[]; logs: Log[]; days: string[]; readOnly: boolean }) {
+  const refresh = useRefreshMeds();
+  const [busy, setBusy] = useState<string | null>(null);
+  const shown = [...days].reverse();
+
+  const toggle = async (medId: string, date: string, time: string, taken: boolean) => {
+    if (readOnly || busy) return;
+    const key = `${medId}-${date}-${time}`;
+    setBusy(key);
+    try {
+      if (taken) await untakeDose(medId, date, time);
+      else await takeDose(medId, date, time);
+      refresh();
+    } catch {
+      toast.error("Could not update the dose. Please try again.");
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  return (
+    <div className="space-y-3">
+      <h2 className="text-lg font-semibold">Doses by day</h2>
+      {shown.map((date) => {
+        const doses = dosesForDay(meds, date);
+        if (doses.length === 0) return null;
+        const label = new Date(date + "T00:00").toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+        return (
+          <div key={date} className="rounded-xl border bg-card p-3">
+            <p className="mb-2 font-semibold">{label}</p>
+            <ul className="space-y-1.5">
+              {doses.map(({ med, time }) => {
+                const log = logs.find((l) => l.medicine_id === med.id && l.scheduled_date === date && l.scheduled_time === time);
+                const taken = !!log;
+                const key = `${med.id}-${date}-${time}`;
+                return (
+                  <li key={key} className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={readOnly || busy === key}
+                      onClick={() => toggle(med.id, date, time, taken)}
+                      aria-label={taken ? `Mark ${med.name} at ${time} as not taken` : `Mark ${med.name} at ${time} as taken`}
+                      className="shrink-0 disabled:opacity-60"
+                    >
+                      {taken
+                        ? <CheckCircle2 className="h-6 w-6 text-success" />
+                        : <Circle className="h-6 w-6 text-muted-foreground" />}
+                    </button>
+                    <span className={taken ? "" : "text-muted-foreground"}>
+                      <b>{time}</b> · {med.name}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        );
+      })}
     </div>
   );
 }

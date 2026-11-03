@@ -205,6 +205,10 @@ export type Database = {
         Args: { _date: string; _medicine: string; _time: string }
         Returns: undefined
       }
+      untake_dose: {
+        Args: { _date: string; _medicine: string; _time: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
