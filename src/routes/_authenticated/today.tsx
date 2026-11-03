@@ -4,7 +4,7 @@ import { AlertTriangle, CheckCircle2, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MedImage } from "@/components/MedImage";
 import { useUser, useMeds, useLogs, takeDose, useRefreshMeds } from "@/lib/meds";
-import { dosesForDay, isLowStock, daysOfStockLeft, ymd, type Med } from "@/lib/schedule";
+import { dosesForDay, isLowStock, daysOfStockLeft, ymd, time12, doseText, type Med } from "@/lib/schedule";
 
 export const Route = createFileRoute("/_authenticated/today")({
   head: () => ({ meta: [{ title: "Today's doses — ShowMyMeds" }, { name: "description", content: "Your medicines for today." }] }),
@@ -66,22 +66,22 @@ function TodayPage() {
             const m = meds.find((x) => x.id === med.id)!;
             const log = logs.find((l) => l.medicine_id === med.id && l.scheduled_time === time);
             return (
-              <li key={`${med.id}-${time}`} className="flex items-center gap-4 rounded-xl border bg-card p-4 shadow-soft">
+              <li key={`${med.id}-${time}`} className="flex flex-wrap items-center gap-3 rounded-xl border bg-card p-3 shadow-soft sm:flex-nowrap sm:gap-4 sm:p-4">
                 <MedImage src={m.image_url} form={m.form} name={m.name} />
                 <div className="min-w-0 flex-1">
-                  <p className="text-lg font-semibold">{time}</p>
-                  <p className="truncate text-xl font-bold text-primary">{m.name}</p>
-                  {m.dosage && <p className="text-muted-foreground">{m.dosage}</p>}
+                  <p className="break-words text-lg font-semibold leading-tight text-primary">{m.name}</p>
+                  <p className="font-medium">at {time12(time)}</p>
+                  <p className="text-muted-foreground">{doseText(Number(m.dose_qty), m.form)}</p>
                 </div>
                 {log ? (
-                  <div className="flex flex-col items-center text-success">
+                  <div className="ml-auto flex shrink-0 flex-col items-center text-success">
                     <CheckCircle2 className="h-10 w-10" />
                     <span className="text-sm font-bold">
-                      {new Date(log.taken_at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {new Date(log.taken_at).toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: true })}
                     </span>
                   </div>
                 ) : (
-                  <Button variant="take" size="lg" onClick={() => take(m.id, time, m.name)}>Take Now</Button>
+                  <Button variant="take" size="lg" className="ml-auto shrink-0" onClick={() => take(m.id, time, m.name)}>Take Now</Button>
                 )}
               </li>
             );
