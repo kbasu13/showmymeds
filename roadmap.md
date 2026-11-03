@@ -18,3 +18,6 @@
 - [x] Own app icon, centered branding, footer wording, larger text on every page
 - [ ] WhatsApp reminders — still needs WhatsApp Business connected
 - [ ] SMS codes for mobile sign-in — still needs an SMS provider in Auth settings
+- [x] Homepage: "Your medicines, Made simple" heading, new tagline, centred points, one button per visitor
+- [x] Washed health-leaf backdrop behind every page
+- [x] History: report heading and Download/Share buttons centred
