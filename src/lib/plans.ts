@@ -25,9 +25,9 @@ export const GST_PERCENT = 18;
 export const UPI_ID = "kaustabh.basu-3@oksbi";
 export const UPI_NAME = "ShowMyMeds";
 
-/** Price including 18% GST, rounded to the nearest rupee. */
+/** Price including 18% GST, to the paisa. */
 export function withGst(price: number) {
-  return Math.round(price * (100 + GST_PERCENT) / 100);
+  return Math.round(price * (100 + GST_PERCENT)) / 100;
 }
 
 export function upiLink(amount: number, note: string) {

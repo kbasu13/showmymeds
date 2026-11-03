@@ -12,3 +12,10 @@ test("expired free premium is not active", () => {
   expect(isPremiumActive("2020-01-01")).toBe(false);
   expect(isPremiumActive(null)).toBe(true);
 });
+import { withGst, upiLink } from "./plans";
+test("monthly ₹99 + 18% GST is ₹116.82", () => expect(withGst(99)).toBe(116.82));
+test("yearly ₹990 + 18% GST is ₹1168.20", () => expect(withGst(990)).toBe(1168.2));
+test("UPI link pays kaustabh.basu-3@oksbi in INR", () => {
+  expect(upiLink(116.82, "x")).toContain("pa=kaustabh.basu-3%40oksbi");
+  expect(upiLink(116.82, "x")).toContain("am=116.82&cu=INR");
+});
