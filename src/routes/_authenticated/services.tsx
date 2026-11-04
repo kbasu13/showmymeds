@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { MapPin, HeartHandshake, Store, BadgePercent, MessageCircle } from "lucide-react";
-import { PremiumBadge } from "@/components/Premium";
+import { PremiumBadge, usePremium, UpgradeCard } from "@/components/Premium";
+import { useUser } from "@/lib/meds";
 
 export const Route = createFileRoute("/_authenticated/services")({
   head: () => ({
     meta: [
-      { title: "Other services — ShowMyMeds" },
+      { title: "Discover — ShowMyMeds" }, { property: "og:title", content: "Discover — ShowMyMeds" },
       { name: "description", content: "Find care centres and pharmacies nearby, with partner discounts. Coming soon." },
     ],
   }),
@@ -17,11 +18,15 @@ const maps = (q: string) => `https://www.google.com/maps/search/${encodeURICompo
 const CARE = ["Geriatric care", "Pediatric care", "Palliative care", "Home nursing"];
 
 function ServicesPage() {
+  const { data: user } = useUser();
+  const { data: premium, isLoading } = usePremium(user?.id);
+  if (isLoading) return <p>Loading…</p>;
+  if (!premium) return <UpgradeCard feature="Discover" text="Find care centres, pharmacies and partner discounts near you." />;
   return (
     <div className="space-y-4">
       <div className="text-center">
-        <h1 className="text-2xl font-semibold text-primary">Other services</h1>
-        <p className="mt-1 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm font-semibold">Coming soon <PremiumBadge /></p>
+        <h1 className="text-2xl font-semibold text-primary">Discover</h1>
+        <p className="mt-1 inline-flex items-center gap-2 rounded-full bg-secondary px-3 py-1 text-sm font-semibold">More coming soon</p>
       </div>
 
       <section className="space-y-3 rounded-xl border bg-card p-4">

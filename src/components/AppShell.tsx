@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarCheck, Pill, CalendarClock, UsersRound, CircleHelp, Check, MoreVertical } from "lucide-react";
+import { CalendarCheck, Pill, CalendarClock, UsersRound, CircleHelp, Check, Gem } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -45,8 +45,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen flex-col pb-24">
-      <header className="sticky top-0 z-40 grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center border-b bg-background/95 px-4 py-3 backdrop-blur">
-        <Link to="/services" aria-label="Other services" className="flex h-10 w-10 items-center justify-center rounded-full text-primary hover:bg-secondary"><MoreVertical /></Link>
+      <header className="sticky top-0 z-40 grid grid-cols-[2.5rem_minmax(0,1fr)_2.5rem] items-center border-b bg-background/95 px-4 py-3 backdrop-blur">
+        <span aria-hidden />
         <Link to="/today" className="flex min-w-0 items-center justify-center gap-2">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-primary"><Pill /></span>
           <span className="truncate font-display text-lg font-semibold text-primary">ShowMyMeds</span>
@@ -69,15 +69,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               ))}
             </div>
             <DropdownMenuLabel>Colour theme</DropdownMenuLabel>
-            {THEMES.map((t) => (
-              <DropdownMenuItem key={t.id} onSelect={(e) => { e.preventDefault(); setTheme(t.id); }} className="min-h-11 text-base">
-                <span data-theme={t.id} className="h-5 w-5 rounded-full border bg-brand" />
-                {t.label}
-                {theme === t.id && <Check className="ml-auto" />}
-              </DropdownMenuItem>
-            ))}
+            <div className="grid grid-cols-5 gap-3 p-2">
+              {THEMES.map((t) => (
+                <button key={t.id} aria-label={t.label} title={t.label} onClick={() => setTheme(t.id)}
+                  className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full border-2 ${theme === t.id ? "border-foreground" : "border-transparent"}`}>
+                  <span data-theme={t.id} className="flex h-7 w-7 items-center justify-center rounded-full border bg-brand">
+                    {theme === t.id && <Check className="h-4 w-4 text-primary" />}
+                  </span>
+                </button>
+              ))}
+            </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/services">🧭 Other services</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/services" className="flex w-full items-center gap-2">🧭 Discover <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-premium px-2 py-0.5 text-xs font-semibold text-premium-foreground"><Gem className="h-3.5 w-3.5" /> Premium</span></Link></DropdownMenuItem>
             {!premium && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/premium">💎 Go Premium</Link></DropdownMenuItem>}
             {isAdmin && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/admin">🛠 Admin</Link></DropdownMenuItem>}
             <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base">Sign out</DropdownMenuItem>
