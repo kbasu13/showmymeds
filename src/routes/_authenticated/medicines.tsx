@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -37,6 +37,13 @@ function MedicinesPage() {
     if (first) { setPrefill(first); setEditing("new"); setFormKey((k) => k + 1); }
     else { setPrefill(null); setEditing(null); }
   };
+  // A medicine suggested in Ask opens here for review before saving.
+  useEffect(() => {
+    const raw = sessionStorage.getItem("smm-ask-draft");
+    if (!raw) return;
+    sessionStorage.removeItem("smm-ask-draft");
+    try { next([JSON.parse(raw) as RxItem]); } catch { /* ignore */ }
+  }, []);
 
   const exportCalendar = () => {
     const missing = meds.find((m) => !(Number(m.stock) > 0));
