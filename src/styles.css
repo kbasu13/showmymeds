@@ -8,7 +8,7 @@
   --color-premium: var(--premium);
   --color-premium-foreground: var(--premium-foreground);
   --font-sans: "Atkinson Hyperlegible", system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, serif;
+  --font-display: "Atkinson Hyperlegible", system-ui, sans-serif;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);

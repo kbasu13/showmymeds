@@ -18,6 +18,7 @@ import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedMedicinesRouteImport } from './routes/_authenticated/medicines'
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
+import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAskRouteImport } from './routes/api/ask'
 import { Route as ApiCompositionRouteImport } from './routes/api/composition'
@@ -71,6 +72,11 @@ const AuthenticatedPremiumRoute = AuthenticatedPremiumRouteImport.update({
   path: '/premium',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedServicesRoute = AuthenticatedServicesRouteImport.update({
+  id: '/services',
+  path: '/services',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedTodayRoute = AuthenticatedTodayRouteImport.update({
   id: '/today',
   path: '/today',
@@ -122,6 +128,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
   '/premium': typeof AuthenticatedPremiumRoute
+  '/services': typeof AuthenticatedServicesRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -140,6 +147,7 @@ export interface FileRoutesByTo {
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
   '/premium': typeof AuthenticatedPremiumRoute
+  '/services': typeof AuthenticatedServicesRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/medicines': typeof AuthenticatedMedicinesRoute
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
+  '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -180,6 +189,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/medicines'
     | '/premium'
+    | '/services'
     | '/today'
     | '/api/ask'
     | '/api/composition'
@@ -198,6 +208,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/medicines'
     | '/premium'
+    | '/services'
     | '/today'
     | '/api/ask'
     | '/api/composition'
@@ -217,6 +228,7 @@ export interface FileRouteTypes {
     | '/_authenticated/history'
     | '/_authenticated/medicines'
     | '/_authenticated/premium'
+    | '/_authenticated/services'
     | '/_authenticated/today'
     | '/api/ask'
     | '/api/composition'
@@ -304,6 +316,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPremiumRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/services': {
+      id: '/_authenticated/services'
+      path: '/services'
+      fullPath: '/services'
+      preLoaderRoute: typeof AuthenticatedServicesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/today': {
       id: '/_authenticated/today'
       path: '/today'
@@ -370,6 +389,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedMedicinesRoute: typeof AuthenticatedMedicinesRoute
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
+  AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
   AuthenticatedFamilyPatientIdRoute: typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -381,6 +401,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedMedicinesRoute: AuthenticatedMedicinesRoute,
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
+  AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
   AuthenticatedFamilyPatientIdRoute: AuthenticatedFamilyPatientIdRoute,
 }
