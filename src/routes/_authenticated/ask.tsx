@@ -75,9 +75,9 @@ function AskPage() {
             : <div key={i} className="max-w-[90%] space-y-2 rounded-xl bg-secondary p-3 text-base leading-relaxed [&_h3]:mt-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-primary [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1"><ReactMarkdown>{m.text}</ReactMarkdown></div>
         ))}
       </div>
-      <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); send(); }}>
-        <Input className="h-12 text-lg" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Type your question" />
-        <Button type="submit" size="icon" aria-label="Send" disabled={busy}><Send /></Button>
+      <form className="relative" onSubmit={(e) => { e.preventDefault(); send(); }}>
+        <Input className="h-12 pr-14 text-lg" value={q} onChange={(e) => setQ(e.target.value)} placeholder="What do you want to know today?" />
+        <Button type="submit" size="icon" aria-label="Send" disabled={busy} className="absolute right-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Send /></Button>
       </form>
     </div>
   );
