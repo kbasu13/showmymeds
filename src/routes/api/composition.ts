@@ -31,7 +31,7 @@ export const Route = createFileRoute("/api/composition")({
             model: provider.responses("openai/gpt-6-astra"),
             providerOptions: { openai: { forceReasoning: true, reasoningEffort: "low", reasoningSummary: "auto", store: false, include: ["reasoning.encrypted_content"] } },
             system:
-              "You are a pharmacist database. Given a medicine brand or generic name (any country, including India), reply with ONE line: its full active composition (every active ingredient with strength, separated by ' + ', e.g. 'Paracetamol 500mg + Caffeine 30mg'; most common strength if several), then ' || ', then the manufacturer/marketing company short name (e.g. 'GSK', 'Cipla', 'Abbott', 'Sun Pharma'). Use UNKNOWN for any part you do not know. Example: 'Paracetamol 650mg || GSK'.",
+              "You are a pharmacist database. Given a medicine brand or generic name (any country, including India; allopathic, homeopathic, Ayurvedic, Unani or Siddha), reply with ONE line: its full active composition (every active ingredient with strength, separated by ' + ', e.g. 'Paracetamol 500mg + Caffeine 30mg'; most common strength if several; for homeopathy give remedy + potency like 'Arnica montana 30C' or the mother tincture/combination ingredients; for Ayurvedic/Unani give the main herbs/ingredients with amounts if known, e.g. 'Ashwagandha 250mg + Shatavari 100mg'), then ' || ', then the manufacturer/marketing company short name (e.g. 'GSK', 'Cipla', 'Abbott', 'Sun Pharma', 'SBL', 'Dr. Reckeweg', 'Schwabe', 'Himalaya', 'Dabur', 'Patanjali', 'Baidyanath', 'Hamdard'). Use UNKNOWN for any part you do not know. Example: 'Paracetamol 650mg || GSK'.",
             prompt: name,
           });
           const text = await result.text;
