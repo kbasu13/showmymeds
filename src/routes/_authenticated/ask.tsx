@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser, FORMS, lookupMedicineImage } from "@/lib/meds";
-import { joinTimes, fmtTime } from "@/lib/schedule";
+import { joinTimes, doseText } from "@/lib/schedule";
 import { usePremium, UpgradeCard } from "@/components/Premium";
 
 export const Route = createFileRoute("/_authenticated/ask")({
@@ -122,7 +122,7 @@ function AddCard({ med, userId }: { med: Draft; userId: string }) {
     <div className="rounded-xl border bg-card p-3 text-base">
       <p className="font-semibold text-primary">{med.name}</p>
       {med.composition && <p className="text-sm text-muted-foreground">{med.composition}</p>}
-      <p className="text-sm">{med.dose_qty ?? 1} {form} at {joinTimes((times.length ? times : ["08:00"]).map(fmtTime))}</p>
+      <p className="text-sm">{doseText(Math.max(1, Number(med.dose_qty) || 1), form)} at {joinTimes(times.length ? times : ["08:00"])}</p>
       <Button size="sm" className="mt-2" disabled={state !== "idle"} onClick={add}>
         {state === "done" ? <><Check /> Added</> : <><Plus /> Add to my medicines</>}
       </Button>
