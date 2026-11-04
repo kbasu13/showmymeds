@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarCheck, Pill, BarChart3, Users, MessageCircle, Check } from "lucide-react";
+import { CalendarCheck, Pill, CalendarClock, UsersRound, CircleHelp, Check, MoreVertical } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -18,9 +18,9 @@ import { useIsAdmin, usePremium } from "./Premium";
 const NAV = [
   { to: "/today", label: "Today", icon: CalendarCheck },
   { to: "/medicines", label: "Medicines", icon: Pill },
-  { to: "/history", label: "History", icon: BarChart3 },
-  { to: "/family", label: "Family", icon: Users },
-  { to: "/ask", label: "Ask", icon: MessageCircle },
+  { to: "/history", label: "History", icon: CalendarClock },
+  { to: "/family", label: "Family", icon: UsersRound },
+  { to: "/ask", label: "Ask", icon: CircleHelp },
 ] as const;
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen flex-col pb-24">
       <header className="sticky top-0 z-40 grid grid-cols-[2.75rem_minmax(0,1fr)_2.75rem] items-center border-b bg-background/95 px-4 py-3 backdrop-blur">
-        <span />
+        <Link to="/services" aria-label="Other services" className="flex h-10 w-10 items-center justify-center rounded-full text-primary hover:bg-secondary"><MoreVertical /></Link>
         <Link to="/today" className="flex min-w-0 items-center justify-center gap-2">
           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand text-primary"><Pill /></span>
           <span className="truncate font-display text-lg font-semibold text-primary">ShowMyMeds</span>
@@ -77,6 +77,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/services">🧭 Other services</Link></DropdownMenuItem>
             {!premium && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/premium">💎 Go Premium</Link></DropdownMenuItem>}
             {isAdmin && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/admin">🛠 Admin</Link></DropdownMenuItem>}
             <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base">Sign out</DropdownMenuItem>
@@ -91,7 +92,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <ul className="mx-auto grid max-w-2xl grid-cols-5">
           {NAV.map(({ to, label, icon: Icon }) => (
             <li key={to}>
-              <Link to={to} className="flex min-h-16 flex-col items-center justify-center gap-1 py-2 text-xs font-semibold sm:text-sm text-muted-foreground"
+              <Link to={to} className="flex min-h-16 flex-col items-center justify-center gap-1 py-2 text-sm font-semibold sm:text-base text-muted-foreground"
                 activeProps={{ className: "bg-secondary text-primary" }}>
                 <Icon className="h-6 w-6" />
                 {label}

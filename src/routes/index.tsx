@@ -43,18 +43,17 @@ function Index() {
 
   return (
     <div className="flex min-h-screen flex-col bg-hero">
-      <main className="mx-auto w-full max-w-xl flex-1 px-5 py-12">
-        <span className="mx-auto flex h-16 w-16 items-center justify-center rounded-xl bg-brand text-primary"><Pill className="h-9 w-9" /></span>
-        <h1 className="mt-6 text-center text-4xl font-semibold leading-tight text-primary">Your medicines,<br />Made simple</h1>
+      <main className="mx-auto w-full max-w-xl flex-1 px-5 py-8">
+        <h1 className="text-center text-4xl font-semibold leading-tight text-primary">Your medicines,<br />Made simple</h1>
         <p className="mt-4 text-center text-xl">ShowMyMeds remembers every dose, so you don't have to.</p>
-        <ul className="mt-8 space-y-3">
+        <ul className="mt-6 space-y-2">
           {features.map(({ icon: Icon, t }) => (
-            <li key={t} className="flex items-center justify-center gap-3 rounded-xl bg-card/80 p-4 text-center text-lg shadow-soft">
+            <li key={t} className="flex items-center justify-center gap-3 rounded-xl bg-card/80 p-3 text-center text-base shadow-soft">
               <Icon className="h-7 w-7 shrink-0 text-primary" /> <span>{t}</span>
             </li>
           ))}
         </ul>
-        <Button asChild size="lg" className="mt-8 w-full text-lg">{signedIn ? <Link to="/today">Go to my medicines</Link> : <Link to="/auth">Get started for free</Link>}</Button>
+        <Button asChild size="lg" className="mt-6 w-full text-lg">{signedIn ? <Link to="/today">Welcome back! Check your medicines</Link> : <Link to="/auth">Get started for free</Link>}</Button>
       </main>
       <Footer />
     </div>
