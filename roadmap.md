@@ -1,4 +1,5 @@
 # ShowMyMeds roadmap
+- [x] Fix Family and Refer sharing errors and verify signed-in sharing
 - [x] Profile referrals with editable sharing, mobile-derived codes and database/Admin attribution
 - [x] Named caregiver invitations with sharing method, accepted profile names and 15-day expiry
 - [x] History report placement/icon actions and footer wording

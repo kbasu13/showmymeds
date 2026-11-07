@@ -14,3 +14,4 @@
 - Account contact presentation uses libphonenumber-js to format explicit international numbers without guessing the country of national-only numbers.
 - Referral attribution uses per-share opaque links and database claims restricted to new accounts; mobile-derived codes are hashed with the sender ID to avoid publishing mobile numbers.
 - Caregiver invitation expiry is enforced in database triggers and acceptance functions; named-link reads expose only linked parties' display names.
+- Family and referral sharing reuse browser-safe validation schemas and field errors before persistence; server validation remains enforced without exposing serialized errors.

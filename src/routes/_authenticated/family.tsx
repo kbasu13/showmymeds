@@ -10,32 +10,38 @@ import { InvitationButtons } from "@/components/InvitationButtons";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
 import { usePremium, PremiumBadge, UpgradeCard } from "@/components/Premium";
-import { inviteSchema, inviteExpired, invitationText, openInvitation, type SharingMethod } from "@/lib/invitations";
+import { inviteSchema, inviteExpired, invitationText, openInvitation, invitationFieldErrors, invitationShareError, type InvitationErrors, type SharingMethod } from "@/lib/invitations";
 export const Route = createFileRoute("/_authenticated/family")({ head: () => ({ meta: [{ title: "Family & caregivers — ShowMyMeds" }, { name: "description", content: "Invite family to help with your medicines." }, { property: "og:title", content: "Family & caregivers — ShowMyMeds" }, { property: "og:description", content: "Invite family to help with your medicines." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: FamilyPage });
 function FamilyPage() {
   const { data: user } = useUser(); const qc = useQueryClient(); const { data: premium } = usePremium(user?.id);
   const [msg, setMsg] = useState("Hi! I'm using ShowMyMeds to keep track of my medicines. Please join as my caregiver so you can see if I've taken them: {link}");
   const [recipient, setRecipient] = useState(""), [busy, setBusy] = useState(false);
+  const [errors, setErrors] = useState<InvitationErrors>({});
   const query = useQuery({ queryKey: ["links", user?.id], enabled: !!user, queryFn: async () => { const { data, error } = await supabase.rpc("list_named_caregiver_links"); if (error) throw error; return data; } });
   const links = query.data ?? [], caring = links.filter((l) => l.caregiver_id === user?.id && l.status === "accepted"), mine = links.filter((l) => l.patient_id === user?.id);
   const send = async (method: SharingMethod) => {
-    if (!user || busy) return; setBusy(true);
+    if (!user || busy) return;
+    const parsed = inviteSchema.safeParse({ recipient, method, message: msg });
+    if (!parsed.success) { setErrors(invitationFieldErrors(parsed.error)); return; }
+    setErrors({}); setBusy(true);
     try {
-      const details = inviteSchema.parse({ recipient, method, message: msg });
-      const { data, error } = await supabase.from("caregiver_links").insert({ patient_id: user.id, recipient_name: details.recipient, share_method: method, invite_message: msg }).select().single();
+      const details = parsed.data;
+      const { data, error } = await supabase.from("caregiver_links").insert({ patient_id: user.id, recipient_name: details.recipient, share_method: method, invite_message: details.message }).select().single();
       if (error) throw error;
       await qc.invalidateQueries({ queryKey: ["links"] });
-      await openInvitation(method, invitationText(msg, `https://showmymeds.lovable.app/invite/${data.invite_token}`));
+      await openInvitation(method, invitationText(details.message, `https://showmymeds.lovable.app/invite/${data.invite_token}`));
       if (method === "copy") toast.success("Invite copied");
-    } catch (error) { if (!(error instanceof DOMException && error.name === "AbortError")) toast.error(error instanceof Error ? error.message : "Could not share invite"); }
+    } catch (error) { if (!(error instanceof DOMException && error.name === "AbortError")) toast.error(invitationShareError(error, "Could not share invite. Please try again.")); }
     finally { setBusy(false); }
   };
   const revoke = async (id: string) => { const { error } = await supabase.from("caregiver_links").delete().eq("id", id); if (error) { toast.error(error.message); return; } await qc.invalidateQueries({ queryKey: ["links"] }); };
   return <div className="space-y-6"><h1 className="flex items-center gap-2 text-2xl font-semibold text-primary">Family <PremiumBadge /></h1>
     {!premium ? <UpgradeCard feature="Family sharing" text="Invite family members to see whether you have taken your medicines." /> : <section className="space-y-3">
       <h2 className="text-lg font-semibold">Invite a caregiver</h2><p className="text-sm text-muted-foreground">They can see your medicines and doses. Unaccepted invites expire in 15 days.</p>
-      <label className="block space-y-1 font-medium">Who are you inviting?<Input placeholder="Their name" value={recipient} onChange={(e) => setRecipient(e.target.value)} /></label>
-      <label className="block space-y-1 font-medium">Your message<Textarea rows={4} value={msg} onChange={(e) => setMsg(e.target.value)} /></label>
+      <label className="block space-y-1 font-medium">Who are you inviting?<Input placeholder="Their name" value={recipient} aria-invalid={!!errors.recipient} aria-describedby={errors.recipient ? "family-recipient-error" : undefined} onChange={(e) => { setRecipient(e.target.value); setErrors((current) => ({ ...current, recipient: undefined })); }} /></label>
+      {errors.recipient && <p id="family-recipient-error" role="alert" className="text-sm text-destructive">{errors.recipient}</p>}
+      <label className="block space-y-1 font-medium">Your message<Textarea rows={4} value={msg} aria-invalid={!!errors.message} aria-describedby={errors.message ? "family-message-error" : undefined} onChange={(e) => { setMsg(e.target.value); setErrors((current) => ({ ...current, message: undefined })); }} /></label>
+      {errors.message && <p id="family-message-error" role="alert" className="text-sm text-destructive">{errors.message}</p>}
       <InvitationButtons busy={busy} onSend={send} /><p className="text-xs text-muted-foreground">The selected sharing option is recorded; message delivery cannot be confirmed.</p>
     </section>}
     <section className="space-y-3"><h2 className="text-lg font-semibold">People who can see my medicines</h2>
