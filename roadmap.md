@@ -1,4 +1,7 @@
 # ShowMyMeds roadmap
+- [x] Profile referrals with editable sharing, mobile-derived codes and database/Admin attribution
+- [x] Named caregiver invitations with sharing method, accepted profile names and 15-day expiry
+- [x] History report placement/icon actions and footer wording
 - [x] Compact six-theme row, Premium Discover badge, searchable account dropdown and international mobile display
 - [x] Admin directory: all users/caregivers, contact editing, Premium, connections and suspension
 - [x] Core app: sign-in, medicines, today, alarms, history, family

@@ -23,7 +23,7 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
     const d = new Date(); d.setDate(d.getDate() - (range - 1 - i)); return ymd(d);
   });
   const { data: meds = [] } = useMeds(userId);
-  const { data: logs = [] } = useLogs(userId, days[0]!);
+  const { data: logs = [] } = useLogs(userId, days[0] ?? ymd(new Date()));
   const data = adherenceByDay(meds as unknown as Med[], logs as unknown as Log[], days).map((d) => ({
     ...d, label: new Date(d.date + "T00:00").toLocaleDateString(undefined, { day: "numeric", month: "short" }), value: d.pct ?? 0,
   }));
@@ -55,28 +55,6 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
 
   return (
     <div className="space-y-4">
-      <div className="space-y-3 rounded-xl border bg-card p-4">
-        <p className="flex flex-wrap items-center justify-center gap-2 text-center text-lg font-semibold">Report for your doctor (PDF) <PremiumBadge /></p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
-          {([7, 15, 30, "custom"] as const).map((d) => (
-            <Button key={d} variant={reportDays === d ? "default" : "outline"} onClick={() => setReportDays(d)}>
-              {d === "custom" ? "Choose dates" : d === 30 ? "Last 1 month" : `Last ${d} days`}
-            </Button>
-          ))}
-        </div>
-        {reportDays === "custom" && (
-          <div className="grid grid-cols-2 gap-2">
-            <label className="text-sm font-medium">From<input type="date" max={today} value={cFrom} onChange={(e) => setCFrom(e.target.value)} className="mt-1 h-10 w-full rounded-md border bg-background px-2" /></label>
-            <label className="text-sm font-medium">To<input type="date" max={today} value={cTo} onChange={(e) => setCTo(e.target.value)} className="mt-1 h-10 w-full rounded-md border bg-background px-2" /></label>
-          </div>
-        )}
-        <div className="flex flex-wrap items-center justify-center gap-2">
-          <Button size="lg" variant="secondary" disabled={!!premium && !report}
-            onClick={() => (!premium ? navigate({ to: "/premium" }) : report && downloadBlob(report.blob, report.filename))}><Download /> Download report</Button>
-          <Button size="lg" variant="secondary" disabled={!!premium && !report}
-            onClick={() => (!premium ? navigate({ to: "/premium" }) : share())}><Share2 /> Share report</Button>
-        </div>
-      </div>
       <div className="rounded-xl bg-hero p-5">
         <p className="text-lg">Average doses taken</p>
         <p className="font-display text-4xl font-semibold text-primary">{avg}%</p>
@@ -100,6 +78,28 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+      <div className="space-y-3 rounded-xl border bg-card p-4">
+        <p className="flex flex-wrap items-center justify-center gap-2 text-center text-lg font-semibold">Report for your doctor (PDF) <PremiumBadge /></p>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {([7, 15, 30, "custom"] as const).map((d) => (
+            <Button key={d} variant={reportDays === d ? "default" : "outline"} onClick={() => setReportDays(d)}>
+              {d === "custom" ? "Choose dates" : d === 30 ? "Last 1 month" : `Last ${d} days`}
+            </Button>
+          ))}
+        </div>
+        {reportDays === "custom" && (
+          <div className="grid grid-cols-2 gap-2">
+            <label className="text-sm font-medium">From<input type="date" max={today} value={cFrom} onChange={(e) => setCFrom(e.target.value)} className="mt-1 h-10 w-full rounded-md border bg-background px-2" /></label>
+            <label className="text-sm font-medium">To<input type="date" max={today} value={cTo} onChange={(e) => setCTo(e.target.value)} className="mt-1 h-10 w-full rounded-md border bg-background px-2" /></label>
+          </div>
+        )}
+        <div className="flex flex-wrap items-center justify-center gap-2">
+          <Button size="icon" variant="secondary" aria-label="Download report" title="Download report" disabled={!!premium && !report}
+            onClick={() => (!premium ? navigate({ to: "/premium" }) : report && downloadBlob(report.blob, report.filename))}><Download /></Button>
+          <Button size="icon" variant="secondary" aria-label="Share report" title="Share report" disabled={!!premium && !report}
+            onClick={() => (!premium ? navigate({ to: "/premium" }) : share())}><Share2 /></Button>
         </div>
       </div>
       <DoseChecklist meds={meds} logs={logs} days={days} readOnly={userId !== me?.id} />

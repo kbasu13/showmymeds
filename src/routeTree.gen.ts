@@ -18,6 +18,7 @@ import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedMedicinesRouteImport } from './routes/_authenticated/medicines'
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
+import { Route as AuthenticatedReferRouteImport } from './routes/_authenticated/refer'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAskRouteImport } from './routes/api/ask'
@@ -26,6 +27,7 @@ import { Route as ApiMedimageRouteImport } from './routes/api/medimage'
 import { Route as ApiMedphotoRouteImport } from './routes/api/medphoto'
 import { Route as ApiRxscanRouteImport } from './routes/api/rxscan'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
+import { Route as ReferTokenRouteImport } from './routes/refer.$token'
 import { Route as AuthenticatedFamilyPatientIdRouteImport } from './routes/_authenticated/family_.$patientId'
 
 const IndexRoute = IndexRouteImport.update({
@@ -72,6 +74,11 @@ const AuthenticatedPremiumRoute = AuthenticatedPremiumRouteImport.update({
   path: '/premium',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedReferRoute = AuthenticatedReferRouteImport.update({
+  id: '/refer',
+  path: '/refer',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedServicesRoute = AuthenticatedServicesRouteImport.update({
   id: '/services',
   path: '/services',
@@ -112,6 +119,11 @@ const InviteTokenRoute = InviteTokenRouteImport.update({
   path: '/invite/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ReferTokenRoute = ReferTokenRouteImport.update({
+  id: '/refer/$token',
+  path: '/refer/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthenticatedFamilyPatientIdRoute =
   AuthenticatedFamilyPatientIdRouteImport.update({
     id: '/family_/$patientId',
@@ -128,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
   '/premium': typeof AuthenticatedPremiumRoute
+  '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
@@ -136,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/api/medphoto': typeof ApiMedphotoRoute
   '/api/rxscan': typeof ApiRxscanRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/refer/$token': typeof ReferTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
 export interface FileRoutesByTo {
@@ -147,6 +161,7 @@ export interface FileRoutesByTo {
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
   '/premium': typeof AuthenticatedPremiumRoute
+  '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
@@ -155,6 +170,7 @@ export interface FileRoutesByTo {
   '/api/medphoto': typeof ApiMedphotoRoute
   '/api/rxscan': typeof ApiRxscanRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/refer/$token': typeof ReferTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
 export interface FileRoutesById {
@@ -168,6 +184,7 @@ export interface FileRoutesById {
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/medicines': typeof AuthenticatedMedicinesRoute
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
+  '/_authenticated/refer': typeof AuthenticatedReferRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
@@ -176,6 +193,7 @@ export interface FileRoutesById {
   '/api/medphoto': typeof ApiMedphotoRoute
   '/api/rxscan': typeof ApiRxscanRoute
   '/invite/$token': typeof InviteTokenRoute
+  '/refer/$token': typeof ReferTokenRoute
   '/_authenticated/family_/$patientId': typeof AuthenticatedFamilyPatientIdRoute
 }
 export interface FileRouteTypes {
@@ -189,6 +207,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/medicines'
     | '/premium'
+    | '/refer'
     | '/services'
     | '/today'
     | '/api/ask'
@@ -197,6 +216,7 @@ export interface FileRouteTypes {
     | '/api/medphoto'
     | '/api/rxscan'
     | '/invite/$token'
+    | '/refer/$token'
     | '/family/$patientId'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -208,6 +228,7 @@ export interface FileRouteTypes {
     | '/history'
     | '/medicines'
     | '/premium'
+    | '/refer'
     | '/services'
     | '/today'
     | '/api/ask'
@@ -216,6 +237,7 @@ export interface FileRouteTypes {
     | '/api/medphoto'
     | '/api/rxscan'
     | '/invite/$token'
+    | '/refer/$token'
     | '/family/$patientId'
   id:
     | '__root__'
@@ -228,6 +250,7 @@ export interface FileRouteTypes {
     | '/_authenticated/history'
     | '/_authenticated/medicines'
     | '/_authenticated/premium'
+    | '/_authenticated/refer'
     | '/_authenticated/services'
     | '/_authenticated/today'
     | '/api/ask'
@@ -236,6 +259,7 @@ export interface FileRouteTypes {
     | '/api/medphoto'
     | '/api/rxscan'
     | '/invite/$token'
+    | '/refer/$token'
     | '/_authenticated/family_/$patientId'
   fileRoutesById: FileRoutesById
 }
@@ -249,6 +273,7 @@ export interface RootRouteChildren {
   ApiMedphotoRoute: typeof ApiMedphotoRoute
   ApiRxscanRoute: typeof ApiRxscanRoute
   InviteTokenRoute: typeof InviteTokenRoute
+  ReferTokenRoute: typeof ReferTokenRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -316,6 +341,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedPremiumRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/refer': {
+      id: '/_authenticated/refer'
+      path: '/refer'
+      fullPath: '/refer'
+      preLoaderRoute: typeof AuthenticatedReferRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/services': {
       id: '/_authenticated/services'
       path: '/services'
@@ -372,6 +404,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InviteTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/refer/$token': {
+      id: '/refer/$token'
+      path: '/refer/$token'
+      fullPath: '/refer/$token'
+      preLoaderRoute: typeof ReferTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_authenticated/family_/$patientId': {
       id: '/_authenticated/family_/$patientId'
       path: '/family/$patientId'
@@ -389,6 +428,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedMedicinesRoute: typeof AuthenticatedMedicinesRoute
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
+  AuthenticatedReferRoute: typeof AuthenticatedReferRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
   AuthenticatedFamilyPatientIdRoute: typeof AuthenticatedFamilyPatientIdRoute
@@ -401,6 +441,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedMedicinesRoute: AuthenticatedMedicinesRoute,
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
+  AuthenticatedReferRoute: AuthenticatedReferRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
   AuthenticatedFamilyPatientIdRoute: AuthenticatedFamilyPatientIdRoute,
@@ -419,6 +460,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiMedphotoRoute: ApiMedphotoRoute,
   ApiRxscanRoute: ApiRxscanRoute,
   InviteTokenRoute: InviteTokenRoute,
+  ReferTokenRoute: ReferTokenRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

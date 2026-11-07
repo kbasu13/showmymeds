@@ -16,27 +16,42 @@ export type Database = {
     Tables: {
       caregiver_links: {
         Row: {
+          accepted_at: string | null
           caregiver_id: string | null
           created_at: string
+          expires_at: string
           id: string
+          invite_message: string | null
           invite_token: string
           patient_id: string
+          recipient_name: string
+          share_method: string | null
           status: string
         }
         Insert: {
+          accepted_at?: string | null
           caregiver_id?: string | null
           created_at?: string
+          expires_at?: string
           id?: string
+          invite_message?: string | null
           invite_token?: string
           patient_id: string
+          recipient_name?: string
+          share_method?: string | null
           status?: string
         }
         Update: {
+          accepted_at?: string | null
           caregiver_id?: string | null
           created_at?: string
+          expires_at?: string
           id?: string
+          invite_message?: string | null
           invite_token?: string
           patient_id?: string
+          recipient_name?: string
+          share_method?: string | null
           status?: string
         }
         Relationships: []
@@ -240,6 +255,83 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_acceptances: {
+        Row: {
+          accepted_at: string
+          share_id: string
+          user_id: string
+        }
+        Insert: {
+          accepted_at?: string
+          share_id: string
+          user_id: string
+        }
+        Update: {
+          accepted_at?: string
+          share_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_acceptances_share_id_fkey"
+            columns: ["share_id"]
+            isOneToOne: false
+            referencedRelation: "referral_shares"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_senders: {
+        Row: {
+          code: string
+          created_at: string
+          user_id: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          user_id: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      referral_shares: {
+        Row: {
+          code: string
+          created_at: string
+          id: string
+          message: string
+          method: string
+          recipient_name: string
+          sender_id: string
+          token: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          id?: string
+          message: string
+          method: string
+          recipient_name?: string
+          sender_id: string
+          token?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          id?: string
+          message?: string
+          method?: string
+          recipient_name?: string
+          sender_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           id: string
@@ -284,6 +376,31 @@ export type Database = {
       }
       admin_revoke_premium: { Args: { _user: string }; Returns: undefined }
       check_discount: { Args: { _code: string }; Returns: number }
+      claim_referral: { Args: { _token: string }; Returns: boolean }
+      create_referral_share: {
+        Args: {
+          _message: string
+          _method: string
+          _phone: string
+          _recipient: string
+        }
+        Returns: {
+          code: string
+          created_at: string
+          id: string
+          message: string
+          method: string
+          recipient_name: string
+          sender_id: string
+          token: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "referral_shares"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -293,6 +410,21 @@ export type Database = {
       }
       is_account_active: { Args: never; Returns: boolean }
       is_caregiver_of: { Args: { _patient: string }; Returns: boolean }
+      list_named_caregiver_links: {
+        Args: never
+        Returns: {
+          caregiver_id: string
+          caregiver_name: string
+          created_at: string
+          expires_at: string
+          id: string
+          patient_id: string
+          patient_name: string
+          recipient_name: string
+          share_method: string
+          status: string
+        }[]
+      }
       redeem_discount: {
         Args: { _code: string; _plan: string }
         Returns: number

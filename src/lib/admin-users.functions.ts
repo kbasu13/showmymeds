@@ -19,7 +19,7 @@ export const listAdminUsers = createServerFn({ method: "POST" })
     }
     const [profiles, premium, links, roles] = await Promise.all([
       db.from("profiles").select("id, display_name"), db.from("premium_users").select("*"),
-      db.from("caregiver_links").select("id, patient_id, caregiver_id, status, created_at"),
+      db.from("caregiver_links").select("id, patient_id, caregiver_id, status, created_at, recipient_name, share_method, expires_at"),
       db.from("user_roles").select("user_id, role"),
     ]);
     for (const result of [profiles, premium, links, roles]) if (result.error) throw result.error;
