@@ -1,5 +1,5 @@
 # ShowMyMeds roadmap
-- [ ] Compact six-theme row, Premium Discover badge, searchable account dropdown and international mobile display
+- [x] Compact six-theme row, Premium Discover badge, searchable account dropdown and international mobile display
 - [x] Admin directory: all users/caregivers, contact editing, Premium, connections and suspension
 - [x] Core app: sign-in, medicines, today, alarms, history, family
 - [x] Ask tab: real AI answers using the user's medicines and dose history (Premium)
