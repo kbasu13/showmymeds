@@ -11,6 +11,8 @@ import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, Command
 import { displayPhone, internationalPhone } from "@/lib/contact-phone";
 import { listAdminUsers, updateAdminContact, updateAdminAccess, updateAdminPremium, removeAdminConnection } from "@/lib/admin-users.functions";
 import { matchesUser } from "@/lib/admin-users";
+import { listReferralRecords } from "@/lib/invitations.functions";
+import { inviteExpired } from "@/lib/invitations";
 import { isPremiumActive } from "@/lib/plans";
 
 type Directory = Awaited<ReturnType<typeof listAdminUsers>>;
@@ -18,6 +20,8 @@ type Account = Directory["users"][number];
 
 export function AdminUsers() {
   const fetchUsers = useServerFn(listAdminUsers);
+  const fetchReferrals = useServerFn(listReferralRecords);
+  const referrals = useQuery({ queryKey: ["admin-referrals"], queryFn: () => fetchReferrals(), refetchInterval: 60000 });
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
   const [selected, setSelected] = useState<Account | null>(null);
@@ -44,6 +48,16 @@ export function AdminUsers() {
       </div><Button variant="outline" size="sm" onClick={() => setSelected(u)} aria-label={`Settings for ${u.name || u.email || "user"}`}><Settings2 className="h-4 w-4" /><span className="hidden sm:inline">Settings</span></Button>
     </li>)}</ul>
     {!query.isPending && !query.isError && !users.length && <p className="text-muted-foreground">No matching accounts.</p>}
+    {current && <section className="space-y-2 border-t pt-3"><h3 className="font-semibold">Referrals & invitations</h3>
+      {referrals.isError && <p role="alert" className="text-sm text-destructive">Could not load referrals.</p>}
+      {(referrals.data?.shares ?? []).filter((r) => r.sender_id === current.id || referrals.data?.acceptances.some((a) => a.share_id === r.id && a.user_id === current.id)).map((r) => {
+        const sender = query.data?.users.find((u) => u.id === r.sender_id);
+        const joined = referrals.data?.acceptances.filter((a) => a.share_id === r.id) ?? [];
+        return <div key={r.id} className="border-b py-2 text-sm"><p className="break-words font-medium">{sender?.name || sender?.email || "User"} → {joined.length ? joined.map((a) => { const u = query.data?.users.find((u) => u.id === a.user_id); return u?.name || u?.email || "User"; }).join(", ") : r.recipient_name}</p><p className="text-xs text-muted-foreground">{r.method.toUpperCase()} · {new Date(r.created_at).toLocaleDateString()} · {joined.length ? "Joined" : "Shared · not yet joined"}</p><p className="break-all text-xs text-muted-foreground">{r.code}</p></div>;
+      })}
+      {!referrals.isPending && !(referrals.data?.shares ?? []).some((r) => r.sender_id === current.id || referrals.data?.acceptances.some((a) => a.share_id === r.id && a.user_id === current.id)) && <p className="text-sm text-muted-foreground">No app referrals for this account.</p>}
+      <p className="text-xs text-muted-foreground">Sharing methods record the selected app, not confirmed message delivery.</p>
+    </section>}
     {selected && query.data && <UserSettings key={selected.id} account={query.data.users.find((u) => u.id === selected.id) ?? selected} directory={query.data} onClose={() => setSelected(null)} />}
   </section>;
 }
@@ -85,7 +99,7 @@ function UserSettings({ account, directory, onClose }: { account: Account; direc
     </section>
     <section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Caregiver connections</h3>
       {!connections.length && <p className="text-sm text-muted-foreground">No caregiver connections.</p>}
-      {connections.map((l) => { const otherId = l.patient_id === account.id ? l.caregiver_id : l.patient_id; const other = directory.users.find((u) => u.id === otherId); return <div key={l.id} className="flex items-center gap-2"><div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">{other?.name || other?.email || "Unaccepted invitation"}</p><p className="text-xs text-muted-foreground">{l.patient_id === account.id ? "Caregiver" : "Cares for"} · {l.status}</p></div><Button size="icon" variant="ghost" disabled={busy} aria-label="Remove connection" onClick={() => setConfirm({ label: "Remove this caregiver connection? They will no longer be able to view these medicines.", action: () => disconnect({ data: { id: l.id } }) })}><Trash2 /></Button></div>; })}
+      {connections.map((l) => { const otherId = l.patient_id === account.id ? l.caregiver_id : l.patient_id; const other = directory.users.find((u) => u.id === otherId); return <div key={l.id} className="flex items-center gap-2"><div className="min-w-0 flex-1"><p className="break-words text-sm font-medium">{other?.name || other?.email || l.recipient_name || "Unaccepted invitation"}</p><p className="text-xs text-muted-foreground">{l.patient_id === account.id ? "Caregiver" : "Cares for"} · {l.status !== "accepted" && inviteExpired(l.created_at) ? "Expired" : l.status} · {l.share_method?.toUpperCase() || "Method not recorded"}</p></div><Button size="icon" variant="ghost" disabled={busy} aria-label="Remove connection" onClick={() => setConfirm({ label: "Remove this caregiver connection? They will no longer be able to view these medicines.", action: () => disconnect({ data: { id: l.id } }) })}><Trash2 /></Button></div>; })}
     </section>
     <section className="space-y-3 border-t pt-4"><h3 className="font-semibold">Account access</h3><p className="text-sm text-muted-foreground">{account.suspended ? "Suspended" : "Active"}</p>
       {!account.admin && <Button variant={account.suspended ? "outline" : "destructive"} size="sm" disabled={busy} onClick={() => setConfirm({ label: account.suspended ? "Restore access to this account?" : "Suspend this account? Sign-in and access to medicines will be blocked. Saved data will be kept.", action: () => access({ data: { userId: account.id, suspended: !account.suspended } }) })}>{account.suspended ? <ShieldCheck /> : <ShieldBan />}{account.suspended ? "Restore account" : "Suspend account"}</Button>}
