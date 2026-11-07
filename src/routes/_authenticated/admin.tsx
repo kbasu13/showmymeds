@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Copy, Gem, Ticket, Trash2 } from "lucide-react";
+import { Copy, Gem, Ticket, Trash2, ChevronsUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,8 @@ import { DISCOUNT_PERCENTS, randomCode } from "@/lib/plans";
 import { useIsAdmin } from "@/components/Premium";
 import { useUser } from "@/lib/meds";
 import { AdminUsers } from "@/components/AdminUsers";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 
 export const Route = createFileRoute("/_authenticated/admin")({
   head: () => ({ meta: [{ title: "Manage users — ShowMyMeds Admin" }, { name: "description", content: "Manage ShowMyMeds users, caregivers, account access and Premium." }, { property: "og:title", content: "Manage users — ShowMyMeds Admin" }, { property: "og:description", content: "Owner-only account and caregiver management." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
@@ -43,10 +45,13 @@ function FreePremium() {
   const qc = useQueryClient();
   const [email, setEmail] = useState("");
   const [dur, setDur] = useState<string>("year");
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState("");
   const list = useQuery({
     queryKey: ["admin-premium"],
     queryFn: async () => { const { data, error } = await supabase.rpc("admin_list_premium"); if (error) throw error; return data; },
   });
+  const selected = list.data?.find((p) => p.user_id === selectedId);
   async function give() {
     const d = DURATIONS.find((x) => x.id === dur);
     if (!d) return;
@@ -73,18 +78,20 @@ function FreePremium() {
         </div>
         <Button size="sm" onClick={give} disabled={!email.includes("@")}>Give Premium</Button>
       </div>
-      <ul className="divide-y text-sm">
-        {(list.data ?? []).map((p) => (
-          <li key={p.user_id} className="flex items-center gap-2 py-2">
+      <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
+        <PopoverTrigger asChild><Button variant="outline" role="combobox" aria-label="Select Premium account" aria-expanded={pickerOpen} className="w-full justify-between gap-2" disabled={!list.data?.length}><span className="truncate">{selected ? selected.display_name || selected.email : `Select Premium account (${list.data?.length ?? 0})`}</span><ChevronsUpDown className="h-4 w-4 shrink-0" /></Button></PopoverTrigger>
+        <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0"><Command><CommandInput placeholder="Search name or email" aria-label="Search Premium accounts" /><CommandList className="max-h-56"><CommandEmpty>No matching accounts.</CommandEmpty><CommandGroup>{(list.data ?? []).map((p) => <CommandItem key={p.user_id} value={`${p.user_id} ${p.display_name || ""} ${p.email || ""}`} onSelect={() => { setSelectedId(p.user_id); setPickerOpen(false); }}><div className="min-w-0 py-1"><p className="break-words font-medium">{p.display_name || p.email}</p><p className="break-all text-xs text-muted-foreground">{p.email}</p></div></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent>
+      </Popover>
+      {selected && (
+          <div className="flex items-center gap-2 py-2 text-sm">
             <div className="min-w-0 flex-1">
-              <p className="truncate font-medium">{p.display_name || p.email}</p>
-              <p className="truncate text-xs text-muted-foreground">{p.email} · ends {fmt(p.expires_at)}</p>
+              <p className="truncate font-medium">{selected.display_name || selected.email}</p>
+              <p className="break-all text-xs text-muted-foreground">{selected.email} · ends {fmt(selected.expires_at)}</p>
             </div>
-            <Button size="sm" variant="outline" onClick={() => remove(p.user_id)}><Trash2 /> Remove</Button>
-          </li>
-        ))}
-        {list.data?.length === 0 && <li className="py-2 text-muted-foreground">No one has Premium yet.</li>}
-      </ul>
+            <Button size="sm" variant="outline" onClick={() => remove(selected.user_id)}><Trash2 /> Remove</Button>
+          </div>
+      )}
+      {list.data?.length === 0 && <p className="text-sm text-muted-foreground">No one has Premium yet.</p>}
     </section>
   );
 }
