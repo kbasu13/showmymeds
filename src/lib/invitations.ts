@@ -3,7 +3,7 @@ export const sharingMethods = ["whatsapp", "sms", "email", "share", "copy"] as c
 export type SharingMethod = typeof sharingMethods[number];
 export const inviteSchema = z.object({ recipient: z.string().trim().min(1, "Enter the person's name").max(120, "Keep the name within 120 characters"), method: z.enum(sharingMethods), message: z.string().trim().min(1, "Enter an invitation message").max(3000, "Keep your message within 3,000 characters") });
 export const referralSchema = inviteSchema.extend({ phone: z.string().regex(/^\+[1-9]\d{6,14}$/, "Enter your mobile number with its country code, such as +91 or +1") });
-export type InvitationErrors = Partial<Record<"recipient" | "message" | "phone", string>>;
+export type InvitationErrors = Partial<Record<"recipient" | "message" | "phone", string | undefined>>;
 export function invitationFieldErrors(error: z.ZodError): InvitationErrors {
   const fields: InvitationErrors = {};
   for (const issue of error.issues) {
