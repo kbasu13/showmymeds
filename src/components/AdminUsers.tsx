@@ -24,7 +24,7 @@ export function AdminUsers() {
   return <section className="space-y-4">
     <h2 className="flex items-center gap-2 text-lg font-semibold"><UsersRound className="h-5 w-5" /> Users & caregivers <span className="text-sm text-muted-foreground">({query.data?.users.length ?? 0})</span></h2>
     <div className="relative"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input aria-label="Search users" placeholder="Search name, email or mobile" className="pl-9" value={search} onChange={(e) => setSearch(e.target.value)} /></div>
-    <div className="flex flex-wrap gap-2">{[["all", "All users"], ["caregivers", "Caregivers"], ["suspended", "Suspended"]].map(([id, label]) => <Button key={id} size="sm" variant={filter === id ? "default" : "outline"} onClick={() => setFilter(id)}>{label}</Button>)}</div>
+    <div className="flex flex-wrap gap-2">{([["all", "All users"], ["caregivers", "Caregivers"], ["suspended", "Suspended"]] as const).map(([id, label]) => <Button key={id} size="sm" variant={filter === id ? "default" : "outline"} onClick={() => setFilter(id)}>{label}</Button>)}</div>
     {query.isPending && <p className="text-muted-foreground">Loading accounts…</p>}
     {query.isError && <div role="alert" className="text-destructive">Could not load accounts. <Button variant="outline" size="sm" onClick={() => query.refetch()}>Retry</Button></div>}
     <ul className="divide-y">{users.map((u) => <li key={u.id} className="flex items-center gap-3 py-4">
@@ -67,7 +67,7 @@ function UserSettings({ account, directory, onClose }: { account: Account; direc
     </form>
     <section className="space-y-3 border-t pt-4"><h3 className="flex items-center gap-2 font-semibold"><Gem className="h-4 w-4" /> Premium access</h3>
       <p className="text-sm text-muted-foreground">{account.premium ? account.premium.expires_at ? `Expires ${new Date(account.premium.expires_at).toLocaleDateString()}` : "Lifetime Premium" : "No Premium access"}</p>
-      <div className="flex flex-wrap gap-2">{[["month", "1 month"], ["year", "1 year"], ["life", "Lifetime"], ["custom", "Set expiry"]].map(([id, label]) => <Button key={id} size="sm" variant={duration === id ? "default" : "outline"} onClick={() => setDuration(id)}>{label}</Button>)}</div>
+      <div className="flex flex-wrap gap-2">{([["month", "1 month"], ["year", "1 year"], ["life", "Lifetime"], ["custom", "Set expiry"]] as const).map(([id, label]) => <Button key={id} size="sm" variant={duration === id ? "default" : "outline"} onClick={() => setDuration(id)}>{label}</Button>)}</div>
       {duration === "custom" && <Input aria-label="Premium expiry date" type="date" value={expiry} onChange={(e) => setExpiry(e.target.value)} />}
       <div className="flex flex-wrap gap-2"><Button size="sm" disabled={busy} onClick={grant}>Grant / update Premium</Button>{account.premium && <Button size="sm" variant="outline" disabled={busy} onClick={() => setConfirm({ label: "Remove Premium access for this account?", action: () => premium({ data: { userId: account.id, expires: null, revoke: true } }) })}>Remove Premium</Button>}</div>
     </section>
