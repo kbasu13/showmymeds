@@ -50,6 +50,13 @@
       "when": 1794067691734,
       "tag": "0006_admin_directory_and_suspended_access",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1794067850208,
+      "tag": "0007_enforce_suspension_in_privileged_actions",
+      "breakpoints": true
     }
   ]
 }
