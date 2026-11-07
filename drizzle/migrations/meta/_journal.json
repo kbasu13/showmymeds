@@ -43,6 +43,13 @@
       "when": 1793738902930,
       "tag": "0005_self_activate_premium",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1794067691734,
+      "tag": "0006_admin_directory_and_suspended_access",
+      "breakpoints": true
     }
   ]
 }
