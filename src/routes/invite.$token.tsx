@@ -12,7 +12,7 @@ export const Route = createFileRoute("/invite/$token")({
       { name: "description", content: "You've been invited to help someone with their medicines." },
       { property: "og:title", content: "You're invited to be a caregiver on ShowMyMeds" },
       { property: "og:description", content: "Help a family member stay on track with their medicines." },
-    ],
+      { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }],
   }),
   component: InvitePage,
 });

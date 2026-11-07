@@ -19,7 +19,7 @@ import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, 
 import type { RxItem } from "@/routes/api/rxscan";
 
 export const Route = createFileRoute("/_authenticated/medicines")({
-  head: () => ({ meta: [{ title: "My medicines — ShowMyMeds" }, { name: "description", content: "Add and manage your medicines." }] }),
+  head: () => ({ meta: [{ title: "My medicines — ShowMyMeds" }, { name: "description", content: "Add and manage your medicines." }, { property: "og:title", content: "My medicines — ShowMyMeds" }, { property: "og:description", content: "Add and manage your medicines." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: MedicinesPage,
 });
 

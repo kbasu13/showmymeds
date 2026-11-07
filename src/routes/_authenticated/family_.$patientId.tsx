@@ -6,7 +6,7 @@ import { MedImage } from "@/components/MedImage";
 import { AdherenceView } from "./history";
 
 export const Route = createFileRoute("/_authenticated/family_/$patientId")({
-  head: () => ({ meta: [{ title: "Family member — ShowMyMeds" }, { name: "description", content: "Medicines of someone you care for." }] }),
+  head: () => ({ meta: [{ title: "Family member — ShowMyMeds" }, { name: "description", content: "Medicines of someone you care for." }, { property: "og:title", content: "Family member — ShowMyMeds" }, { property: "og:description", content: "Medicines of someone you care for." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PatientView,
 });
 

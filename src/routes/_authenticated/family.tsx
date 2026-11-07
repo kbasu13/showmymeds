@@ -10,7 +10,7 @@ import { useUser } from "@/lib/meds";
 import { usePremium, PremiumBadge, UpgradeCard } from "@/components/Premium";
 
 export const Route = createFileRoute("/_authenticated/family")({
-  head: () => ({ meta: [{ title: "Family & caregivers — ShowMyMeds" }, { name: "description", content: "Invite family to help with your medicines." }] }),
+  head: () => ({ meta: [{ title: "Family & caregivers — ShowMyMeds" }, { name: "description", content: "Invite family to help with your medicines." }, { property: "og:title", content: "Family & caregivers — ShowMyMeds" }, { property: "og:description", content: "Invite family to help with your medicines." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: FamilyPage,
 });
 
