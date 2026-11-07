@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
+import { isValidatedAccountActive } from "@/lib/account-access.server";
 
 export type RxItem = {
   name: string; composition: string | null; manufacturer: string | null; form: string;
@@ -22,6 +23,7 @@ export const Route = createFileRoute("/api/rxscan")({
         });
         const { data: u } = await db.auth.getUser(token);
         if (!u.user) return Response.json({ error: "Please sign in." }, { status: 401 });
+        if (!await isValidatedAccountActive(u.user.id)) return Response.json({ error: "Account access is suspended." }, { status: 403 });
         const body = (await request.json().catch(() => null)) as { path?: string } | null;
         const path = body?.path ?? "";
         if (!path.startsWith(`${u.user.id}/`)) return Response.json({ error: "Not allowed." }, { status: 403 });

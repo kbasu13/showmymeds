@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { createClient } from "@supabase/supabase-js";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
+import { isValidatedAccountActive } from "@/lib/account-access.server";
 
 export const Route = createFileRoute("/api/composition")({
   server: {
@@ -14,6 +15,7 @@ export const Route = createFileRoute("/api/composition")({
         });
         const { data: u } = await db.auth.getUser(token);
         if (!u.user) return Response.json({ error: "Please sign in." }, { status: 401 });
+        if (!await isValidatedAccountActive(u.user.id)) return Response.json({ error: "Account access is suspended." }, { status: 403 });
 
         const body = (await request.json().catch(() => null)) as { name?: string } | null;
         const name = (body?.name ?? "").trim().slice(0, 120);

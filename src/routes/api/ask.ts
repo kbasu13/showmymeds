@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, type ModelMessage } from "ai";
 import type { Database } from "@/integrations/supabase/types";
+import { isValidatedAccountActive } from "@/lib/account-access.server";
 import {
   createLovableAiGatewayRunIdFetch,
   getLovableAiGatewayRunId,
@@ -42,6 +43,7 @@ export const Route = createFileRoute("/api/ask")({
         });
         const { data: u } = await db.auth.getUser(token);
         if (!u.user) return Response.json({ error: "Please sign in." }, { status: 401 });
+        if (!await isValidatedAccountActive(u.user.id)) return Response.json({ error: "Account access is suspended." }, { status: 403 });
         const { data: prem } = await db.from("premium_users").select("user_id").eq("user_id", u.user.id).maybeSingle();
         if (!prem) return Response.json({ error: "Ask is a Premium feature." }, { status: 403 });
 
