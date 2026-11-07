@@ -4,15 +4,9 @@ export const THEMES = [
   { id: "sage", label: "Sage Garden" },
   { id: "ocean", label: "Calm Ocean" },
   { id: "sunrise", label: "Warm Sunrise" },
-  { id: "contrast", label: "High Contrast" },
   { id: "lavender", label: "Lavender" },
   { id: "rose", label: "Rose" },
-  { id: "teal", label: "Teal" },
-  { id: "forest", label: "Forest" },
-  { id: "plum", label: "Plum" },
   { id: "slate", label: "Slate" },
-  { id: "amber", label: "Amber" },
-  { id: "coral", label: "Coral" },
 ] as const;
 export type ThemeId = (typeof THEMES)[number]["id"];
 export type SizeId = "normal" | "large";
@@ -27,7 +21,7 @@ export function PrefsProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const t = localStorage.getItem("smm-theme") as ThemeId | null;
     const s = localStorage.getItem("smm-size") as SizeId | null;
-    if (t) setTheme(t);
+    if (t && THEMES.some((option) => option.id === t)) setTheme(t);
     if (s) setSize(s);
   }, []);
 

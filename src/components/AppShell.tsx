@@ -32,7 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const photo = meta["avatar_url"] || meta["picture"];
   const fullName = meta["full_name"] || meta["name"] || user?.email || "";
   const parts = fullName.split(/[\s@.]+/).filter(Boolean);
-  const initials = ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1]![0] : "")).toUpperCase() || "?";
+  const initials = ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "")).toUpperCase() || "?";
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -69,18 +69,18 @@ export function AppShell({ children }: { children: ReactNode }) {
               ))}
             </div>
             <DropdownMenuLabel>Colour theme</DropdownMenuLabel>
-            <div className="grid grid-cols-5 gap-3 p-2">
+            <div className="grid grid-cols-6 gap-1 px-2 py-2">
               {THEMES.map((t) => (
-                <button key={t.id} aria-label={t.label} title={t.label} onClick={() => setTheme(t.id)}
-                  className={`mx-auto flex h-9 w-9 items-center justify-center rounded-full border-2 ${theme === t.id ? "border-foreground" : "border-transparent"}`}>
+                <Button key={t.id} variant="ghost" size="icon" aria-label={t.label} aria-pressed={theme === t.id} title={t.label} onClick={() => setTheme(t.id)}
+                  className={`mx-auto h-9 w-9 rounded-full border-2 p-0 ${theme === t.id ? "border-foreground" : "border-transparent"}`}>
                   <span data-theme={t.id} className="flex h-7 w-7 items-center justify-center rounded-full border bg-brand">
                     {theme === t.id && <Check className="h-4 w-4 text-primary" />}
                   </span>
-                </button>
+                </Button>
               ))}
             </div>
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/services" className="flex w-full items-center gap-2">🧭 Discover <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-premium px-2 py-0.5 text-xs font-semibold text-premium-foreground"><Gem className="h-3.5 w-3.5" /> Premium</span></Link></DropdownMenuItem>
+            <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/services" className="flex w-full items-center gap-2">🧭 Discover {!premium && <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-premium px-2 py-0.5 text-xs font-semibold text-premium-foreground"><Gem className="h-3.5 w-3.5" /> Premium</span>}</Link></DropdownMenuItem>
             {!premium && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/premium">💎 Go Premium</Link></DropdownMenuItem>}
             {isAdmin && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/admin">🛠 Admin</Link></DropdownMenuItem>}
             <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base">Sign out</DropdownMenuItem>

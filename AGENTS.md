@@ -11,3 +11,4 @@
 
 - Owner account management uses authenticated server functions that verify active status and the database admin role before loading the privileged client; never expose the account directory through browser-admin queries.
 - Suspension uses Auth bans plus restrictive database/storage policies against live banned status, so existing tokens cannot retain data access.
+- Account contact presentation uses libphonenumber-js to format explicit international numbers without guessing the country of national-only numbers.
