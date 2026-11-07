@@ -9,9 +9,9 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "ShowMyMeds — simple medicine reminders" },
-      { name: "description", content: "Large, easy medicine reminders with loud alarms, low-stock alerts and family caregivers." },
+      { name: "description", content: "Stay on track with ShowMyMeds: medicine reminders, dose and stock tracking, family caregiver support, and doctor-ready reports. Start managing your medicines today." },
       { property: "og:title", content: "ShowMyMeds — simple medicine reminders" },
-      { property: "og:description", content: "Large, easy medicine reminders with loud alarms, low-stock alerts and family caregivers." },
+      { property: "og:description", content: "Stay on track with ShowMyMeds: medicine reminders, dose and stock tracking, family caregiver support, and doctor-ready reports. Start managing your medicines today." },
       { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }],
   }),
   component: Index,
