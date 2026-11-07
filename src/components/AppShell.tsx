@@ -81,6 +81,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/services" className="flex w-full items-center gap-2">🧭 Discover {!premium && <span className="ml-auto inline-flex items-center gap-1 rounded-full bg-premium px-2 py-0.5 text-xs font-semibold text-premium-foreground"><Gem className="h-3.5 w-3.5" /> Premium</span>}</Link></DropdownMenuItem>
+            <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/refer">Refer app</Link></DropdownMenuItem>
             {!premium && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/premium">💎 Go Premium</Link></DropdownMenuItem>}
             {isAdmin && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/admin">🛠 Admin</Link></DropdownMenuItem>}
             <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base">Sign out</DropdownMenuItem>
