@@ -8,3 +8,6 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- Owner account management uses authenticated server functions that verify active status and the database admin role before loading the privileged client; never expose the account directory through browser-admin queries.
+- Suspension uses Auth bans plus restrictive database/storage policies against live banned status, so existing tokens cannot retain data access.
