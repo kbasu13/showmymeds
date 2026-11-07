@@ -8,7 +8,7 @@ export const Route = createFileRoute("/_authenticated/services")({
     meta: [
       { title: "Discover — ShowMyMeds" }, { property: "og:title", content: "Discover — ShowMyMeds" },
       { name: "description", content: "Find care centres and pharmacies nearby, with partner discounts. Coming soon." },
-    ],
+      { property: "og:description", content: "Find care centres and pharmacies nearby, with partner discounts. Coming soon." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }],
   }),
   component: ServicesPage,
 });

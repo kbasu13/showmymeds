@@ -291,6 +291,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_account_active: { Args: never; Returns: boolean }
       is_caregiver_of: { Args: { _patient: string }; Returns: boolean }
       redeem_discount: {
         Args: { _code: string; _plan: string }

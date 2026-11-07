@@ -9,9 +9,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { DISCOUNT_PERCENTS, randomCode } from "@/lib/plans";
 import { useIsAdmin } from "@/components/Premium";
 import { useUser } from "@/lib/meds";
+import { AdminUsers } from "@/components/AdminUsers";
 
 export const Route = createFileRoute("/_authenticated/admin")({
-  head: () => ({ meta: [{ title: "Admin — ShowMyMeds" }, { name: "description", content: "Give free Premium and create discount codes." }, { name: "robots", content: "noindex" }] }),
+  head: () => ({ meta: [{ title: "Manage users — ShowMyMeds Admin" }, { name: "description", content: "Manage ShowMyMeds users, caregivers, account access and Premium." }, { property: "og:title", content: "Manage users — ShowMyMeds Admin" }, { property: "og:description", content: "Owner-only account and caregiver management." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: AdminPage,
 });
 
@@ -31,6 +32,7 @@ function AdminPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold text-primary">Admin</h1>
+      <AdminUsers />
       <FreePremium />
       <Codes />
     </div>
@@ -46,7 +48,8 @@ function FreePremium() {
     queryFn: async () => { const { data, error } = await supabase.rpc("admin_list_premium"); if (error) throw error; return data; },
   });
   async function give() {
-    const d = DURATIONS.find((x) => x.id === dur)!;
+    const d = DURATIONS.find((x) => x.id === dur);
+    if (!d) return;
     const expires = d.days ? new Date(Date.now() + d.days * 864e5).toISOString() : null;
     const { error } = await supabase.rpc("admin_grant_premium", { _email: email, _expires: expires as string });
     if (error) { toast.error(error.message); return; }

@@ -1,4 +1,5 @@
 # ShowMyMeds roadmap
+- [x] Admin directory: all users/caregivers, contact editing, Premium, connections and suspension
 - [x] Core app: sign-in, medicines, today, alarms, history, family
 - [x] Ask tab: real AI answers using the user's medicines and dose history (Premium)
 - [ ] WhatsApp reminders (Meta WhatsApp Cloud) — needs the user to connect WhatsApp Business

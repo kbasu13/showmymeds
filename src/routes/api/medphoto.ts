@@ -69,6 +69,8 @@ export const Route = createFileRoute("/api/medphoto")({
         });
         const { data: u } = await db.auth.getUser(token);
         if (!u.user) return Response.json({ error: "Please sign in." }, { status: 401 });
+        const { isValidatedAccountActive } = await import("@/lib/account-access.server");
+        if (!await isValidatedAccountActive(u.user.id)) return Response.json({ error: "Account access is suspended." }, { status: 403 });
 
         const body = (await request.json().catch(() => null)) as { name?: string; composition?: string; form?: string } | null;
         const name = (body?.name ?? "").trim().slice(0, 80);

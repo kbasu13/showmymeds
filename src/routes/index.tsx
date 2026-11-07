@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
       { name: "description", content: "Large, easy medicine reminders with loud alarms, low-stock alerts and family caregivers." },
       { property: "og:title", content: "ShowMyMeds — simple medicine reminders" },
       { property: "og:description", content: "Large, easy medicine reminders with loud alarms, low-stock alerts and family caregivers." },
-    ],
+      { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }],
   }),
   component: Index,
 });
