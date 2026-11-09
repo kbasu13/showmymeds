@@ -11,7 +11,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
 import { usePremium, PremiumBadge, UpgradeCard } from "@/components/Premium";
 import { inviteSchema, inviteExpired, invitationText, openInvitation, invitationFieldErrors, invitationShareError, type InvitationErrors, type SharingMethod } from "@/lib/invitations";
-export const Route = createFileRoute("/_authenticated/family")({ head: () => ({ meta: [{ title: "Family & caregivers — ShowMyMeds" }, { name: "description", content: "Invite family to help with your medicines." }, { property: "og:title", content: "Family & caregivers — ShowMyMeds" }, { property: "og:description", content: "Invite family to help with your medicines." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: FamilyPage });
+export const Route = createFileRoute("/_authenticated/family")({ staticData: { sitemap: false }, head: () => ({ meta: [{ title: "Family & caregivers — ShowMyMeds" }, { name: "description", content: "Invite family to help with your medicines." }, { property: "og:title", content: "Family & caregivers — ShowMyMeds" }, { property: "og:description", content: "Invite family to help with your medicines." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: FamilyPage });
 function FamilyPage() {
   const { data: user } = useUser(); const qc = useQueryClient(); const { data: premium } = usePremium(user?.id);
   const [msg, setMsg] = useState("Hi! I'm using ShowMyMeds to keep track of my medicines. Please join as my caregiver so you can see if I've taken them: {link}");

@@ -13,7 +13,7 @@ import { PREMIUM_PLANS, discountedPrice, withGst, upiLink, GST_PERCENT, UPI_ID, 
 import { supabase } from "@/integrations/supabase/client";
 import { savePendingPayment, clearPendingPayment } from "@/components/PendingPayment";
 
-export const Route = createFileRoute("/_authenticated/premium")({
+export const Route = createFileRoute("/_authenticated/premium")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Go Premium — ShowMyMeds" }, { name: "description", content: "Unlock the AI helper, doctor PDF reports, family caregivers and WhatsApp reminders." }, { property: "og:title", content: "Go Premium — ShowMyMeds" }, { property: "og:description", content: "Unlock the AI helper, doctor PDF reports, family caregivers and WhatsApp reminders." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: PremiumPage,
 });

@@ -10,7 +10,7 @@ export type RxItem = {
 const FORMS = ["tablet", "capsule", "syrup", "drops", "injection", "inhaler", "cream"];
 
 // Reads a prescription photo (incl. handwriting) stored in the user's own folder and lists the medicines on it.
-export const Route = createFileRoute("/api/rxscan")({
+export const Route = createFileRoute("/api/rxscan")({ staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

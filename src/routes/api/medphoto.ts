@@ -56,7 +56,7 @@ async function download(url: string): Promise<{ bytes: ArrayBuffer; type: string
 
 // Finds a medicine photo online (Gemini suggestions, then pharmacy, then Wikimedia Commons),
 // copies the first working image into the user's own storage folder, and returns its path.
-export const Route = createFileRoute("/api/medphoto")({
+export const Route = createFileRoute("/api/medphoto")({ staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

@@ -9,7 +9,7 @@ import { useUser } from "@/lib/meds";
 import { createReferral } from "@/lib/invitations.functions";
 import { internationalPhone } from "@/lib/contact-phone";
 import { openInvitation, referralSchema, invitationFieldErrors, invitationShareError, type InvitationErrors, type SharingMethod } from "@/lib/invitations";
-export const Route = createFileRoute("/_authenticated/refer")({ head: () => ({ meta: [{ title: "Refer a friend — ShowMyMeds" }, { name: "description", content: "Invite someone to ShowMyMeds with your personal referral code." }, { property: "og:title", content: "Refer a friend — ShowMyMeds" }, { property: "og:description", content: "Share ShowMyMeds with someone you care about." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: ReferPage });
+export const Route = createFileRoute("/_authenticated/refer")({ staticData: { sitemap: false }, head: () => ({ meta: [{ title: "Refer a friend — ShowMyMeds" }, { name: "description", content: "Invite someone to ShowMyMeds with your personal referral code." }, { property: "og:title", content: "Refer a friend — ShowMyMeds" }, { property: "og:description", content: "Share ShowMyMeds with someone you care about." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: ReferPage });
 function ReferPage() {
   const { data: user } = useUser(); const create = useServerFn(createReferral);
   const [phone, setPhone] = useState<string | null>(null), [recipient, setRecipient] = useState("");

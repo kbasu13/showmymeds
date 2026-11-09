@@ -13,7 +13,7 @@ import { AdminUsers } from "@/components/AdminUsers";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 
-export const Route = createFileRoute("/_authenticated/admin")({
+export const Route = createFileRoute("/_authenticated/admin")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Manage users — ShowMyMeds Admin" }, { name: "description", content: "Manage ShowMyMeds users, caregivers, account access and Premium." }, { property: "og:title", content: "Manage users — ShowMyMeds Admin" }, { property: "og:description", content: "Owner-only account and caregiver management." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
   component: AdminPage,
 });

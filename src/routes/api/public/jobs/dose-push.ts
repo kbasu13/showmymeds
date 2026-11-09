@@ -7,7 +7,7 @@ function localNow(tz: string) {
   return { date: `${parts["year"]}-${parts["month"]}-${parts["day"]}`, minutes: Number(parts["hour"]) * 60 + Number(parts["minute"]) };
 }
 
-export const Route = createFileRoute("/api/public/jobs/dose-push")({
+export const Route = createFileRoute("/api/public/jobs/dose-push")({ staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

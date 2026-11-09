@@ -23,7 +23,7 @@ If the user asks to ADD a medicine to their list, collect name, how many each ti
 form must be one of tablet, capsule, syrup, drops, injection, inhaler, cream; times are 24-hour HH:MM. You cannot save it yourself — the app shows an "Add" button to the user.
 Format every answer in Markdown so it is easy to read: a short bold one-line summary first, then "###" headings for sections, bullet points for lists, short paragraphs with blank lines between them. Keep it concise.`;
 
-export const Route = createFileRoute("/api/ask")({
+export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

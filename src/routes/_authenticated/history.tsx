@@ -9,7 +9,7 @@ import { useUser, useMeds, useLogs, takeDose, untakeDose, useRefreshMeds } from 
 import { buildDoctorReport, downloadBlob, shareBlob } from "@/lib/report";
 import { adherenceByDay, dosesForDay, ymd, time12, type Med, type Log } from "@/lib/schedule";
 
-export const Route = createFileRoute("/_authenticated/history")({
+export const Route = createFileRoute("/_authenticated/history")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "History & insights — ShowMyMeds" }, { name: "description", content: "How well you kept to your medicine schedule." }, { property: "og:title", content: "History & insights — ShowMyMeds" }, { property: "og:description", content: "How well you kept to your medicine schedule." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: HistoryPage,
 });

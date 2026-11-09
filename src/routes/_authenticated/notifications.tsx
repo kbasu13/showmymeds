@@ -9,7 +9,7 @@ import { useUser } from "@/lib/meds";
 import { sendTestPush } from "@/lib/push.functions";
 import { currentSubscription, detectPlatform, disablePush, enablePush, isBrave, pushStatus, type Platform, type PushStatus } from "@/lib/push";
 
-export const Route = createFileRoute("/_authenticated/notifications")({
+export const Route = createFileRoute("/_authenticated/notifications")({ staticData: { sitemap: false },
   head: () => ({ meta: [
     { title: "Phone notifications — ShowMyMeds" },
     { name: "description", content: "Turn on dose reminders on your phone's lock screen, with medicine name and photo." },
