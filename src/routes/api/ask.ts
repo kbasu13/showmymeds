@@ -44,8 +44,8 @@ export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false 
         const { data: u } = await db.auth.getUser(token);
         if (!u.user) return Response.json({ error: "Please sign in." }, { status: 401 });
         if (!await isValidatedAccountActive(u.user.id)) return Response.json({ error: "Account access is suspended." }, { status: 403 });
-        const { data: prem } = await db.from("premium_users").select("user_id").eq("user_id", u.user.id).maybeSingle();
-        if (!prem) return Response.json({ error: "Ask is a Premium feature." }, { status: 403 });
+        const { data: prem } = await db.from("premium_users").select("user_id, expires_at").eq("user_id", u.user.id).maybeSingle();
+        if (!prem || (prem.expires_at && new Date(prem.expires_at) <= new Date())) return Response.json({ error: "Ask is a Premium feature." }, { status: 403 });
 
         const body = (await request.json().catch(() => null)) as { messages?: { role: string; text: string }[] } | null;
         const messages: ModelMessage[] = (body?.messages ?? [])

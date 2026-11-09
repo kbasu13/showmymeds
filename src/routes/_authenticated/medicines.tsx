@@ -1,11 +1,11 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { usePremium, PremiumBadge } from "@/components/Premium";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { usePremium } from "@/components/Premium";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Pencil, Trash2, X, Search, ImageOff } from "lucide-react";
+import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Gem, BellRing, Pencil, Trash2, X, Search, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -83,9 +83,10 @@ function MedicinesPage() {
       </div>
       {meds.length > 0 && (
         <Button variant="outline" size="lg" className="w-full text-base" onClick={exportCalendar}>
-          <CalendarPlus /> Add schedule to phone calendar <PremiumBadge />
+          <CalendarPlus /> Add schedule to phone calendar {!premium && <Gem className="h-4 w-4 text-premium" aria-label="Premium" />}
         </Button>
       )}
+      <Button asChild variant="outline" size="lg" className="w-full text-base"><Link to="/notifications"><BellRing /> Notifications</Link></Button>
       <ul className="space-y-3">
         {meds.map((m) => (
           <li key={m.id} className="rounded-xl border bg-card p-4 shadow-soft">
