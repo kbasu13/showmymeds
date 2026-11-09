@@ -18,7 +18,10 @@ export const Route = createFileRoute("/api/public/jobs/dose-push")({ staticData:
         let sent = 0;
         const byUser = new Map<string, NonNullable<typeof subs>>();
         for (const s of subs ?? []) byUser.set(s.user_id, [...(byUser.get(s.user_id) ?? []), s]);
+        const { data: prem } = await db.from("premium_users").select("user_id,expires_at").in("user_id", [...byUser.keys()]);
+        const active = new Set((prem ?? []).filter((p) => !p.expires_at || new Date(p.expires_at) > new Date()).map((p) => p.user_id));
         for (const [userId, devices] of byUser) {
+          if (!active.has(userId)) continue; // Premium only: expired users get no reminders
           let tz = devices[0]!.tz; try { localNow(tz); } catch { tz = "Asia/Kolkata"; }
           const { date, minutes } = localNow(tz);
           const { data: meds } = await db.from("medicines").select("id,name,dosage,image_url,times,start_date,end_date,notes").eq("user_id", userId).lte("start_date", date);
