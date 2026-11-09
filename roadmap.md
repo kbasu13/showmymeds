@@ -29,3 +29,4 @@
 - [x] History: report heading and Download/Share buttons centred
 - [x] Phone push notifications with medicine name/photo, test button and phone/Brave help guide
 - [x] Brave browser support guidance
+- [x] On-screen reminders while the app is open stay free always (test guards it)
