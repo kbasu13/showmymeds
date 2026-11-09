@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle2, Plus, BellRing } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Plus, BellRing, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MedImage } from "@/components/MedImage";
+import { usePremium } from "@/components/Premium";
 import { useUser, useMeds, useLogs, takeDose, useRefreshMeds } from "@/lib/meds";
 import { dosesForDay, isLowStock, daysOfStockLeft, ymd, time12, doseText, type Med } from "@/lib/schedule";
 
@@ -13,6 +14,7 @@ export const Route = createFileRoute("/_authenticated/today")({ staticData: { si
 
 function TodayPage() {
   const { data: user } = useUser();
+  const { data: premium } = usePremium(user?.id);
   const today = ymd(new Date());
   const { data: meds = [], isLoading } = useMeds(user?.id);
   const { data: logs = [] } = useLogs(user?.id, today);
