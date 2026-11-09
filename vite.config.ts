@@ -12,4 +12,8 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  vite: {
+    // Never ship source maps so browser tools cannot rebuild readable source.
+    build: { sourcemap: false },
+  },
 });
