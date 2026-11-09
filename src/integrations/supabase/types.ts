@@ -255,6 +255,60 @@ export type Database = {
         }
         Relationships: []
       }
+      push_sent: {
+        Row: {
+          medicine_id: string
+          scheduled_date: string
+          scheduled_time: string
+          sent_at: string
+        }
+        Insert: {
+          medicine_id: string
+          scheduled_date: string
+          scheduled_time: string
+          sent_at?: string
+        }
+        Update: {
+          medicine_id?: string
+          scheduled_date?: string
+          scheduled_time?: string
+          sent_at?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          tz: string
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          tz?: string
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          tz?: string
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       referral_acceptances: {
         Row: {
           accepted_at: string
