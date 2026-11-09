@@ -102,7 +102,7 @@ export function AdherenceView({ userId, patientName }: { userId: string; patient
             onClick={() => (!premium ? navigate({ to: "/premium" }) : share())}><Share2 /></Button>
         </div>
       </div>
-      <DoseChecklist meds={meds} logs={logs} days={days} readOnly={userId !== me?.id} />
+      <DoseChecklist meds={meds} logs={logs} days={days} readOnly={!me} />
     </div>
   );
 }
