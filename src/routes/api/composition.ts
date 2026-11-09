@@ -4,7 +4,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { streamText } from "ai";
 import { isValidatedAccountActive } from "@/lib/account-access.server";
 
-export const Route = createFileRoute("/api/composition")({
+export const Route = createFileRoute("/api/composition")({ staticData: { sitemap: false },
   server: {
     handlers: {
       POST: async ({ request }) => {

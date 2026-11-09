@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/invite/$token")({
+export const Route = createFileRoute("/invite/$token")({ staticData: { sitemap: false },
   ssr: false,
   head: () => ({
     meta: [

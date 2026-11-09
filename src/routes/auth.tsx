@@ -10,7 +10,7 @@ import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
-export const Route = createFileRoute("/auth")({
+export const Route = createFileRoute("/auth")({ staticData: { sitemap: false },
   validateSearch: z.object({ redirect: z.string().optional() }),
   head: () => ({
     meta: [

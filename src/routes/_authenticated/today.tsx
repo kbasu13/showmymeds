@@ -6,7 +6,7 @@ import { MedImage } from "@/components/MedImage";
 import { useUser, useMeds, useLogs, takeDose, useRefreshMeds } from "@/lib/meds";
 import { dosesForDay, isLowStock, daysOfStockLeft, ymd, time12, doseText, type Med } from "@/lib/schedule";
 
-export const Route = createFileRoute("/_authenticated/today")({
+export const Route = createFileRoute("/_authenticated/today")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Today's doses — ShowMyMeds" }, { name: "description", content: "Your medicines for today." }, { property: "og:title", content: "Today's doses — ShowMyMeds" }, { property: "og:description", content: "Your medicines for today." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: TodayPage,
 });

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/")({ staticData: { sitemap: true },
   head: () => ({
     meta: [
       { title: "ShowMyMeds — simple medicine reminders" },

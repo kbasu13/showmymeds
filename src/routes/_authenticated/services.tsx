@@ -3,7 +3,7 @@ import { MapPin, HeartHandshake, Store, BadgePercent, MessageCircle } from "luci
 import { PremiumBadge, usePremium, UpgradeCard } from "@/components/Premium";
 import { useUser } from "@/lib/meds";
 
-export const Route = createFileRoute("/_authenticated/services")({
+export const Route = createFileRoute("/_authenticated/services")({ staticData: { sitemap: false },
   head: () => ({
     meta: [
       { title: "Discover — ShowMyMeds" }, { property: "og:title", content: "Discover — ShowMyMeds" },

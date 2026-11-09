@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 
 // Finds a pack photo of a medicine brand from an Indian online pharmacy search page.
-export const Route = createFileRoute("/api/medimage")({
+export const Route = createFileRoute("/api/medimage")({ staticData: { sitemap: false },
   server: {
     handlers: {
       GET: async ({ request }) => {

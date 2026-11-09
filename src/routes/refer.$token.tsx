@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
 import { supabase } from "@/integrations/supabase/client";
-export const Route = createFileRoute("/refer/$token")({ head: () => ({ meta: [{ title: "You've been invited — ShowMyMeds" }, { name: "description", content: "Join ShowMyMeds for medicine reminders, stock tracking and doctor-ready reports." }, { property: "og:title", content: "You've been invited to ShowMyMeds" }, { property: "og:description", content: "Make managing your medicines simpler with ShowMyMeds." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: ReferralLanding });
+export const Route = createFileRoute("/refer/$token")({ staticData: { sitemap: false }, head: () => ({ meta: [{ title: "You've been invited — ShowMyMeds" }, { name: "description", content: "Join ShowMyMeds for medicine reminders, stock tracking and doctor-ready reports." }, { property: "og:title", content: "You've been invited to ShowMyMeds" }, { property: "og:description", content: "Make managing your medicines simpler with ShowMyMeds." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }), component: ReferralLanding });
 function ReferralLanding() {
   const { token } = Route.useParams(); const [state, setState] = useState("loading"), [error, setError] = useState("");
   useEffect(() => { let live = true; (async () => {

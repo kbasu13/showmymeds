@@ -9,7 +9,7 @@ import { useUser, FORMS } from "@/lib/meds";
 import { joinTimes, doseText } from "@/lib/schedule";
 import { usePremium, UpgradeCard } from "@/components/Premium";
 
-export const Route = createFileRoute("/_authenticated/ask")({
+export const Route = createFileRoute("/_authenticated/ask")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Ask — ShowMyMeds" }, { name: "description", content: "Ask questions about your doses and side effects." }, { property: "og:title", content: "Ask — ShowMyMeds" }, { property: "og:description", content: "Ask questions about your doses and side effects." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
   component: AskPage,
 });
