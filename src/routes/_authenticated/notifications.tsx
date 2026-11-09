@@ -64,6 +64,7 @@ function NotificationsPage() {
     <div className="space-y-5">
       <h1 className="text-2xl font-semibold text-primary">Allow notifications</h1>
       <UpgradeCard feature="Notifications" text="Get dose reminders on your phone's lock screen with the medicine name and photo." />
+      <p className="text-sm text-muted-foreground">On-screen reminders while the app is open are always free — this page is only for reminders on your phone's lock screen.</p>
     </div>
   );
 
@@ -71,6 +72,7 @@ function NotificationsPage() {
     <div className="space-y-5">
       <h1 className="text-2xl font-semibold text-primary">Allow notifications</h1>
       <p className="text-muted-foreground">Get a reminder on your lock screen at each dose time, with the medicine name, dose and photo — even when the app is closed.</p>
+      <p className="text-sm text-muted-foreground">On-screen reminders while the app is open are always free.</p>
 
       <section className="space-y-3 rounded-xl border bg-card p-4">
         <div className="flex items-center gap-2 font-medium">
