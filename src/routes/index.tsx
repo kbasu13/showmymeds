@@ -53,7 +53,7 @@ function Index() {
             </li>
           ))}
         </ul>
-        <Button asChild size="lg" className="mt-6 w-full text-lg">{signedIn ? <Link to="/today">Welcome back! Check your medicines</Link> : <Link to="/auth">Get started for free</Link>}</Button>
+        <Button asChild size="lg" className="mt-6 w-full text-lg">{signedIn ? <Link to="/today" className="flex h-auto flex-col py-2 leading-tight"><span>Welcome back!</span><span>Let's check your medicines</span></Link> : <Link to="/auth">Get started for free</Link>}</Button>
       </main>
       <Footer />
     </div>
