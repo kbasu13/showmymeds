@@ -1,4 +1,5 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { usePremium, PremiumBadge } from "@/components/Premium";
 import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -27,6 +28,8 @@ function MedicinesPage() {
   const { data: user } = useUser();
   const { data: meds = [] } = useMeds(user?.id);
   const refresh = useRefreshMeds();
+  const { data: premium } = usePremium(user?.id);
+  const navigate = useNavigate();
   const [editing, setEditing] = useState<Medicine | "new" | null>(null);
   const [queue, setQueue] = useState<RxItem[]>([]);
   const [prefill, setPrefill] = useState<RxItem | null>(null);
@@ -46,6 +49,11 @@ function MedicinesPage() {
   }, []);
 
   const exportCalendar = () => {
+    if (!premium) {
+      toast("Adding your schedule to the phone calendar is a Premium feature");
+      navigate({ to: "/premium" });
+      return;
+    }
     const missing = meds.find((m) => !(Number(m.stock) > 0));
     if (missing) {
       toast.error(`Stock is not updated for ${missing.name}. Please add how many you have.`);
@@ -75,7 +83,7 @@ function MedicinesPage() {
       </div>
       {meds.length > 0 && (
         <Button variant="outline" size="lg" className="w-full text-base" onClick={exportCalendar}>
-          <CalendarPlus /> Add schedule to phone calendar
+          <CalendarPlus /> Add schedule to phone calendar <PremiumBadge />
         </Button>
       )}
       <ul className="space-y-3">
