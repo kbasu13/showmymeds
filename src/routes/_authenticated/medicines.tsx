@@ -83,9 +83,10 @@ function MedicinesPage() {
       </div>
       {meds.length > 0 && (
         <Button variant="outline" size="lg" className="w-full text-base" onClick={exportCalendar}>
-          <CalendarPlus /> Add schedule to phone calendar <PremiumBadge />
+          <CalendarPlus /> Add schedule to phone calendar {!premium && <Gem className="h-4 w-4 text-premium" aria-label="Premium" />}
         </Button>
       )}
+      <Button asChild variant="outline" size="lg" className="w-full text-base"><Link to="/notifications"><BellRing /> Notifications</Link></Button>
       <ul className="space-y-3">
         {meds.map((m) => (
           <li key={m.id} className="rounded-xl border bg-card p-4 shadow-soft">

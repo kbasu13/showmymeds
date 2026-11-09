@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle2, Plus } from "lucide-react";
+import { AlertTriangle, CheckCircle2, Plus, BellRing } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MedImage } from "@/components/MedImage";
 import { useUser, useMeds, useLogs, takeDose, useRefreshMeds } from "@/lib/meds";
@@ -38,6 +38,7 @@ function TodayPage() {
         <p className="text-lg text-muted-foreground">{dateLabel}</p>
         <h1 className="text-2xl font-semibold text-primary">Today</h1>
       </div>
+      <Button asChild variant="outline" size="lg" className="w-full text-base"><Link to="/notifications"><BellRing /> Notifications</Link></Button>
 
       {low.length > 0 && (
         <div role="alert" className="flex gap-3 rounded-xl border-2 border-warning bg-warning/30 p-4 text-warning-foreground">
