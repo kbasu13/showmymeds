@@ -6,6 +6,7 @@ import { BellRing, BellOff, CheckCircle2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useUser } from "@/lib/meds";
+import { usePremium, UpgradeCard } from "@/components/Premium";
 import { sendTestPush } from "@/lib/push.functions";
 import { currentSubscription, detectPlatform, disablePush, enablePush, isBrave, pushStatus, type Platform, type PushStatus } from "@/lib/push";
 
@@ -30,6 +31,7 @@ const STATUS: Record<PushStatus, { text: string; tone: string }> = {
 
 function NotificationsPage() {
   const { data: user } = useUser();
+  const { data: premium } = usePremium(user?.id);
   const test = useServerFn(sendTestPush);
   const [status, setStatus] = useState<PushStatus | null>(null);
   const [platform, setPlatform] = useState<Platform>("android");
@@ -57,9 +59,17 @@ function NotificationsPage() {
     catch (e) { toast.error((e as Error).message || "Couldn't send a test"); } finally { setBusy(false); }
   };
 
+  useEffect(() => { if (premium === false) currentSubscription().then((s) => { if (s) disablePush(); }); }, [premium]);
+  if (premium === false) return (
+    <div className="space-y-5">
+      <h1 className="text-2xl font-semibold text-primary">Allow notifications</h1>
+      <UpgradeCard feature="Notifications" text="Get dose reminders on your phone's lock screen with the medicine name and photo." />
+    </div>
+  );
+
   return (
     <div className="space-y-5">
-      <h1 className="text-2xl font-semibold text-primary">Phone notifications</h1>
+      <h1 className="text-2xl font-semibold text-primary">Allow notifications</h1>
       <p className="text-muted-foreground">Get a reminder on your lock screen at each dose time, with the medicine name, dose and photo — even when the app is closed.</p>
 
       <section className="space-y-3 rounded-xl border bg-card p-4">
