@@ -17,6 +17,7 @@ import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/as
 import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated/family'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedMedicinesRouteImport } from './routes/_authenticated/medicines'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedReferRouteImport } from './routes/_authenticated/refer'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
@@ -29,6 +30,7 @@ import { Route as ApiRxscanRouteImport } from './routes/api/rxscan'
 import { Route as InviteTokenRouteImport } from './routes/invite.$token'
 import { Route as ReferTokenRouteImport } from './routes/refer.$token'
 import { Route as AuthenticatedFamilyPatientIdRouteImport } from './routes/_authenticated/family_.$patientId'
+import { Route as ApiPublicJobsDosePushRouteImport } from './routes/api/public/jobs/dose-push'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -69,6 +71,12 @@ const AuthenticatedMedicinesRoute = AuthenticatedMedicinesRouteImport.update({
   path: '/medicines',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPremiumRoute = AuthenticatedPremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
@@ -130,6 +138,11 @@ const AuthenticatedFamilyPatientIdRoute =
     path: '/family/$patientId',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const ApiPublicJobsDosePushRoute = ApiPublicJobsDosePushRouteImport.update({
+  id: '/api/public/jobs/dose-push',
+  path: '/api/public/jobs/dose-push',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -139,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/family': typeof AuthenticatedFamilyRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/premium': typeof AuthenticatedPremiumRoute
   '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
@@ -151,6 +165,7 @@ export interface FileRoutesByFullPath {
   '/invite/$token': typeof InviteTokenRoute
   '/refer/$token': typeof ReferTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
+  '/api/public/jobs/dose-push': typeof ApiPublicJobsDosePushRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -160,6 +175,7 @@ export interface FileRoutesByTo {
   '/family': typeof AuthenticatedFamilyRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/premium': typeof AuthenticatedPremiumRoute
   '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
@@ -172,6 +188,7 @@ export interface FileRoutesByTo {
   '/invite/$token': typeof InviteTokenRoute
   '/refer/$token': typeof ReferTokenRoute
   '/family/$patientId': typeof AuthenticatedFamilyPatientIdRoute
+  '/api/public/jobs/dose-push': typeof ApiPublicJobsDosePushRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -183,6 +200,7 @@ export interface FileRoutesById {
   '/_authenticated/family': typeof AuthenticatedFamilyRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/medicines': typeof AuthenticatedMedicinesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/refer': typeof AuthenticatedReferRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
@@ -195,6 +213,7 @@ export interface FileRoutesById {
   '/invite/$token': typeof InviteTokenRoute
   '/refer/$token': typeof ReferTokenRoute
   '/_authenticated/family_/$patientId': typeof AuthenticatedFamilyPatientIdRoute
+  '/api/public/jobs/dose-push': typeof ApiPublicJobsDosePushRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -206,6 +225,7 @@ export interface FileRouteTypes {
     | '/family'
     | '/history'
     | '/medicines'
+    | '/notifications'
     | '/premium'
     | '/refer'
     | '/services'
@@ -218,6 +238,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/refer/$token'
     | '/family/$patientId'
+    | '/api/public/jobs/dose-push'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -227,6 +248,7 @@ export interface FileRouteTypes {
     | '/family'
     | '/history'
     | '/medicines'
+    | '/notifications'
     | '/premium'
     | '/refer'
     | '/services'
@@ -239,6 +261,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/refer/$token'
     | '/family/$patientId'
+    | '/api/public/jobs/dose-push'
   id:
     | '__root__'
     | '/'
@@ -249,6 +272,7 @@ export interface FileRouteTypes {
     | '/_authenticated/family'
     | '/_authenticated/history'
     | '/_authenticated/medicines'
+    | '/_authenticated/notifications'
     | '/_authenticated/premium'
     | '/_authenticated/refer'
     | '/_authenticated/services'
@@ -261,6 +285,7 @@ export interface FileRouteTypes {
     | '/invite/$token'
     | '/refer/$token'
     | '/_authenticated/family_/$patientId'
+    | '/api/public/jobs/dose-push'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -274,6 +299,7 @@ export interface RootRouteChildren {
   ApiRxscanRoute: typeof ApiRxscanRoute
   InviteTokenRoute: typeof InviteTokenRoute
   ReferTokenRoute: typeof ReferTokenRoute
+  ApiPublicJobsDosePushRoute: typeof ApiPublicJobsDosePushRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -332,6 +358,13 @@ declare module '@tanstack/react-router' {
       path: '/medicines'
       fullPath: '/medicines'
       preLoaderRoute: typeof AuthenticatedMedicinesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/premium': {
@@ -418,6 +451,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedFamilyPatientIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/jobs/dose-push': {
+      id: '/api/public/jobs/dose-push'
+      path: '/api/public/jobs/dose-push'
+      fullPath: '/api/public/jobs/dose-push'
+      preLoaderRoute: typeof ApiPublicJobsDosePushRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -427,6 +467,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFamilyRoute: typeof AuthenticatedFamilyRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedMedicinesRoute: typeof AuthenticatedMedicinesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedReferRoute: typeof AuthenticatedReferRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
@@ -440,6 +481,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFamilyRoute: AuthenticatedFamilyRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedMedicinesRoute: AuthenticatedMedicinesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedReferRoute: AuthenticatedReferRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
@@ -461,6 +503,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiRxscanRoute: ApiRxscanRoute,
   InviteTokenRoute: InviteTokenRoute,
   ReferTokenRoute: ReferTokenRoute,
+  ApiPublicJobsDosePushRoute: ApiPublicJobsDosePushRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

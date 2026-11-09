@@ -27,3 +27,5 @@
 - [x] Homepage: "Your medicines, Made simple" heading, new tagline, centred points, one button per visitor
 - [x] Washed health-leaf backdrop behind every page
 - [x] History: report heading and Download/Share buttons centred
+- [x] Phone push notifications with medicine name/photo, test button and phone/Brave help guide
+- [x] Brave browser support guidance
