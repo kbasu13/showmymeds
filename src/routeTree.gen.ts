@@ -17,6 +17,7 @@ import { Route as AuthenticatedAskRouteImport } from './routes/_authenticated/as
 import { Route as AuthenticatedFamilyRouteImport } from './routes/_authenticated/family'
 import { Route as AuthenticatedHistoryRouteImport } from './routes/_authenticated/history'
 import { Route as AuthenticatedMedicinesRouteImport } from './routes/_authenticated/medicines'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedReferRouteImport } from './routes/_authenticated/refer'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
@@ -70,6 +71,12 @@ const AuthenticatedMedicinesRoute = AuthenticatedMedicinesRouteImport.update({
   path: '/medicines',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedPremiumRoute = AuthenticatedPremiumRouteImport.update({
   id: '/premium',
   path: '/premium',
@@ -145,6 +152,7 @@ export interface FileRoutesByFullPath {
   '/family': typeof AuthenticatedFamilyRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/premium': typeof AuthenticatedPremiumRoute
   '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
@@ -167,6 +175,7 @@ export interface FileRoutesByTo {
   '/family': typeof AuthenticatedFamilyRoute
   '/history': typeof AuthenticatedHistoryRoute
   '/medicines': typeof AuthenticatedMedicinesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/premium': typeof AuthenticatedPremiumRoute
   '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
@@ -191,6 +200,7 @@ export interface FileRoutesById {
   '/_authenticated/family': typeof AuthenticatedFamilyRoute
   '/_authenticated/history': typeof AuthenticatedHistoryRoute
   '/_authenticated/medicines': typeof AuthenticatedMedicinesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/refer': typeof AuthenticatedReferRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
@@ -215,6 +225,7 @@ export interface FileRouteTypes {
     | '/family'
     | '/history'
     | '/medicines'
+    | '/notifications'
     | '/premium'
     | '/refer'
     | '/services'
@@ -237,6 +248,7 @@ export interface FileRouteTypes {
     | '/family'
     | '/history'
     | '/medicines'
+    | '/notifications'
     | '/premium'
     | '/refer'
     | '/services'
@@ -260,6 +272,7 @@ export interface FileRouteTypes {
     | '/_authenticated/family'
     | '/_authenticated/history'
     | '/_authenticated/medicines'
+    | '/_authenticated/notifications'
     | '/_authenticated/premium'
     | '/_authenticated/refer'
     | '/_authenticated/services'
@@ -345,6 +358,13 @@ declare module '@tanstack/react-router' {
       path: '/medicines'
       fullPath: '/medicines'
       preLoaderRoute: typeof AuthenticatedMedicinesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/premium': {
@@ -447,6 +467,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedFamilyRoute: typeof AuthenticatedFamilyRoute
   AuthenticatedHistoryRoute: typeof AuthenticatedHistoryRoute
   AuthenticatedMedicinesRoute: typeof AuthenticatedMedicinesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedReferRoute: typeof AuthenticatedReferRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
@@ -460,6 +481,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedFamilyRoute: AuthenticatedFamilyRoute,
   AuthenticatedHistoryRoute: AuthenticatedHistoryRoute,
   AuthenticatedMedicinesRoute: AuthenticatedMedicinesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedReferRoute: AuthenticatedReferRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,

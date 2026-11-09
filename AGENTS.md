@@ -15,3 +15,4 @@
 - Referral attribution uses per-share opaque links and database claims restricted to new accounts; mobile-derived codes are hashed with the sender ID to avoid publishing mobile numbers.
 - Caregiver invitation expiry is enforced in database triggers and acceptance functions; named-link reads expose only linked parties' display names.
 - Family and referral sharing reuse browser-safe validation schemas and field errors before persistence; server validation remains enforced without exposing serialized errors.
+- Dose push reminders run from a 5-minute managed schedule; push_sent dedupes each dose and expired device subscriptions are deleted on 404/410.
