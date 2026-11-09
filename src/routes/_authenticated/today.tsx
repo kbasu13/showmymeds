@@ -38,7 +38,7 @@ function TodayPage() {
         <p className="text-lg text-muted-foreground">{dateLabel}</p>
         <h1 className="text-2xl font-semibold text-primary">Today</h1>
       </div>
-      <Button asChild variant="outline" size="lg" className="w-full text-base"><Link to="/notifications"><BellRing /> Notifications</Link></Button>
+      <Button asChild variant="outline" size="lg" className="w-full text-base"><Link to="/notifications"><BellRing /> Allow notifications {!premium && <Gem className="h-4 w-4 text-premium" aria-label="Premium" />}</Link></Button>
 
       {low.length > 0 && (
         <div role="alert" className="flex gap-3 rounded-xl border-2 border-warning bg-warning/30 p-4 text-warning-foreground">

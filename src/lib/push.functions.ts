@@ -7,6 +7,8 @@ import { sendPush, medicineImageUrl, doseBody } from "./push-send.server";
 export const sendTestPush = createServerFn({ method: "POST" }).middleware([requireSupabaseAuth])
   .inputValidator((i) => z.object({ endpoint: z.string().url().max(2000) }).parse(i))
   .handler(async ({ context, data }) => {
+    const { data: prem } = await context.supabase.from("premium_users").select("expires_at").eq("user_id", context.userId).maybeSingle();
+    if (!prem || (prem.expires_at && new Date(prem.expires_at) <= new Date())) throw new Error("Notifications are a Premium feature");
     const { data: sub } = await context.supabase.from("push_subscriptions").select("id,endpoint,p256dh,auth").eq("endpoint", data.endpoint).maybeSingle();
     if (!sub) throw new Error("This phone is not set up for notifications yet");
     const { data: med } = await context.supabase.from("medicines").select("name,dosage,image_url,times").eq("user_id", context.userId).order("name").limit(1).maybeSingle();
