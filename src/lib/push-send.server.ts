@@ -1,7 +1,7 @@
 import { buildPushHTTPRequest } from "@pushforge/builder";
 
 export type PushSub = { id: string; endpoint: string; p256dh: string; auth: string };
-export type PushPayload = { title: string; body: string; image?: string; tag?: string; url?: string };
+export type PushPayload = { title: string; body: string; image?: string | undefined; tag?: string; url?: string };
 
 /** Sends one notification to a device. Returns false when the device subscription is gone. */
 export async function sendPush(sub: PushSub, payload: PushPayload): Promise<boolean> {
