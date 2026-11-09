@@ -10,7 +10,7 @@ export async function sendPush(sub: PushSub, payload: PushPayload): Promise<bool
   const { endpoint, headers, body } = await buildPushHTTPRequest({
     privateJWK,
     subscription: { endpoint: sub.endpoint, keys: { p256dh: sub.p256dh, auth: sub.auth } },
-    message: { payload: { icon: "/icon-192.png", ...payload }, adminContact: "mailto:support@showmymeds.app", options: { ttl: 3600, urgency: "high" } },
+    message: { payload: JSON.parse(JSON.stringify({ icon: "/icon-192.png", ...payload })), adminContact: "mailto:support@showmymeds.app", options: { ttl: 3600, urgency: "high" } },
   });
   const res = await fetch(endpoint, { method: "POST", headers, body });
   return !(res.status === 404 || res.status === 410);
