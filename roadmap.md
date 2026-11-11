@@ -31,3 +31,4 @@
 - [x] Phone push notifications with medicine name/photo, test button and phone/Brave help guide
 - [x] Brave browser support guidance
 - [x] On-screen reminders while the app is open stay free always (test guards it)
+- [x] Profile: Allow notifications shows the full blue Premium pill like Discover; Sign out gets an icon
