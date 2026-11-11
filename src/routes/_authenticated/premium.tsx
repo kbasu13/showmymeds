@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils";
 import { PREMIUM_PLANS, discountedPrice, withGst, upiLink, GST_PERCENT, UPI_ID, AUTO_TERMS, validUtr, validGstin, cleanUtr } from "@/lib/plans";
 import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
-import { usePendingPayment } from "./subscription";
+import { usePendingPayment } from "@/lib/payments";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/_authenticated/premium")({ staticData: { sitemap: false },
