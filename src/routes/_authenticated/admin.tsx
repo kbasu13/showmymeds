@@ -189,7 +189,7 @@ function Payments() {
           <div key={p.id} className="space-y-1 rounded-lg border bg-card p-3 text-sm">
             <div className="flex justify-between gap-2"><b className="truncate">{p.email}</b><span>₹{Number(p.total).toFixed(2)}</span></div>
             <p>UTR <span className="font-mono">{p.utr}</span> · {p.plan} · {new Date(p.created_at).toLocaleDateString()}</p>
-            <p className="text-muted-foreground">Txn {p.txn_no} · {p.status}{p.admin_note === "Past payment recorded by admin" ? " · recorded by admin" : ""}{p.invoice_no ? ` · ${p.invoice_no}` : ""}</p>
+            <p className="text-muted-foreground">Txn {p.txn_no} · {p.status}{p.invoice_no ? ` · ${p.invoice_no}` : ""}</p>
             {p.support_note && <p className="rounded bg-secondary/60 p-2">💬 {p.support_note}</p>}
             {p.status === "pending" && (
               <div className="flex gap-2 pt-1">
@@ -225,7 +225,7 @@ function PastPayment() {
       <p className="font-semibold">Record past payment</p>
       <Input type="email" placeholder="User's email" value={f.email} onChange={set("email")} />
       <div className="flex flex-wrap gap-1">
-        {(["monthly", "yearly", "lifetime"] as const).map((pl) => <Button key={pl} size="sm" variant={f.plan === pl ? "default" : "outline"} onClick={() => setF({ ...f, plan: pl })}>{pl[0].toUpperCase() + pl.slice(1)}</Button>)}
+        {(["monthly", "yearly", "lifetime"] as const).map((pl) => <Button key={pl} size="sm" variant={f.plan === pl ? "default" : "outline"} onClick={() => setF({ ...f, plan: pl })}>{pl.charAt(0).toUpperCase() + pl.slice(1)}</Button>)}
       </div>
       <div className="flex flex-wrap gap-1">
         {[0, ...DISCOUNT_PERCENTS].map((d) => <Button key={d} size="sm" variant={f.discount === d ? "default" : "outline"} onClick={() => setF({ ...f, discount: d })}>{d ? `${d}% off` : "No discount"}</Button>)}
