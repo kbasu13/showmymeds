@@ -1,5 +1,6 @@
 import type { Database } from "@/integrations/supabase/types";
 import { AUTO_TERMS, SELLER, planLabel } from "@/lib/plans";
+import { invoiceBuyerName } from "@/lib/profile-name";
 
 export type Payment = Database["public"]["Tables"]["payments"]["Row"];
 
@@ -7,7 +8,7 @@ const rs = (n: number) => `Rs. ${Number(n).toFixed(2)}`;
 const dt = (d: string | null) => (d ? new Date(d).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : "-");
 
 /** GST invoice (approved) or payment receipt (pending/rejected) as a PDF. */
-export async function buildInvoice(p: Payment, email: string) {
+export async function buildInvoice(p: Payment, email: string, name: string = "") {
   const { jsPDF } = await import("jspdf");
   const autoTable = (await import("jspdf-autotable")).default;
   const approved = p.status === "approved";
@@ -17,7 +18,7 @@ export async function buildInvoice(p: Payment, email: string) {
   doc.setFontSize(10);
   const seller = [SELLER.name, SELLER.address, SELLER.state, `GSTIN: ${SELLER.gstin || "To be added"}`].filter(Boolean);
   doc.text(seller, 14, 27);
-  const buyer = [`Billed to: ${p.bill_name || email}`, email, `GSTIN: ${p.user_gstin || "Not provided"}`];
+  const buyer = [`Billed to: ${invoiceBuyerName(p.bill_name, name)}`, email, `GSTIN: ${p.user_gstin || "Not provided"}`];
   doc.text(buyer, 120, 27);
   autoTable(doc, {
     startY: 50,

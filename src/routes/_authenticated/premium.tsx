@@ -14,6 +14,7 @@ import { Label } from "@/components/ui/label";
 import { Link } from "@tanstack/react-router";
 import { usePendingPayment } from "@/lib/payments";
 import { supabase } from "@/integrations/supabase/client";
+import { useProfileName } from "@/lib/user-profile";
 
 export const Route = createFileRoute("/_authenticated/premium")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Go Premium — ShowMyMeds" }, { name: "description", content: "Unlock the AI helper, doctor PDF reports, family caregivers and WhatsApp reminders." }, { property: "og:title", content: "Go Premium — ShowMyMeds" }, { property: "og:description", content: "Unlock the AI helper, doctor PDF reports, family caregivers and WhatsApp reminders." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -23,6 +24,7 @@ export const Route = createFileRoute("/_authenticated/premium")({ staticData: { 
 const FEATURES = ["Ask — AI helper for your medicines", "PDF reports for your doctor", "Family & caregiver sharing", "WhatsApp reminders"];
 
 function PremiumPage() {
+  const { firstName } = useProfileName();
   const [plan, setPlan] = useState<string>("yearly");
   const [code, setCode] = useState("");
   const [applied, setApplied] = useState<{ code: string; percent: number } | null>(null);
@@ -92,19 +94,19 @@ function PremiumPage() {
       {paying && (() => {
         const chosen = PREMIUM_PLANS.find((p) => p.id === plan)!;
         const base = applied ? discountedPrice(chosen.price, applied.percent) : chosen.price;
-        return <PayDialog plan={chosen.id} label={chosen.label} base={base} code={applied?.code ?? null} onClose={() => setPaying(false)} />;
+        return <PayDialog plan={chosen.id} label={chosen.label} base={base} code={applied?.code ?? null} defaultName={firstName} onClose={() => setPaying(false)} />;
       })()}
     </div>
   );
 }
 
-function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: string; base: number; code: string | null; onClose: () => void }) {
+function PayDialog({ plan, label, base, code, defaultName, onClose }: { plan: string; label: string; base: number; code: string | null; defaultName: string; onClose: () => void }) {
   const total = withGst(base);
   const gst = Math.round((total - base) * 100) / 100;
   const link = upiLink(total, `ShowMyMeds Premium ${label}`);
   const [qr, setQr] = useState<string | null>(null);
   const [utr, setUtr] = useState("");
-  const [billName, setBillName] = useState("");
+  const [billName, setBillName] = useState(defaultName);
   const [gstin, setGstin] = useState("");
   const [err, setErr] = useState<{ utr?: string | undefined; gstin?: string | undefined }>({});
   const [busy, setBusy] = useState(false);

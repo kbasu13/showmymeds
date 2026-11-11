@@ -18,3 +18,4 @@
 - Dose push reminders run from a 5-minute managed schedule; push_sent dedupes each dose and expired device subscriptions are deleted on 404/410.
 - Production builds never emit source maps; keeps client source unreadable in browser tools.
 - UPI Premium activates only via admin approval of a submitted UTR (`submit_payment` → `admin_review_payment`); users cannot self-activate because personal UPI gives no payment confirmation.
+- Resolve personal display names through the shared profile-name helper and cached profile hook, preserving explicit invoice billing names and contact emails so identity presentation stays consistent without changing account records.

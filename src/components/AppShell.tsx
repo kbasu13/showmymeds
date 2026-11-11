@@ -13,6 +13,7 @@ import { THEMES, usePrefs } from "@/lib/prefs";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
 import { useIsAdmin, usePremium } from "./Premium";
+import { useProfileName } from "@/lib/user-profile";
 
 const NAV = [
   { to: "/today", label: "Today", icon: CalendarCheck },
@@ -29,7 +30,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { data: premium } = usePremium(user?.id);
   const meta = (user?.user_metadata ?? {}) as Record<string, string | undefined>;
   const photo = meta["avatar_url"] || meta["picture"];
-  const fullName = meta["full_name"] || meta["name"] || user?.email || "";
+  const { name: fullName, firstName } = useProfileName();
   const parts = fullName.split(/[\s@.]+/).filter(Boolean);
   const initials = ((parts[0]?.[0] ?? "") + (parts.length > 1 ? parts[parts.length - 1]?.[0] ?? "" : "")).toUpperCase() || "?";
   const navigate = useNavigate();
@@ -57,7 +58,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-72 text-base">
-            <DropdownMenuLabel className="truncate">{user?.email}</DropdownMenuLabel>
+            <DropdownMenuLabel className="break-words">{firstName ? `Hi ${firstName}!` : "Hi there!"}</DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuLabel>Display Settings</DropdownMenuLabel>
             <div className="grid grid-cols-2 gap-2 p-2">
