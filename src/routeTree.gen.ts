@@ -22,6 +22,7 @@ import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authen
 import { Route as AuthenticatedPremiumRouteImport } from './routes/_authenticated/premium'
 import { Route as AuthenticatedReferRouteImport } from './routes/_authenticated/refer'
 import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticated/services'
+import { Route as AuthenticatedSubscriptionRouteImport } from './routes/_authenticated/subscription'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAskRouteImport } from './routes/api/ask'
 import { Route as ApiCompositionRouteImport } from './routes/api/composition'
@@ -98,6 +99,12 @@ const AuthenticatedServicesRoute = AuthenticatedServicesRouteImport.update({
   path: '/services',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedSubscriptionRoute =
+  AuthenticatedSubscriptionRouteImport.update({
+    id: '/subscription',
+    path: '/subscription',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedTodayRoute = AuthenticatedTodayRouteImport.update({
   id: '/today',
   path: '/today',
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/premium': typeof AuthenticatedPremiumRoute
   '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
+  '/subscription': typeof AuthenticatedSubscriptionRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -187,6 +195,7 @@ export interface FileRoutesByTo {
   '/premium': typeof AuthenticatedPremiumRoute
   '/refer': typeof AuthenticatedReferRoute
   '/services': typeof AuthenticatedServicesRoute
+  '/subscription': typeof AuthenticatedSubscriptionRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -213,6 +222,7 @@ export interface FileRoutesById {
   '/_authenticated/premium': typeof AuthenticatedPremiumRoute
   '/_authenticated/refer': typeof AuthenticatedReferRoute
   '/_authenticated/services': typeof AuthenticatedServicesRoute
+  '/_authenticated/subscription': typeof AuthenticatedSubscriptionRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
   '/api/composition': typeof ApiCompositionRoute
@@ -239,6 +249,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/refer'
     | '/services'
+    | '/subscription'
     | '/today'
     | '/api/ask'
     | '/api/composition'
@@ -263,6 +274,7 @@ export interface FileRouteTypes {
     | '/premium'
     | '/refer'
     | '/services'
+    | '/subscription'
     | '/today'
     | '/api/ask'
     | '/api/composition'
@@ -288,6 +300,7 @@ export interface FileRouteTypes {
     | '/_authenticated/premium'
     | '/_authenticated/refer'
     | '/_authenticated/services'
+    | '/_authenticated/subscription'
     | '/_authenticated/today'
     | '/api/ask'
     | '/api/composition'
@@ -408,6 +421,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedServicesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/subscription': {
+      id: '/_authenticated/subscription'
+      path: '/subscription'
+      fullPath: '/subscription'
+      preLoaderRoute: typeof AuthenticatedSubscriptionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/today': {
       id: '/_authenticated/today'
       path: '/today'
@@ -491,6 +511,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedPremiumRoute: typeof AuthenticatedPremiumRoute
   AuthenticatedReferRoute: typeof AuthenticatedReferRoute
   AuthenticatedServicesRoute: typeof AuthenticatedServicesRoute
+  AuthenticatedSubscriptionRoute: typeof AuthenticatedSubscriptionRoute
   AuthenticatedTodayRoute: typeof AuthenticatedTodayRoute
   AuthenticatedFamilyPatientIdRoute: typeof AuthenticatedFamilyPatientIdRoute
 }
@@ -505,6 +526,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedPremiumRoute: AuthenticatedPremiumRoute,
   AuthenticatedReferRoute: AuthenticatedReferRoute,
   AuthenticatedServicesRoute: AuthenticatedServicesRoute,
+  AuthenticatedSubscriptionRoute: AuthenticatedSubscriptionRoute,
   AuthenticatedTodayRoute: AuthenticatedTodayRoute,
   AuthenticatedFamilyPatientIdRoute: AuthenticatedFamilyPatientIdRoute,
 }

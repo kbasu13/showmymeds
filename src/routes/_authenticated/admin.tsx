@@ -34,6 +34,7 @@ function AdminPage() {
   return (
     <div className="space-y-8">
       <h1 className="text-2xl font-semibold text-primary">Admin</h1>
+      <Payments />
       <AdminUsers />
       <FreePremium />
       <Codes />
@@ -150,6 +151,53 @@ function Codes() {
         ))}
         {codes.data?.length === 0 && <li className="py-2 text-muted-foreground">No codes yet.</li>}
       </ul>
+    </section>
+  );
+}
+
+function Payments() {
+  const qc = useQueryClient();
+  const [show, setShow] = useState<"pending" | "all">("pending");
+  const list = useQuery({
+    queryKey: ["admin-payments"],
+    queryFn: async () => { const { data, error } = await supabase.rpc("admin_list_payments"); if (error) throw error; return data; },
+  });
+  const rows = (list.data ?? []).filter((p) => show === "all" || p.status === "pending" || (p.support_shared_at && p.status !== "approved"));
+  async function review(id: string, approve: boolean) {
+    const note = approve ? "" : (window.prompt("Reason shown to the user (optional)", "Transaction ID not found in our account") ?? "");
+    const { error } = await supabase.rpc("admin_review_payment", { _id: id, _approve: approve, _note: note });
+    if (error) { toast.error(error.message); return; }
+    toast.success(approve ? "Approved — Premium is on" : "Marked as not verified");
+    await qc.invalidateQueries({ queryKey: ["admin-payments"] });
+    await qc.invalidateQueries({ queryKey: ["admin-premium"] });
+  }
+  return (
+    <section className="space-y-3">
+      <div className="flex items-center justify-between gap-2">
+        <h2 className="text-xl font-semibold">UPI payments</h2>
+        <div className="flex gap-1">
+          <Button size="sm" variant={show === "pending" ? "default" : "outline"} onClick={() => setShow("pending")}>To check</Button>
+          <Button size="sm" variant={show === "all" ? "default" : "outline"} onClick={() => setShow("all")}>All</Button>
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground">Match the UTR and amount in your bank/UPI app before approving.</p>
+      {rows.length === 0 && <p className="text-muted-foreground">Nothing to check.</p>}
+      <div className="max-h-[28rem] space-y-2 overflow-y-auto">
+        {rows.map((p) => (
+          <div key={p.id} className="space-y-1 rounded-lg border bg-card p-3 text-sm">
+            <div className="flex justify-between gap-2"><b className="truncate">{p.email}</b><span>₹{Number(p.total).toFixed(2)}</span></div>
+            <p>UTR <span className="font-mono">{p.utr}</span> · {p.plan} · {new Date(p.created_at).toLocaleDateString()}</p>
+            <p className="text-muted-foreground">Txn {p.txn_no} · {p.status}{p.invoice_no ? ` · ${p.invoice_no}` : ""}</p>
+            {p.support_note && <p className="rounded bg-secondary/60 p-2">💬 {p.support_note}</p>}
+            {p.status === "pending" && (
+              <div className="flex gap-2 pt-1">
+                <Button size="sm" onClick={() => review(p.id, true)}>Approve</Button>
+                <Button size="sm" variant="outline" onClick={() => review(p.id, false)}>Reject</Button>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
     </section>
   );
 }

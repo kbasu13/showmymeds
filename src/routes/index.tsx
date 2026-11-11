@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { BellRing, CalendarCheck, Users, Pill, Share2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/Footer";
+import { ACCEPT_LINE } from "@/components/LegalPage";
 import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/")({ staticData: { sitemap: true },
@@ -54,6 +55,12 @@ function Index() {
           ))}
         </ul>
         <Button asChild size="lg" className="mt-6 w-full text-lg">{signedIn ? <Link to="/today" className="flex h-auto flex-col py-2 leading-tight"><span>Welcome back!</span><span>Let's check your medicines</span></Link> : <Link to="/auth">Get started for free</Link>}</Button>
+        <p className="mt-5 text-center text-sm text-muted-foreground">{ACCEPT_LINE}</p>
+        <nav aria-label="Legal" className="mt-2 flex flex-wrap justify-center gap-x-4 gap-y-1 text-sm">
+          <Link to="/terms" className="text-primary underline">EULA</Link>
+          <Link to="/privacy" className="text-primary underline">Privacy</Link>
+          <Link to="/data-rights" className="text-primary underline">DPDP & GDPR</Link>
+        </nav>
       </main>
       <Footer />
     </div>
