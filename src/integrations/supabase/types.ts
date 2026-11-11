@@ -230,6 +230,7 @@ export type Database = {
           invoice_no: string | null
           plan: string
           premium_until: string | null
+          recorded_by_admin: boolean
           reviewed_at: string | null
           status: string
           support_note: string | null
@@ -254,6 +255,7 @@ export type Database = {
           invoice_no?: string | null
           plan: string
           premium_until?: string | null
+          recorded_by_admin?: boolean
           reviewed_at?: string | null
           status?: string
           support_note?: string | null
@@ -278,6 +280,7 @@ export type Database = {
           invoice_no?: string | null
           plan?: string
           premium_until?: string | null
+          recorded_by_admin?: boolean
           reviewed_at?: string | null
           status?: string
           support_note?: string | null
@@ -295,16 +298,19 @@ export type Database = {
         Row: {
           expires_at: string | null
           granted_at: string
+          source: string
           user_id: string
         }
         Insert: {
           expires_at?: string | null
           granted_at?: string
+          source?: string
           user_id: string
         }
         Update: {
           expires_at?: string | null
           granted_at?: string
+          source?: string
           user_id?: string
         }
         Relationships: []
@@ -517,8 +523,51 @@ export type Database = {
           email: string
           expires_at: string
           granted_at: string
+          source: string
           user_id: string
         }[]
+      }
+      admin_record_past_payment: {
+        Args: {
+          _bill_name: string
+          _discount: number
+          _email: string
+          _gstin: string
+          _paid_on: string
+          _plan: string
+          _utr: string
+        }
+        Returns: {
+          admin_note: string | null
+          base_amount: number
+          bill_name: string | null
+          created_at: string
+          discount_code: string | null
+          discount_percent: number
+          gst_amount: number
+          gst_percent: number
+          id: string
+          invoice_no: string | null
+          plan: string
+          premium_until: string | null
+          recorded_by_admin: boolean
+          reviewed_at: string | null
+          status: string
+          support_note: string | null
+          support_shared_at: string | null
+          terms_accepted_at: string
+          total: number
+          txn_no: string
+          user_gstin: string | null
+          user_id: string
+          utr: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       admin_review_payment: {
         Args: { _approve: boolean; _id: string; _note: string }
@@ -604,6 +653,7 @@ export type Database = {
           invoice_no: string | null
           plan: string
           premium_until: string | null
+          recorded_by_admin: boolean
           reviewed_at: string | null
           status: string
           support_note: string | null
