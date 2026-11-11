@@ -19,3 +19,13 @@ test("UPI link pays kaustabh.basu-3@oksbi in INR", () => {
   expect(upiLink(116.82, "x")).toContain("pa=kaustabh.basu-3%40oksbi");
   expect(upiLink(116.82, "x")).toContain("am=116.82&cu=INR");
 });
+import { validUtr, validGstin } from "./plans";
+test("12-digit UPI UTR is accepted, short one is not", () => {
+  expect(validUtr("4321 5678 9012")).toBe(true);
+  expect(validUtr("1234")).toBe(false);
+});
+test("GSTIN is optional but must be 15 characters", () => {
+  expect(validGstin("")).toBe(true);
+  expect(validGstin("19ABCDE1234F1Z5")).toBe(true);
+  expect(validGstin("19ABC")).toBe(false);
+});

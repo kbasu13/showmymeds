@@ -9,9 +9,11 @@ import { Check, Gem, Ticket, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { PREMIUM_PLANS, discountedPrice, withGst, upiLink, GST_PERCENT, UPI_ID, UPI_NAME } from "@/lib/plans";
+import { PREMIUM_PLANS, discountedPrice, withGst, upiLink, GST_PERCENT, UPI_ID, AUTO_TERMS, validUtr, validGstin, cleanUtr } from "@/lib/plans";
+import { Label } from "@/components/ui/label";
+import { Link } from "@tanstack/react-router";
+import { usePendingPayment } from "@/lib/payments";
 import { supabase } from "@/integrations/supabase/client";
-import { savePendingPayment, clearPendingPayment } from "@/components/PendingPayment";
 
 export const Route = createFileRoute("/_authenticated/premium")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Go Premium — ShowMyMeds" }, { name: "description", content: "Unlock the AI helper, doctor PDF reports, family caregivers and WhatsApp reminders." }, { property: "og:title", content: "Go Premium — ShowMyMeds" }, { property: "og:description", content: "Unlock the AI helper, doctor PDF reports, family caregivers and WhatsApp reminders." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -26,6 +28,7 @@ function PremiumPage() {
   const [applied, setApplied] = useState<{ code: string; percent: number } | null>(null);
   const [checking, setChecking] = useState(false);
   const [paying, setPaying] = useState(false);
+  const pending = usePendingPayment();
 
   async function apply() {
     setChecking(true);
@@ -77,9 +80,15 @@ function PremiumPage() {
           </div>
         )}
       </div>
-      <Button size="lg" className="w-full" onClick={() => setPaying(true)}>
-        Continue to payment
-      </Button>
+      {pending ? (
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="font-medium">Your payment of ₹{Number(pending.total).toFixed(2)} is being verified.</p>
+          <p className="text-sm text-muted-foreground">Premium turns on as soon as it's confirmed.</p>
+          <Button variant="outline" className="mt-3" asChild><Link to="/subscription">Manage subscription</Link></Button>
+        </div>
+      ) : (
+        <Button size="lg" className="w-full" onClick={() => setPaying(true)}>Continue to payment</Button>
+      )}
       {paying && (() => {
         const chosen = PREMIUM_PLANS.find((p) => p.id === plan)!;
         const base = applied ? discountedPrice(chosen.price, applied.percent) : chosen.price;
@@ -94,23 +103,28 @@ function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: 
   const gst = Math.round((total - base) * 100) / 100;
   const link = upiLink(total, `ShowMyMeds Premium ${label}`);
   const [qr, setQr] = useState<string | null>(null);
+  const [utr, setUtr] = useState("");
+  const [billName, setBillName] = useState("");
+  const [gstin, setGstin] = useState("");
+  const [err, setErr] = useState<{ utr?: string | undefined; gstin?: string | undefined }>({});
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
   const navigate = useNavigate();
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => data.user && savePendingPayment({ userId: data.user.id, plan, label, code, total, at: Date.now() }));
-  }, [plan, label, code, total]);
   useEffect(() => { QRCode.toDataURL(link, { width: 280, margin: 1 }).then(setQr); }, [link]);
 
-  const paid = async () => {
+  const submit = async () => {
+    const e: { utr?: string | undefined; gstin?: string | undefined } = {};
+    if (!validUtr(utr)) e.utr = "Enter the transaction ID (UTR) from your UPI app — usually 12 digits.";
+    if (!validGstin(gstin)) e.gstin = "GSTIN should be 15 characters, like 19ABCDE1234F1Z5.";
+    setErr(e);
+    if (e.utr || e.gstin) return;
     setBusy(true);
-    const { error } = await supabase.rpc("activate_premium_paid", { _plan: plan, _code: code ?? "" });
+    const { error } = await supabase.rpc("submit_payment", { _plan: plan, _code: code ?? "", _utr: cleanUtr(utr), _bill_name: billName, _gstin: gstin });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    clearPendingPayment();
-    await qc.invalidateQueries({ queryKey: ["premium"] });
-    toast.success("Thank you! Premium is now on.");
-    navigate({ to: "/today" });
+    await qc.invalidateQueries({ queryKey: ["payments"] });
+    toast.success("Thank you! We'll verify your payment and turn on Premium shortly.");
+    navigate({ to: "/subscription" });
   };
 
   return (
@@ -127,7 +141,24 @@ function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: 
           <p className="text-center text-sm text-muted-foreground">Scan with any UPI app (GPay, PhonePe, Paytm, BHIM…).<br />Paying to <b>EMC (ShowMyMeds)</b> · {UPI_ID}</p>
           <Button variant="outline" className="w-full sm:hidden" asChild><a href={link}>Open my UPI app</a></Button>
         </div>
-        <Button size="lg" className="w-full" disabled={busy} onClick={paid}>{busy ? "Please wait…" : "I have paid"}</Button>
+        <div className="space-y-3">
+          <div className="space-y-1">
+            <Label htmlFor="utr">UPI transaction ID (UTR) *</Label>
+            <Input id="utr" inputMode="text" placeholder="e.g. 432156789012" value={utr} onChange={(e) => { setUtr(e.target.value); setErr((x) => ({ ...x, utr: undefined })); }} aria-invalid={!!err.utr} className="font-mono" />
+            {err.utr ? <p className="text-sm text-destructive">{err.utr}</p> : <p className="text-xs text-muted-foreground">After paying, find it in your UPI app's payment details.</p>}
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="bill">Name on invoice (optional)</Label>
+            <Input id="bill" placeholder="Your or your company's name" value={billName} onChange={(e) => setBillName(e.target.value)} />
+          </div>
+          <div className="space-y-1">
+            <Label htmlFor="gstin">Your GSTIN (optional)</Label>
+            <Input id="gstin" placeholder="19ABCDE1234F1Z5" value={gstin} onChange={(e) => { setGstin(e.target.value); setErr((x) => ({ ...x, gstin: undefined })); }} aria-invalid={!!err.gstin} className="font-mono uppercase" />
+            {err.gstin && <p className="text-sm text-destructive">{err.gstin}</p>}
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground">{AUTO_TERMS}</p>
+        <Button size="lg" className="w-full" disabled={busy} onClick={submit}>{busy ? "Please wait…" : "Submit payment details"}</Button>
       </DialogContent>
     </Dialog>
   );

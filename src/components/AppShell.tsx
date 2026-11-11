@@ -9,7 +9,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Footer } from "./Footer";
 import { AlarmWatcher } from "./AlarmWatcher";
-import { PendingPayment } from "./PendingPayment";
 import { THEMES, usePrefs } from "@/lib/prefs";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@/lib/meds";
@@ -84,6 +83,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/notifications" className="flex w-full items-center gap-2">🔔 Allow notifications {!premium && <Gem className="ml-auto h-4 w-4 text-premium" aria-label="Premium" />}</Link></DropdownMenuItem>
             <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/refer">🎁 Refer app</Link></DropdownMenuItem>
             {!premium && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/premium">💎 Go Premium</Link></DropdownMenuItem>}
+            <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/subscription">🧾 Manage subscription</Link></DropdownMenuItem>
             {isAdmin && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/admin">🛠 Admin</Link></DropdownMenuItem>}
             <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base">Sign out</DropdownMenuItem>
           </DropdownMenuContent>
@@ -108,7 +108,6 @@ export function AppShell({ children }: { children: ReactNode }) {
       </nav>
 
       {user && <AlarmWatcher userId={user.id} />}
-      {user && premium !== undefined && <PendingPayment userId={user.id} premium={!!premium} />}
     </div>
   );
 }

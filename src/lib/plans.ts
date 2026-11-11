@@ -33,3 +33,30 @@ export function withGst(price: number) {
 export function upiLink(amount: number, note: string) {
   return `upi://pay?pa=${encodeURIComponent(UPI_ID)}&pn=${encodeURIComponent(UPI_NAME)}&am=${amount.toFixed(2)}&cu=INR&tn=${encodeURIComponent(note)}`;
 }
+
+/** Seller details printed on invoices. GSTIN is added once registered. */
+export const SELLER = {
+  name: "EMC (ShowMyMeds)",
+  gstin: "" as string,
+  address: "" as string,
+  state: "" as string,
+};
+
+export const AUTO_TERMS =
+  "By submitting this payment you accept the ShowMyMeds Terms of Use (EULA), Privacy Policy and Data Rights (DPDP/GDPR) policy. Premium starts after the payment is verified.";
+
+export function planLabel(id: string) {
+  return PREMIUM_PLANS.find((p) => p.id === id)?.label ?? id;
+}
+
+/** UTR / UPI reference: 8–30 letters or digits, spaces ignored. */
+export function cleanUtr(v: string) {
+  return v.replace(/\s/g, "").toUpperCase();
+}
+export function validUtr(v: string) {
+  return /^[A-Z0-9]{8,30}$/.test(cleanUtr(v));
+}
+export function validGstin(v: string) {
+  const g = v.trim().toUpperCase();
+  return g === "" || /^[0-9]{2}[A-Z0-9]{13}$/.test(g);
+}
