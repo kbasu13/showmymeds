@@ -216,6 +216,81 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          admin_note: string | null
+          base_amount: number
+          bill_name: string | null
+          created_at: string
+          discount_code: string | null
+          discount_percent: number
+          gst_amount: number
+          gst_percent: number
+          id: string
+          invoice_no: string | null
+          plan: string
+          premium_until: string | null
+          reviewed_at: string | null
+          status: string
+          support_note: string | null
+          support_shared_at: string | null
+          terms_accepted_at: string
+          total: number
+          txn_no: string
+          user_gstin: string | null
+          user_id: string
+          utr: string
+        }
+        Insert: {
+          admin_note?: string | null
+          base_amount: number
+          bill_name?: string | null
+          created_at?: string
+          discount_code?: string | null
+          discount_percent?: number
+          gst_amount: number
+          gst_percent?: number
+          id?: string
+          invoice_no?: string | null
+          plan: string
+          premium_until?: string | null
+          reviewed_at?: string | null
+          status?: string
+          support_note?: string | null
+          support_shared_at?: string | null
+          terms_accepted_at?: string
+          total: number
+          txn_no?: string
+          user_gstin?: string | null
+          user_id: string
+          utr: string
+        }
+        Update: {
+          admin_note?: string | null
+          base_amount?: number
+          bill_name?: string | null
+          created_at?: string
+          discount_code?: string | null
+          discount_percent?: number
+          gst_amount?: number
+          gst_percent?: number
+          id?: string
+          invoice_no?: string | null
+          plan?: string
+          premium_until?: string | null
+          reviewed_at?: string | null
+          status?: string
+          support_note?: string | null
+          support_shared_at?: string | null
+          terms_accepted_at?: string
+          total?: number
+          txn_no?: string
+          user_gstin?: string | null
+          user_id?: string
+          utr?: string
+        }
+        Relationships: []
+      }
       premium_users: {
         Row: {
           expires_at: string | null
@@ -418,6 +493,23 @@ export type Database = {
         Args: { _email: string; _expires: string }
         Returns: undefined
       }
+      admin_list_payments: {
+        Args: never
+        Returns: {
+          created_at: string
+          email: string
+          id: string
+          invoice_no: string
+          plan: string
+          status: string
+          support_note: string
+          support_shared_at: string
+          total: number
+          txn_no: string
+          user_id: string
+          utr: string
+        }[]
+      }
       admin_list_premium: {
         Args: never
         Returns: {
@@ -427,6 +519,10 @@ export type Database = {
           granted_at: string
           user_id: string
         }[]
+      }
+      admin_review_payment: {
+        Args: { _approve: boolean; _id: string; _note: string }
+        Returns: undefined
       }
       admin_revoke_premium: { Args: { _user: string }; Returns: undefined }
       check_discount: { Args: { _code: string }; Returns: number }
@@ -482,6 +578,49 @@ export type Database = {
       redeem_discount: {
         Args: { _code: string; _plan: string }
         Returns: number
+      }
+      share_payment_with_admin: {
+        Args: { _id: string; _note: string }
+        Returns: undefined
+      }
+      submit_payment: {
+        Args: {
+          _bill_name: string
+          _code: string
+          _gstin: string
+          _plan: string
+          _utr: string
+        }
+        Returns: {
+          admin_note: string | null
+          base_amount: number
+          bill_name: string | null
+          created_at: string
+          discount_code: string | null
+          discount_percent: number
+          gst_amount: number
+          gst_percent: number
+          id: string
+          invoice_no: string | null
+          plan: string
+          premium_until: string | null
+          reviewed_at: string | null
+          status: string
+          support_note: string | null
+          support_shared_at: string | null
+          terms_accepted_at: string
+          total: number
+          txn_no: string
+          user_gstin: string | null
+          user_id: string
+          utr: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "payments"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       take_dose: {
         Args: { _date: string; _medicine: string; _time: string }
