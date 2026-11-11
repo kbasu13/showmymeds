@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import type { ReactNode } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { CalendarCheck, Pill, CalendarClock, UsersRound, CircleHelp, Check, Gem, LogOut } from "lucide-react";
+import { CalendarCheck, Pill, CalendarClock, UsersRound, CircleHelp, Check, Gem } from "lucide-react";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
