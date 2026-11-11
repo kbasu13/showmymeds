@@ -81,7 +81,7 @@ export const updateAdminPremium = createServerFn({ method: "POST" })
     const { supabaseAdmin: db } = await import("@/integrations/supabase/client.server");
     const { error } = data.revoke
       ? await db.from("premium_users").delete().eq("user_id", data.userId)
-      : await db.from("premium_users").upsert({ user_id: data.userId, expires_at: data.expires, granted_at: new Date().toISOString() });
+      : await db.from("premium_users").upsert({ user_id: data.userId, expires_at: data.expires, granted_at: new Date().toISOString(), source: "admin_grant" });
     if (error) throw error;
     return { success: true };
   });

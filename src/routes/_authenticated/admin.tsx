@@ -81,13 +81,14 @@ function FreePremium() {
       </div>
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger asChild><Button variant="outline" role="combobox" aria-label="Select Premium account" aria-expanded={pickerOpen} className="w-full justify-between gap-2" disabled={!list.data?.length}><span className="truncate">{selected ? selected.display_name || selected.email : `Select Premium account (${list.data?.length ?? 0})`}</span><ChevronsUpDown className="h-4 w-4 shrink-0" /></Button></PopoverTrigger>
-        <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0"><Command><CommandInput placeholder="Search name or email" aria-label="Search Premium accounts" /><CommandList className="max-h-56"><CommandEmpty>No matching accounts.</CommandEmpty><CommandGroup>{(list.data ?? []).map((p) => <CommandItem key={p.user_id} value={`${p.user_id} ${p.display_name || ""} ${p.email || ""}`} onSelect={() => { setSelectedId(p.user_id); setPickerOpen(false); }}><div className="min-w-0 py-1"><p className="break-words font-medium">{p.display_name || p.email}</p><p className="break-all text-xs text-muted-foreground">{p.email}</p></div></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent>
+        <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0"><Command><CommandInput placeholder="Search name or email" aria-label="Search Premium accounts" /><CommandList className="max-h-56"><CommandEmpty>No matching accounts.</CommandEmpty><CommandGroup>{(list.data ?? []).map((p) => <CommandItem key={p.user_id} value={`${p.user_id} ${p.display_name || ""} ${p.email || ""}`} onSelect={() => { setSelectedId(p.user_id); setPickerOpen(false); }}><div className="min-w-0 py-1"><p className="break-words font-medium">{p.display_name || p.email}</p><p className="break-all text-xs text-muted-foreground">{p.email} · {p.source === "payment" ? "Paid" : "Free (admin)"}</p></div></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent>
       </Popover>
       {selected && (
           <div className="flex items-center gap-2 py-2 text-sm">
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{selected.display_name || selected.email}</p>
               <p className="break-all text-xs text-muted-foreground">{selected.email} · ends {fmt(selected.expires_at)}</p>
+              <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${selected.source === "payment" ? "bg-success/15 text-success" : "bg-premium/15 text-premium"}`}>{selected.source === "payment" ? "Paid" : "Free — granted by admin"}</span>
             </div>
             <Button size="sm" variant="outline" onClick={() => remove(selected.user_id)}><Trash2 /> Remove</Button>
           </div>
@@ -180,6 +181,7 @@ function Payments() {
           <Button size="sm" variant={show === "all" ? "default" : "outline"} onClick={() => setShow("all")}>All</Button>
         </div>
       </div>
+      <PastPayment />
       <p className="text-sm text-muted-foreground">Match the UTR and amount in your bank/UPI app before approving.</p>
       {rows.length === 0 && <p className="text-muted-foreground">Nothing to check.</p>}
       <div className="max-h-[28rem] space-y-2 overflow-y-auto">
@@ -187,7 +189,7 @@ function Payments() {
           <div key={p.id} className="space-y-1 rounded-lg border bg-card p-3 text-sm">
             <div className="flex justify-between gap-2"><b className="truncate">{p.email}</b><span>₹{Number(p.total).toFixed(2)}</span></div>
             <p>UTR <span className="font-mono">{p.utr}</span> · {p.plan} · {new Date(p.created_at).toLocaleDateString()}</p>
-            <p className="text-muted-foreground">Txn {p.txn_no} · {p.status}{p.invoice_no ? ` · ${p.invoice_no}` : ""}</p>
+            <p className="text-muted-foreground">Txn {p.txn_no} · {p.status}{p.admin_note === "Past payment recorded by admin" ? " · recorded by admin" : ""}{p.invoice_no ? ` · ${p.invoice_no}` : ""}</p>
             {p.support_note && <p className="rounded bg-secondary/60 p-2">💬 {p.support_note}</p>}
             {p.status === "pending" && (
               <div className="flex gap-2 pt-1">
@@ -199,5 +201,40 @@ function Payments() {
         ))}
       </div>
     </section>
+  );
+}
+
+function PastPayment() {
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [f, setF] = useState({ email: "", plan: "monthly", utr: "", date: new Date().toISOString().slice(0, 10), discount: 0, name: "", gstin: "" });
+  const [busy, setBusy] = useState(false);
+  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) => setF({ ...f, [k]: e.target.value });
+  async function save() {
+    setBusy(true);
+    const { error } = await supabase.rpc("admin_record_past_payment", { _email: f.email, _plan: f.plan, _utr: f.utr, _paid_on: f.date, _discount: f.discount, _bill_name: f.name, _gstin: f.gstin });
+    setBusy(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success("Past payment saved — invoice created and Premium updated");
+    setF({ ...f, email: "", utr: "", name: "", gstin: "" });
+    await Promise.all([qc.invalidateQueries({ queryKey: ["admin-payments"] }), qc.invalidateQueries({ queryKey: ["admin-premium"] })]);
+  }
+  if (!open) return <Button size="sm" variant="outline" onClick={() => setOpen(true)}>+ Record past payment</Button>;
+  return (
+    <div className="space-y-2 rounded-lg border bg-card p-3 text-sm">
+      <p className="font-semibold">Record past payment</p>
+      <Input type="email" placeholder="User's email" value={f.email} onChange={set("email")} />
+      <div className="flex flex-wrap gap-1">
+        {(["monthly", "yearly", "lifetime"] as const).map((pl) => <Button key={pl} size="sm" variant={f.plan === pl ? "default" : "outline"} onClick={() => setF({ ...f, plan: pl })}>{pl[0].toUpperCase() + pl.slice(1)}</Button>)}
+      </div>
+      <div className="flex flex-wrap gap-1">
+        {[0, ...DISCOUNT_PERCENTS].map((d) => <Button key={d} size="sm" variant={f.discount === d ? "default" : "outline"} onClick={() => setF({ ...f, discount: d })}>{d ? `${d}% off` : "No discount"}</Button>)}
+      </div>
+      <Input placeholder="UPI transaction ID (UTR)" value={f.utr} onChange={set("utr")} />
+      <label className="block text-xs text-muted-foreground">Paid on<Input type="date" value={f.date} onChange={set("date")} /></label>
+      <Input placeholder="Name on invoice (optional)" value={f.name} onChange={set("name")} />
+      <Input placeholder="User's GSTIN (optional)" value={f.gstin} onChange={set("gstin")} />
+      <div className="flex gap-2"><Button size="sm" onClick={save} disabled={busy || !f.email.includes("@") || !f.utr}>Save payment</Button><Button size="sm" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button></div>
+    </div>
   );
 }
