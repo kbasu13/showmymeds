@@ -24,7 +24,7 @@ export const Route = createFileRoute("/_authenticated/premium")({ staticData: { 
 const FEATURES = ["Ask — AI helper for your medicines", "PDF reports for your doctor", "Family & caregiver sharing", "WhatsApp reminders"];
 
 function PremiumPage() {
-  const { firstName } = useProfileName();
+  const { name: fullName } = useProfileName();
   const [plan, setPlan] = useState<string>("yearly");
   const [code, setCode] = useState("");
   const [applied, setApplied] = useState<{ code: string; percent: number } | null>(null);
@@ -94,7 +94,7 @@ function PremiumPage() {
       {paying && (() => {
         const chosen = PREMIUM_PLANS.find((p) => p.id === plan)!;
         const base = applied ? discountedPrice(chosen.price, applied.percent) : chosen.price;
-        return <PayDialog plan={chosen.id} label={chosen.label} base={base} code={applied?.code ?? null} defaultName={firstName} onClose={() => setPaying(false)} />;
+        return <PayDialog plan={chosen.id} label={chosen.label} base={base} code={applied?.code ?? null} defaultName={fullName} onClose={() => setPaying(false)} />;
       })()}
     </div>
   );
