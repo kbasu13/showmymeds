@@ -16,7 +16,7 @@ describe("account name presentation", () => {
     expect(profileName({ user_metadata: { full_name: "person@example.com" } })).toBe("");
   });
   it("uses the first name for invoice fallback without changing explicit billing names", () => {
-    expect(invoiceBuyerName(null, "Kaustabh Basu")).toBe("Kaustabh");
+    expect(invoiceBuyerName(null, "Kaustabh Basu")).toBe("Kaustabh Basu");
     expect(invoiceBuyerName("Example Company", "Kaustabh Basu")).toBe("Example Company");
     expect(invoiceBuyerName(null, "")).toBe("Customer");
   });

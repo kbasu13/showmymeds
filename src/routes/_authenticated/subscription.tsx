@@ -79,9 +79,11 @@ function SubscriptionPage() {
               {p.support_shared_at && <><dt className="text-muted-foreground">Shared with admin</dt><dd>{d(p.support_shared_at)}</dd></>}
             </dl>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => buildInvoice(p, user?.email ?? "", name)}>
-                <Download /> {p.status === "approved" ? "GST invoice" : "Receipt"}
-              </Button>
+              {p.status === "approved" && (
+                <Button size="sm" variant="outline" onClick={() => buildInvoice(p, user?.email ?? "", name)}>
+                  <Download /> GST invoice
+                </Button>
+              )}
               <Button size="sm" variant="ghost" onClick={() => setShare(p)}><LifeBuoy /> Share with admin</Button>
             </div>
           </div>

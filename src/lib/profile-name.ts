@@ -17,5 +17,5 @@ export function firstName(name: string): string {
 }
 
 export function invoiceBuyerName(billingName: string | null, name: string): string {
-  return billingName?.trim() || firstName(name) || "Customer";
+  return billingName?.trim() || name.trim() || "Customer";
 }
