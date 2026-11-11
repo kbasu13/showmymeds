@@ -86,7 +86,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             {!premium && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/premium">💎 Go Premium</Link></DropdownMenuItem>}
             <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/subscription">🧾 Manage subscription</Link></DropdownMenuItem>
             {isAdmin && <DropdownMenuItem asChild className="min-h-11 text-base"><Link to="/admin">🛠 Admin</Link></DropdownMenuItem>}
-            <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base"><span className="flex w-full items-center gap-2"><LogOut className="h-4 w-4" /> Sign out</span></DropdownMenuItem>
+            <DropdownMenuItem onSelect={signOut} className="min-h-11 text-base"><span className="flex w-full items-center gap-2">🚪 Sign out</span></DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </header>
