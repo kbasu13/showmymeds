@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { useUser, useMeds, useLogs, takeDose, untakeDose, useRefreshMeds } from "@/lib/meds";
 import { buildDoctorReport, downloadBlob, shareBlob } from "@/lib/report";
 import { adherenceByDay, dosesForDay, ymd, time12, type Med, type Log } from "@/lib/schedule";
+import { useProfileName } from "@/lib/user-profile";
 
 export const Route = createFileRoute("/_authenticated/history")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "History & insights — ShowMyMeds" }, { name: "description", content: "How well you kept to your medicine schedule." }, { property: "og:title", content: "History & insights — ShowMyMeds" }, { property: "og:description", content: "How well you kept to your medicine schedule." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -172,10 +173,11 @@ function DoseChecklist({ meds, logs, days, readOnly }: { meds: Med[]; logs: Log[
 
 function HistoryPage() {
   const { data: user } = useUser();
+  const { firstName } = useProfileName();
   return (
     <div className="space-y-5">
       <h1 className="text-2xl font-semibold text-primary">History</h1>
-      {user && <AdherenceView userId={user.id} patientName={user.user_metadata?.['full_name'] || user.email || user.phone} />}
+      {user && <AdherenceView userId={user.id} patientName={firstName || "Patient"} />}
     </div>
   );
 }

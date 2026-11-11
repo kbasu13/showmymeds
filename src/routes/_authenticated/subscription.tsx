@@ -11,6 +11,7 @@ import { useUser } from "@/lib/meds";
 import { usePayments } from "@/lib/payments";
 import { buildInvoice, type Payment } from "@/lib/invoice";
 import { isPremiumActive, planLabel } from "@/lib/plans";
+import { useProfileName } from "@/lib/user-profile";
 
 export const Route = createFileRoute("/_authenticated/subscription")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Manage subscription — ShowMyMeds" }, { name: "description", content: "Your ShowMyMeds Premium plan, payments and GST invoices." }, { property: "og:title", content: "Manage subscription — ShowMyMeds" }, { property: "og:description", content: "Your ShowMyMeds Premium plan, payments and GST invoices." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }, { name: "robots", content: "noindex" }] }),
@@ -26,10 +27,14 @@ const d = (s: string | null) => (s ? new Date(s).toLocaleDateString("en-IN", { d
 
 function SubscriptionPage() {
   const { data: user } = useUser();
+  const { name } = useProfileName();
   const payments = usePayments();
   const premium = useQuery({
     queryKey: ["premium-row", user?.id], enabled: !!user,
-    queryFn: async () => (await supabase.from("premium_users").select("expires_at, granted_at, source").eq("user_id", user!.id).maybeSingle()).data,
+    queryFn: async () => {
+      if (!user) return null;
+      return (await supabase.from("premium_users").select("expires_at, granted_at, source").eq("user_id", user.id).maybeSingle()).data;
+    },
   });
   const [share, setShare] = useState<Payment | null>(null);
   const row = premium.data;
@@ -74,7 +79,7 @@ function SubscriptionPage() {
               {p.support_shared_at && <><dt className="text-muted-foreground">Shared with admin</dt><dd>{d(p.support_shared_at)}</dd></>}
             </dl>
             <div className="flex flex-wrap gap-2">
-              <Button size="sm" variant="outline" onClick={() => buildInvoice(p, user?.email ?? "")}>
+              <Button size="sm" variant="outline" onClick={() => buildInvoice(p, user?.email ?? "", name)}>
                 <Download /> {p.status === "approved" ? "GST invoice" : "Receipt"}
               </Button>
               <Button size="sm" variant="ghost" onClick={() => setShare(p)}><LifeBuoy /> Share with admin</Button>
