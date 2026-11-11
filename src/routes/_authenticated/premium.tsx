@@ -106,14 +106,14 @@ function PayDialog({ plan, label, base, code, onClose }: { plan: string; label: 
   const [utr, setUtr] = useState("");
   const [billName, setBillName] = useState("");
   const [gstin, setGstin] = useState("");
-  const [err, setErr] = useState<{ utr?: string; gstin?: string }>({});
+  const [err, setErr] = useState<{ utr?: string | undefined; gstin?: string | undefined }>({});
   const [busy, setBusy] = useState(false);
   const qc = useQueryClient();
   const navigate = useNavigate();
   useEffect(() => { QRCode.toDataURL(link, { width: 280, margin: 1 }).then(setQr); }, [link]);
 
   const submit = async () => {
-    const e: { utr?: string; gstin?: string } = {};
+    const e: { utr?: string | undefined; gstin?: string | undefined } = {};
     if (!validUtr(utr)) e.utr = "Enter the transaction ID (UTR) from your UPI app — usually 12 digits.";
     if (!validGstin(gstin)) e.gstin = "GSTIN should be 15 characters, like 19ABCDE1234F1Z5.";
     setErr(e);

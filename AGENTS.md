@@ -17,3 +17,4 @@
 - Family and referral sharing reuse browser-safe validation schemas and field errors before persistence; server validation remains enforced without exposing serialized errors.
 - Dose push reminders run from a 5-minute managed schedule; push_sent dedupes each dose and expired device subscriptions are deleted on 404/410.
 - Production builds never emit source maps; keeps client source unreadable in browser tools.
+- UPI Premium activates only via admin approval of a submitted UTR (`submit_payment` → `admin_review_payment`); users cannot self-activate because personal UPI gives no payment confirmation.
