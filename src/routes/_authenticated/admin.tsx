@@ -81,14 +81,14 @@ function FreePremium() {
       </div>
       <Popover open={pickerOpen} onOpenChange={setPickerOpen}>
         <PopoverTrigger asChild><Button variant="outline" role="combobox" aria-label="Select Premium account" aria-expanded={pickerOpen} className="w-full justify-between gap-2" disabled={!list.data?.length}><span className="truncate">{selected ? selected.display_name || selected.email : `Select Premium account (${list.data?.length ?? 0})`}</span><ChevronsUpDown className="h-4 w-4 shrink-0" /></Button></PopoverTrigger>
-        <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0"><Command><CommandInput placeholder="Search name or email" aria-label="Search Premium accounts" /><CommandList className="max-h-56"><CommandEmpty>No matching accounts.</CommandEmpty><CommandGroup>{(list.data ?? []).map((p) => <CommandItem key={p.user_id} value={`${p.user_id} ${p.display_name || ""} ${p.email || ""}`} onSelect={() => { setSelectedId(p.user_id); setPickerOpen(false); }}><div className="min-w-0 py-1"><p className="break-words font-medium">{p.display_name || p.email}</p><p className="break-all text-xs text-muted-foreground">{p.email} · {p.source === "payment" ? "Paid" : "Free (admin)"}</p></div></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent>
+        <PopoverContent align="start" className="w-[var(--radix-popover-trigger-width)] p-0"><Command><CommandInput placeholder="Search name or email" aria-label="Search Premium accounts" /><CommandList className="max-h-56"><CommandEmpty>No matching accounts.</CommandEmpty><CommandGroup>{(list.data ?? []).map((p) => <CommandItem key={p.user_id} value={`${p.user_id} ${p.display_name || ""} ${p.email || ""}`} onSelect={() => { setSelectedId(p.user_id); setPickerOpen(false); }}><div className="min-w-0 py-1"><p className="break-words font-medium">{p.display_name || p.email}</p><p className="break-all text-xs text-muted-foreground">{p.email} · {p.source === "payment" ? "Paid" : p.source === "self_activated" ? "Paid (earlier, unverified)" : "Free (admin)"}</p></div></CommandItem>)}</CommandGroup></CommandList></Command></PopoverContent>
       </Popover>
       {selected && (
           <div className="flex items-center gap-2 py-2 text-sm">
             <div className="min-w-0 flex-1">
               <p className="truncate font-medium">{selected.display_name || selected.email}</p>
               <p className="break-all text-xs text-muted-foreground">{selected.email} · ends {fmt(selected.expires_at)}</p>
-              <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${selected.source === "payment" ? "bg-success/15 text-success" : "bg-premium/15 text-premium"}`}>{selected.source === "payment" ? "Paid" : "Free — granted by admin"}</span>
+              <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-semibold ${selected.source !== "admin_grant" ? "bg-success/15 text-success" : "bg-premium/15 text-premium"}`}>{selected.source === "payment" ? "Paid" : selected.source === "self_activated" ? "Paid earlier (before UTR checks)" : "Free — granted by admin"}</span>
             </div>
             <Button size="sm" variant="outline" onClick={() => remove(selected.user_id)}><Trash2 /> Remove</Button>
           </div>
