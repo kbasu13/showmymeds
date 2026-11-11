@@ -1,5 +1,5 @@
 # ShowMyMeds roadmap
-- [ ] First-name profile greeting, invoice defaults and own doctor-report identity; verify signed-in display
+- [x] First-name profile greeting, invoice defaults and own doctor-report identity; verified signed-in desktop/mobile display and name rules
 - [x] Fix Family and Refer sharing errors and verify signed-in sharing
 - [x] Profile referrals with editable sharing, mobile-derived codes and database/Admin attribution
 - [x] Named caregiver invitations with sharing method, accepted profile names and 15-day expiry
