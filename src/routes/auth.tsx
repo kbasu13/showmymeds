@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Footer } from "@/components/Footer";
-import { ACCEPT_LINE } from "@/components/LegalPage";
+import { AcceptLine } from "@/components/LegalPage";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 
@@ -153,7 +153,7 @@ function AuthPage() {
         <Button variant="link" className="mt-4 w-full" onClick={() => setMode(mode === "signup" ? "signin" : "signup")}>
           {mode === "signup" ? "Already have an account? Sign in" : "New here? Create an account"}
         </Button>
-        <p className="mx-auto mt-4 max-w-sm text-center text-xs text-muted-foreground">{ACCEPT_LINE} <Link to="/terms" className="underline">EULA</Link> · <Link to="/privacy" className="underline">Privacy</Link> · <Link to="/data-rights" className="underline">DPDP & GDPR</Link></p>
+        <p className="mx-auto mt-4 max-w-sm text-center text-xs text-muted-foreground"><AcceptLine /></p>
       </main>
       <Footer />
     </div>

@@ -17,4 +17,8 @@ export function LegalPage({ title, updated, children }: { title: string; updated
   );
 }
 
-export const ACCEPT_LINE = "By creating a profile or signing in, you automatically accept our Terms of Use (EULA), Privacy Policy and DPDP/GDPR Data Rights policy.";
+export function AcceptLine() {
+  return (
+    <>By creating a profile or signing in, you automatically accept our <Link to="/terms" className="text-primary underline">Terms of Use (EULA)</Link>, <Link to="/privacy" className="text-primary underline">Privacy Policy</Link> and <Link to="/data-rights" className="text-primary underline">DPDP/GDPR Data Rights policy</Link>.</>
+  );
+}
