@@ -41,8 +41,8 @@ function SubscriptionPage() {
       <section className="rounded-xl border bg-card p-4">
         <p className="text-sm text-muted-foreground">Current plan</p>
         {active ? (
-          <p className="flex items-center gap-2 text-lg font-semibold"><Gem className="h-5 w-5 text-premium" /> Premium {row?.expires_at ? `· valid until ${d(row.expires_at)}` : "· Lifetime"}</p>
-          {row?.source === "admin_grant" && <p className="mt-2 inline-block rounded-full bg-premium/15 px-3 py-1 text-sm font-semibold text-premium">🎁 Complimentary Premium — granted by ShowMyMeds</p>}
+          <div><p className="flex items-center gap-2 text-lg font-semibold"><Gem className="h-5 w-5 text-premium" /> Premium {row?.expires_at ? `· valid until ${d(row.expires_at)}` : "· Lifetime"}</p>
+          {row?.source === "admin_grant" && <p className="mt-2 inline-block rounded-full bg-premium/15 px-3 py-1 text-sm font-semibold text-premium">🎁 Complimentary Premium — granted by ShowMyMeds</p>}</div>
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-lg font-semibold">Free{row?.expires_at ? ` · Premium ended ${d(row.expires_at)}` : ""}</p>
