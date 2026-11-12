@@ -1,27 +1,27 @@
 import { AlertTriangle, OctagonX, TriangleAlert } from "lucide-react";
-import { daysOfStockLeft, stockLevel, type Med, type StockLevel } from "@/lib/schedule";
+import { daysOfStockLeft, doseText, stockLevel, type Med, type StockLevel } from "@/lib/schedule";
 
 const LEVELS: {
   level: StockLevel;
-  title: (days: number) => string;
+  title: string;
   box: string;
   icon: typeof AlertTriangle;
 }[] = [
   {
     level: "empty",
-    title: () => "No stock left - please refill immediately.",
+    title: "No stock left - please refill immediately",
     box: "border-destructive bg-destructive text-destructive-foreground",
     icon: OctagonX,
   },
   {
     level: "critical",
-    title: (days) => `Critically low stock - please refill urgently in ${days} ${days === 1 ? "day" : "days"}`,
+    title: "Critically low stock - please refill urgently",
     box: "border-critical bg-critical/60 text-critical-foreground",
     icon: TriangleAlert,
   },
   {
     level: "low",
-    title: () => "Running low — please refill soon",
+    title: "Running low — please refill soon",
     box: "border-warning bg-warning/30 text-warning-foreground",
     icon: AlertTriangle,
   },
@@ -38,25 +38,21 @@ export function LowStockAlert({ meds, today }: { meds: Med[]; today: string }) {
 
   return (
     <div className="space-y-3">
-      {groups.map(({ level, title, box, icon: Icon, meds: list }) => {
-        // Days left is per-medicine; with several critical meds show the soonest run-out.
-        const days = Math.min(...list.map((m) => daysOfStockLeft(m)));
-        return (
-          <div key={level} role="alert" className={`flex gap-3 rounded-xl border-2 p-4 ${box}`}>
-            <Icon className="mt-1 h-8 w-8 shrink-0" />
-            <div>
-              <p className="text-xl font-bold">{title(days)}</p>
-              <ul className="mt-1 text-lg">
-                {list.map((m) => (
-                  <li key={m.id}>
-                    <b>{m.name}</b>: about {daysOfStockLeft(m)} day(s) left ({Number(m.stock)} left)
-                  </li>
-                ))}
-              </ul>
-            </div>
+      {groups.map(({ level, title, box, icon: Icon, meds: list }) => (
+        <div key={level} role="alert" className={`flex gap-3 rounded-xl border-2 p-4 ${box}`}>
+          <Icon className="mt-1 h-8 w-8 shrink-0" />
+          <div>
+            <p className="text-xl font-bold">{title}</p>
+            <ul className="mt-1 text-lg">
+              {list.map((m) => (
+                <li key={m.id}>
+                  <b>{m.name}</b>: about {daysOfStockLeft(m)} day(s) left ({doseText(Number(m.stock), m.form ?? "tablet")} left)
+                </li>
+              ))}
+            </ul>
           </div>
-        );
-      })}
+        </div>
+      ))}
     </div>
   );
 }

@@ -6,6 +6,7 @@ export type Med = {
   end_date: string | null;
   stock: number;
   dose_qty: number;
+  form?: string;
   warn_days?: number | null;
 };
 
@@ -148,10 +149,11 @@ const UNIT: Record<string, [string, string]> = {
 };
 /** 1 + "tablet" -> "1 tablet", 2 -> "2 tablets", 0.5 -> "½ tablet" */
 export function doseText(qty: number, form: string) {
-  const q = Number(qty) || 1;
+  const n0 = Number(qty);
+  const q = Number.isFinite(n0) ? n0 : 1;
   const [one, many] = UNIT[form] ?? ["unit", "units"];
   const n = q === 0.5 ? "½" : q === 0.25 ? "¼" : String(q);
-  return `${n} ${q > 1 ? many : one}`;
+  return `${n} ${q === 1 || q === 0.5 || q === 0.25 ? one : many}`;
 }
 
 /** "2026-11-01" -> "01-11-2026, Sun" */
