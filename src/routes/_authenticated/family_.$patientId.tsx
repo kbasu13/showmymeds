@@ -1,8 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { CheckCircle2, Circle, ArrowLeft, AlertTriangle } from "lucide-react";
+import { CheckCircle2, Circle, ArrowLeft } from "lucide-react";
 import { useMeds, useLogs } from "@/lib/meds";
-import { dosesForDay, isLowStock, ymd, type Med } from "@/lib/schedule";
+import { dosesForDay, ymd, type Med } from "@/lib/schedule";
 import { MedImage } from "@/components/MedImage";
+import { LowStockAlert } from "@/components/LowStockAlert";
 import { AdherenceView } from "./history";
 
 export const Route = createFileRoute("/_authenticated/family_/$patientId")({ staticData: { sitemap: false },
@@ -16,17 +17,12 @@ function PatientView() {
   const { data: meds = [] } = useMeds(patientId);
   const { data: logs = [] } = useLogs(patientId, today);
   const doses = dosesForDay(meds as unknown as Med[], today);
-  const low = meds.filter((m) => isLowStock(m as unknown as Med, today));
 
   return (
     <div className="space-y-5">
       <Link to="/family" className="inline-flex items-center gap-2 text-lg font-bold text-primary"><ArrowLeft /> Family</Link>
       <h1 className="text-3xl font-bold text-primary">Today's doses</h1>
-      {low.length > 0 && (
-        <div className="flex gap-2 rounded-xl border-2 border-warning bg-warning/30 p-3 text-warning-foreground">
-          <AlertTriangle /> Low stock: {low.map((m) => m.name).join(", ")}
-        </div>
-      )}
+      <LowStockAlert meds={meds as unknown as Med[]} today={today} />
       <ul className="space-y-2">
         {doses.map(({ med, time }) => {
           const m = meds.find((x) => x.id === med.id)!;
