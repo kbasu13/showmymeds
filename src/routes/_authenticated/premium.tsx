@@ -140,7 +140,7 @@ function PayDialog({ plan, label, base, code, defaultName, onClose }: { plan: st
         </div>
         <div className="flex flex-col items-center gap-2">
           {qr ? <img src={qr} alt={`UPI QR code for ₹${total.toFixed(2)}`} className="h-64 w-64 rounded-lg border bg-white p-2" /> : <div className="h-64 w-64 animate-pulse rounded-lg bg-muted" />}
-          <p className="text-center text-sm text-muted-foreground">Scan with any UPI app (GPay, PhonePe, Paytm, BHIM…).<br />Paying to <b>EMC (ShowMyMeds)</b> · {UPI_ID}</p>
+          <p className="text-center text-sm text-muted-foreground">Scan with any UPI app (GPay, PhonePe, Paytm, BHIM…).<br />Paying to <b>Effemon Consultancy (ShowMyMeds)</b> · {UPI_ID}</p>
           <Button variant="outline" className="w-full sm:hidden" asChild><a href={link}>Open my UPI app</a></Button>
         </div>
         <div className="space-y-3">
@@ -159,7 +159,7 @@ function PayDialog({ plan, label, base, code, defaultName, onClose }: { plan: st
             {err.gstin && <p className="text-sm text-destructive">{err.gstin}</p>}
           </div>
         </div>
-        <p className="text-xs text-muted-foreground">{AUTO_TERMS}</p>
+        <p className="text-xs text-muted-foreground">{AUTO_TERMS} Read our <Link to="/refund" className="underline">Refund Policy</Link>.</p>
         <Button size="lg" className="w-full" disabled={busy} onClick={submit}>{busy ? "Please wait…" : "Submit payment details"}</Button>
       </DialogContent>
     </Dialog>
