@@ -102,7 +102,7 @@ export async function lookupMedicineImage(name: string, composition?: string | n
   return (await wikiImage(`${name} ${form || "medicine"}`)) ?? (ingredient ? await wikiImage(ingredient) : null);
 }
 
-export async function uploadFile(userId: string, file: File, kind: "image" | "rx") {
+export async function uploadFile(userId: string, file: File, kind: "image" | "rx" | "ask") {
   const ext = file.name.split(".").pop() || "jpg";
   const path = `${userId}/${kind}-${crypto.randomUUID()}.${ext}`;
   const { error } = await supabase.storage.from("prescriptions").upload(path, file);
