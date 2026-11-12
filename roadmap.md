@@ -33,4 +33,4 @@
 - [x] On-screen reminders while the app is open stay free always (test guards it)
 - [x] Profile: Allow notifications shows the full blue Premium pill like Discover; Sign out gets an icon
 - [x] Available stock can never go below 0 (form clamps, database blocks negatives)
-- [ ] Ask box: attach a file, open the camera for a photo, and ask a question by voice
+- [x] Ask box: attach a file, open the camera for a photo, and ask a question by voice
