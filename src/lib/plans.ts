@@ -23,7 +23,7 @@ export function isPremiumActive(expiresAt: string | null | undefined, now = new 
 
 export const GST_PERCENT = 18;
 export const UPI_ID = "kaustabh.basu-3@oksbi";
-export const UPI_NAME = "ShowMyMeds";
+export const UPI_NAME = "Effemon Consultancy";
 
 /** Price including 18% GST, to the paisa. */
 export function withGst(price: number) {
@@ -36,14 +36,14 @@ export function upiLink(amount: number, note: string) {
 
 /** Seller details printed on invoices. GSTIN is added once registered. */
 export const SELLER = {
-  name: "EMC (ShowMyMeds)",
+  name: "Effemon Consultancy (ShowMyMeds)",
   gstin: "" as string,
   address: "" as string,
   state: "" as string,
 };
 
 export const AUTO_TERMS =
-  "By submitting this payment you accept the ShowMyMeds Terms of Use (EULA), Privacy Policy and Data Rights (DPDP/GDPR) policy. Premium starts after the payment is verified.";
+  "By submitting this payment you accept the ShowMyMeds Terms of Use (EULA), Privacy Policy, Refund Policy and Data Rights (DPDP/GDPR) policy. Premium starts after the payment is verified.";
 
 export function planLabel(id: string) {
   return PREMIUM_PLANS.find((p) => p.id === id)?.label ?? id;
