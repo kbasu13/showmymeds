@@ -89,7 +89,7 @@ function SubscriptionPage() {
           </div>
         ))}
       </section>
-      <p className="text-xs text-muted-foreground">Payments are verified by ShowMyMeds against the UPI transaction ID, usually within a day. See our <Link to="/terms" className="underline">Terms</Link> , <Link to="/privacy" className="underline">Privacy Policy</Link> and <Link to="/refund" className="underline">Refund Policy</Link>.</p>
+      <p className="text-xs text-muted-foreground">Payments are verified by ShowMyMeds against the UPI transaction ID, usually within a day. See our <Link to="/terms" className="underline">Terms</Link>, <Link to="/privacy" className="underline">Privacy Policy</Link> and <Link to="/refund" className="underline">Refund Policy</Link>.</p>
       {share && <ShareDialog payment={share} onClose={() => setShare(null)} />}
     </div>
   );
