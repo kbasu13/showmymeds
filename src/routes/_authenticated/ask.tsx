@@ -1,11 +1,12 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { Send, Plus } from "lucide-react";
+import { useRef, useState } from "react";
+import { Send, Plus, Paperclip, Camera, Mic, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
-import { useUser, FORMS } from "@/lib/meds";
+import { useUser, FORMS, uploadFile } from "@/lib/meds";
 import { joinTimes, doseText } from "@/lib/schedule";
 import { usePremium, UpgradeCard } from "@/components/Premium";
 
@@ -14,27 +15,129 @@ export const Route = createFileRoute("/_authenticated/ask")({ staticData: { site
   component: AskPage,
 });
 
-type Msg = { role: "user" | "assistant"; text: string };
+type Msg = { role: "user" | "assistant"; text: string; att?: string };
+type Attached = { path: string; name: string };
+
+const MAX_FILE = 8 * 1024 * 1024;
+const MAX_SECONDS = 60;
+
+/** Keep uploads light: photos are resized to at most 1280 px on the long edge. */
+async function shrink(file: File): Promise<File> {
+  try {
+    const bmp = await createImageBitmap(file);
+    const scale = Math.min(1, 1280 / Math.max(bmp.width, bmp.height));
+    if (scale >= 1 && file.size < 1_500_000) { bmp.close?.(); return file; }
+    const w = Math.max(1, Math.round(bmp.width * scale));
+    const h = Math.max(1, Math.round(bmp.height * scale));
+    const c = document.createElement("canvas");
+    c.width = w; c.height = h;
+    c.getContext("2d")?.drawImage(bmp, 0, 0, w, h);
+    const out = await new Promise<Blob | null>((res) => c.toBlob(res, "image/jpeg", 0.82));
+    bmp.close?.();
+    if (!out) return file;
+    return new File([out], file.name.replace(/\.\w+$/, "") + ".jpg", { type: "image/jpeg" });
+  } catch {
+    return file;
+  }
+}
 
 function AskPage() {
   const { data: user } = useUser();
   const { data: premium, isLoading } = usePremium(user?.id);
   const [msgs, setMsgs] = useState<Msg[]>([
-    { role: "assistant", text: "Hello! Ask me about your dose history, possible side effects, or check medicines your doctor has prescribed before you take them." },
+    { role: "assistant", text: "Hello! Ask me about your dose history, possible side effects, or check medicines your doctor has prescribed before you take them.\n\nYou can also **attach a photo or PDF** (a prescription, a medicine pack, a report) or **speak your question** using the mic." },
   ]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
+  const [file, setFile] = useState<Attached | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [recording, setRecording] = useState(false);
+  const [hearing, setHearing] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const camRef = useRef<HTMLInputElement>(null);
+  const recRef = useRef<MediaRecorder | null>(null);
 
   if (isLoading) return <p>Loading…</p>;
   if (!premium) {
     return <UpgradeCard feature="Ask" text="Chat about your medicines, dose history and side effects." />;
   }
 
+  const pick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    if (!f || !user) return;
+    if (f.size > MAX_FILE) { toast.error("That file is too large. Please keep it under 8 MB."); return; }
+    const isPdf = f.type === "application/pdf" || f.name.toLowerCase().endsWith(".pdf");
+    if (!isPdf && !f.type.startsWith("image/")) { toast.error("Please attach a photo or a PDF."); return; }
+    setUploading(true);
+    try {
+      const prepared = isPdf ? f : await shrink(f);
+      const path = await uploadFile(user.id, prepared, "ask");
+      setFile({ path, name: f.name });
+    } catch {
+      toast.error("Could not attach that file. Please try again.");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const transcribe = async (blob: Blob) => {
+    setHearing(true);
+    try {
+      const { data } = await supabase.auth.getSession();
+      const mime = blob.type || "audio/webm";
+      const ext = mime.includes("mp4") ? "m4a" : mime.includes("ogg") ? "ogg" : mime.includes("mpeg") ? "mp3" : "webm";
+      const fd = new FormData();
+      fd.append("file", new File([blob], `voice.${ext}`, { type: mime }));
+      const r = await fetch("/api/ask-transcribe", {
+        method: "POST",
+        headers: { authorization: `Bearer ${data.session?.access_token ?? ""}` },
+        body: fd,
+      });
+      const j = (await r.json().catch(() => ({}))) as { text?: string; error?: string };
+      if (!r.ok || !j.text) { toast.error(j.error ?? "I could not hear that. Please try again."); return; }
+      setQ((v) => (v.trim() ? `${v.trim()} ${j.text}` : j.text));
+    } catch {
+      toast.error("Voice input is not available right now. Please type your question.");
+    } finally {
+      setHearing(false);
+    }
+  };
+
+  const toggleRec = async () => {
+    if (recording) { recRef.current?.stop(); return; }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") {
+      toast.error("Your browser can't record voice here. Please type your question.");
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      const chunks: Blob[] = [];
+      mr.ondataavailable = (e) => { if (e.data.size) chunks.push(e.data); };
+      mr.onstop = async () => {
+        stream.getTracks().forEach((t) => t.stop());
+        recRef.current = null;
+        setRecording(false);
+        await transcribe(new Blob(chunks, { type: mr.mimeType || "audio/webm" }));
+      };
+      recRef.current = mr;
+      mr.start();
+      setRecording(true);
+      window.setTimeout(() => { if (recRef.current === mr && mr.state !== "inactive") mr.stop(); }, MAX_SECONDS * 1000);
+    } catch {
+      toast.error("Please allow microphone access, then try again.");
+    }
+  };
+
   const send = async () => {
-    if (!q.trim() || busy) return;
-    const history = [...msgs.slice(1), { role: "user" as const, text: q }];
-    setMsgs((m) => [...m, { role: "user", text: q }, { role: "assistant", text: "…" }]);
+    if ((!q.trim() && !file) || busy) return;
+    const question = q.trim() || "Please look at the attached file.";
+    const attached = file;
+    const history = [...msgs.slice(1), { role: "user" as const, text: question }];
+    setMsgs((m) => [...m, { role: "user", text: question, att: attached?.name }, { role: "assistant", text: "…" }]);
     setQ("");
+    setFile(null);
     setBusy(true);
     const put = (text: string) => setMsgs((m) => [...m.slice(0, -1), { role: "assistant", text }]);
     try {
@@ -42,7 +145,7 @@ function AskPage() {
       const r = await fetch("/api/ask", {
         method: "POST",
         headers: { "content-type": "application/json", authorization: `Bearer ${data.session?.access_token ?? ""}` },
-        body: JSON.stringify({ messages: history }),
+        body: JSON.stringify({ messages: history, attachment: attached ? { path: attached.path } : undefined }),
       });
       if (!r.ok || !r.body) {
         const j = await r.json().catch(() => ({}));
@@ -72,15 +175,40 @@ function AskPage() {
       <div className="flex-1 space-y-3 overflow-y-auto rounded-xl border bg-card p-4">
         {msgs.map((m, i) => (
           m.role === "user"
-            ? <p key={i} className="ml-auto max-w-[85%] rounded-xl bg-primary p-3 text-lg text-primary-foreground">{m.text}</p>
+            ? <div key={i} className="ml-auto max-w-[85%] rounded-xl bg-primary p-3 text-lg text-primary-foreground">
+                <p>{m.text}</p>
+                {m.att && <p className="mt-1 flex items-center gap-1 text-sm opacity-90"><Paperclip className="h-3.5 w-3.5" />{m.att}</p>}
+              </div>
             : <div key={i} className="max-w-[90%] space-y-2"><div className=" space-y-2 rounded-xl bg-secondary p-3 text-base leading-relaxed [&_h3]:mt-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-primary [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1"><ReactMarkdown>{stripBlocks(m.text)}</ReactMarkdown></div>
                 {user && parseBlocks(m.text).map((d, j) => <AddCard key={j} med={d} userId={user.id} />)}</div>
         ))}
       </div>
-      <form className="relative" onSubmit={(e) => { e.preventDefault(); send(); }}>
-        <Input className="h-12 pr-14 text-lg" value={q} onChange={(e) => setQ(e.target.value)} placeholder="What do you want to know today?" />
-        <Button type="submit" size="icon" aria-label="Send" disabled={busy} className="absolute right-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Send /></Button>
-      </form>
+
+      <div className="space-y-2">
+        <div className="flex flex-wrap items-center gap-1">
+          <input ref={fileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={pick} />
+          <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick} />
+          <Button type="button" variant="ghost" size="icon" aria-label="Attach a file" title="Attach a file" onClick={() => fileRef.current?.click()}><Paperclip /></Button>
+          <Button type="button" variant="ghost" size="icon" aria-label="Take a photo" title="Take a photo" onClick={() => camRef.current?.click()}><Camera /></Button>
+          <Button type="button" variant={recording ? "destructive" : "ghost"} size="icon" aria-label="Speak your question" title="Speak your question" onClick={toggleRec}><Mic /></Button>
+          {uploading && <span className="text-sm text-muted-foreground">Attaching…</span>}
+          {recording && <span className="text-sm font-medium text-destructive">Listening… tap the mic to stop</span>}
+          {hearing && <span className="text-sm text-muted-foreground">Turning your voice into text…</span>}
+        </div>
+
+        {file && (
+          <div className="inline-flex max-w-full items-center gap-2 rounded-full border bg-secondary px-3 py-1 text-sm">
+            <Paperclip className="h-4 w-4 shrink-0" />
+            <span className="truncate">{file.name}</span>
+            <button type="button" aria-label="Remove attachment" onClick={() => setFile(null)}><X className="h-4 w-4" /></button>
+          </div>
+        )}
+
+        <form className="relative" onSubmit={(e) => { e.preventDefault(); send(); }}>
+          <Input className="h-12 pr-14 text-lg" value={q} onChange={(e) => setQ(e.target.value)} placeholder="What do you want to know today?" />
+          <Button type="submit" size="icon" aria-label="Send" disabled={busy} className="absolute right-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Send /></Button>
+        </form>
+      </div>
     </div>
   );
 }
