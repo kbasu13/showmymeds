@@ -59,6 +59,12 @@ export function adherenceByDay(meds: Med[], logs: Log[], days: string[]) {
   });
 }
 
+/** Available stock can never be below zero: negatives, blanks and junk all become 0. */
+export function clampStock(v: string | number): number {
+  const n = Number(v);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
 /** Number of dose occurrences the current stock covers (calendar export cap). */
 export function dosesCoveredByStock(med: Pick<Med, "stock" | "dose_qty">) {
   const q = Number(med.dose_qty || 1);

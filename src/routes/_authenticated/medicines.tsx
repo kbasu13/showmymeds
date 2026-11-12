@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, lookupMedInfo, uploadFile, type Medicine,
 } from "@/lib/meds";
-import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, titleCase, type Med } from "@/lib/schedule";
+import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, titleCase, clampStock, type Med } from "@/lib/schedule";
 import type { RxItem } from "@/routes/api/rxscan";
 
 export const Route = createFileRoute("/_authenticated/medicines")({ staticData: { sitemap: false },
@@ -221,7 +221,7 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
     const row = {
       name: f.name.trim(), composition: composition || null, manufacturer: manufacturer.trim() || null, form: f.form, dosage: f.dosage || null,
       dose_qty: Number(f.dose_qty) || 1, times: f.times.filter(Boolean), start_date: f.start_date,
-      end_date: ongoing ? null : f.end_date || null, warn_days: f.warn_days, stock: Number(f.stock) || 0, image_url,
+      end_date: ongoing ? null : f.end_date || null, warn_days: f.warn_days, stock: clampStock(f.stock), image_url,
       prescription_path: f.prescription_path, notes: f.notes || null,
     };
     const { error } = med
@@ -318,8 +318,9 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
             </label>
           </Field>
 
-          <Field label={`How many ${UNITS[f.form] ?? "units"} do you have now?`}>
-            <Input type="number" value={f.stock} onChange={(e) => set("stock", e.target.value)} />
+          <Field label={`How many ${UNITS[f.form] ?? "units"} do you have now?`} hint="Cannot be below 0.">
+            <Input type="number" min={0} step="any" inputMode="decimal" value={f.stock}
+              onChange={(e) => set("stock", String(clampStock(e.target.value)))} />
           </Field>
 
           <Field label="Warn me before it runs out" hint="We show the refill reminder this many days ahead.">

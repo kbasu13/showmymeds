@@ -28,6 +28,7 @@ import { Route as AuthenticatedServicesRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedSubscriptionRouteImport } from './routes/_authenticated/subscription'
 import { Route as AuthenticatedTodayRouteImport } from './routes/_authenticated/today'
 import { Route as ApiAskRouteImport } from './routes/api/ask'
+import { Route as ApiAskTranscribeRouteImport } from './routes/api/ask-transcribe'
 import { Route as ApiCompositionRouteImport } from './routes/api/composition'
 import { Route as ApiMedimageRouteImport } from './routes/api/medimage'
 import { Route as ApiMedphotoRouteImport } from './routes/api/medphoto'
@@ -133,6 +134,11 @@ const ApiAskRoute = ApiAskRouteImport.update({
   path: '/api/ask',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAskTranscribeRoute = ApiAskTranscribeRouteImport.update({
+  id: '/api/ask-transcribe',
+  path: '/api/ask-transcribe',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiCompositionRoute = ApiCompositionRouteImport.update({
   id: '/api/composition',
   path: '/api/composition',
@@ -194,6 +200,7 @@ export interface FileRoutesByFullPath {
   '/subscription': typeof AuthenticatedSubscriptionRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
+  '/api/ask-transcribe': typeof ApiAskTranscribeRoute
   '/api/composition': typeof ApiCompositionRoute
   '/api/medimage': typeof ApiMedimageRoute
   '/api/medphoto': typeof ApiMedphotoRoute
@@ -222,6 +229,7 @@ export interface FileRoutesByTo {
   '/subscription': typeof AuthenticatedSubscriptionRoute
   '/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
+  '/api/ask-transcribe': typeof ApiAskTranscribeRoute
   '/api/composition': typeof ApiCompositionRoute
   '/api/medimage': typeof ApiMedimageRoute
   '/api/medphoto': typeof ApiMedphotoRoute
@@ -252,6 +260,7 @@ export interface FileRoutesById {
   '/_authenticated/subscription': typeof AuthenticatedSubscriptionRoute
   '/_authenticated/today': typeof AuthenticatedTodayRoute
   '/api/ask': typeof ApiAskRoute
+  '/api/ask-transcribe': typeof ApiAskTranscribeRoute
   '/api/composition': typeof ApiCompositionRoute
   '/api/medimage': typeof ApiMedimageRoute
   '/api/medphoto': typeof ApiMedphotoRoute
@@ -282,6 +291,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/today'
     | '/api/ask'
+    | '/api/ask-transcribe'
     | '/api/composition'
     | '/api/medimage'
     | '/api/medphoto'
@@ -310,6 +320,7 @@ export interface FileRouteTypes {
     | '/subscription'
     | '/today'
     | '/api/ask'
+    | '/api/ask-transcribe'
     | '/api/composition'
     | '/api/medimage'
     | '/api/medphoto'
@@ -339,6 +350,7 @@ export interface FileRouteTypes {
     | '/_authenticated/subscription'
     | '/_authenticated/today'
     | '/api/ask'
+    | '/api/ask-transcribe'
     | '/api/composition'
     | '/api/medimage'
     | '/api/medphoto'
@@ -358,6 +370,7 @@ export interface RootRouteChildren {
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
   ApiAskRoute: typeof ApiAskRoute
+  ApiAskTranscribeRoute: typeof ApiAskTranscribeRoute
   ApiCompositionRoute: typeof ApiCompositionRoute
   ApiMedimageRoute: typeof ApiMedimageRoute
   ApiMedphotoRoute: typeof ApiMedphotoRoute
@@ -502,6 +515,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAskRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/ask-transcribe': {
+      id: '/api/ask-transcribe'
+      path: '/api/ask-transcribe'
+      fullPath: '/api/ask-transcribe'
+      preLoaderRoute: typeof ApiAskTranscribeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/composition': {
       id: '/api/composition'
       path: '/api/composition'
@@ -603,6 +623,7 @@ const rootRouteChildren: RootRouteChildren = {
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
   ApiAskRoute: ApiAskRoute,
+  ApiAskTranscribeRoute: ApiAskTranscribeRoute,
   ApiCompositionRoute: ApiCompositionRoute,
   ApiMedimageRoute: ApiMedimageRoute,
   ApiMedphotoRoute: ApiMedphotoRoute,

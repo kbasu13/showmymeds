@@ -99,6 +99,13 @@
       "when": 1794427719666,
       "tag": "0013_fix_legacy_premium_source_and_reject_refund_code",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1794507759186,
+      "tag": "0014_medicines_stock_non_negative",
+      "breakpoints": true
     }
   ]
 }

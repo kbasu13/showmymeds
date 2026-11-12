@@ -19,3 +19,4 @@
 - Production builds never emit source maps; keeps client source unreadable in browser tools.
 - UPI Premium activates only via admin approval of a submitted UTR (`submit_payment` → `admin_review_payment`); users cannot self-activate because personal UPI gives no payment confirmation.
 - Resolve personal display names through the shared profile-name helper and cached profile hook, preserving explicit invoice billing names and contact emails so identity presentation stays consistent without changing account records.
+- Ask attachments upload to the caller's own private folder and only paths under that user id are read server-side (photos to the vision model, PDFs text-extracted with unpdf); voice recordings are transcribed by /api/ask-transcribe behind the same active-and-Premium checks, so one account can never read another's file.
