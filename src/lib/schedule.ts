@@ -6,6 +6,7 @@ export type Med = {
   end_date: string | null;
   stock: number;
   dose_qty: number;
+  form?: string;
   warn_days?: number | null;
 };
 
