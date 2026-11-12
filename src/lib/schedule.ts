@@ -153,7 +153,7 @@ export function doseText(qty: number, form: string) {
   const q = Number.isFinite(n0) ? n0 : 1;
   const [one, many] = UNIT[form] ?? ["unit", "units"];
   const n = q === 0.5 ? "½" : q === 0.25 ? "¼" : String(q);
-  return `${n} ${q > 1 ? many : one}`;
+  return `${n} ${q === 1 || q === 0.5 || q === 0.25 ? one : many}`;
 }
 
 /** "2026-11-01" -> "01-11-2026, Sun" */
