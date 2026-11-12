@@ -95,8 +95,9 @@ function AskPage() {
         body: fd,
       });
       const j = (await r.json().catch(() => ({}))) as { text?: string; error?: string };
-      if (!r.ok || !j.text) { toast.error(j.error ?? "I could not hear that. Please try again."); return; }
-      setQ((v) => (v.trim() ? `${v.trim()} ${j.text}` : j.text));
+      const heard = (j.text ?? "").trim();
+      if (!r.ok || !heard) { toast.error(j.error ?? "I could not hear that. Please try again."); return; }
+      setQ((v) => (v.trim() ? `${v.trim()} ${heard}` : heard));
     } catch {
       toast.error("Voice input is not available right now. Please type your question.");
     } finally {
