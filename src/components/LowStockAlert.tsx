@@ -3,25 +3,25 @@ import { daysOfStockLeft, doseText, stockLevel, type Med, type StockLevel } from
 
 const LEVELS: {
   level: StockLevel;
-  title: (days: number) => string;
+  title: string;
   box: string;
   icon: typeof AlertTriangle;
 }[] = [
   {
     level: "empty",
-    title: () => "No stock left - please refill immediately",
+    title: "No stock left - please refill immediately",
     box: "border-destructive bg-destructive text-destructive-foreground",
     icon: OctagonX,
   },
   {
     level: "critical",
-    title: () => "Critically low stock - please refill urgently",
+    title: "Critically low stock - please refill urgently",
     box: "border-critical bg-critical/60 text-critical-foreground",
     icon: TriangleAlert,
   },
   {
     level: "low",
-    title: () => "Running low — please refill soon",
+    title: "Running low — please refill soon",
     box: "border-warning bg-warning/30 text-warning-foreground",
     icon: AlertTriangle,
   },
@@ -42,7 +42,7 @@ export function LowStockAlert({ meds, today }: { meds: Med[]; today: string }) {
         <div key={level} role="alert" className={`flex gap-3 rounded-xl border-2 p-4 ${box}`}>
           <Icon className="mt-1 h-8 w-8 shrink-0" />
           <div>
-            <p className="text-xl font-bold">{title(0)}</p>
+            <p className="text-xl font-bold">{title}</p>
             <ul className="mt-1 text-lg">
               {list.map((m) => (
                 <li key={m.id}>
