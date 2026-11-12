@@ -149,7 +149,8 @@ const UNIT: Record<string, [string, string]> = {
 };
 /** 1 + "tablet" -> "1 tablet", 2 -> "2 tablets", 0.5 -> "½ tablet" */
 export function doseText(qty: number, form: string) {
-  const q = Number(qty) || 1;
+  const n0 = Number(qty);
+  const q = Number.isFinite(n0) ? n0 : 1;
   const [one, many] = UNIT[form] ?? ["unit", "units"];
   const n = q === 0.5 ? "½" : q === 0.25 ? "¼" : String(q);
   return `${n} ${q > 1 ? many : one}`;
