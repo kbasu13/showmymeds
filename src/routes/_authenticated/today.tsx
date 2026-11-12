@@ -1,11 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { AlertTriangle, CheckCircle2, Plus, BellRing, Gem } from "lucide-react";
+import { CheckCircle2, Plus, BellRing, Gem } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MedImage } from "@/components/MedImage";
+import { LowStockAlert } from "@/components/LowStockAlert";
 import { usePremium } from "@/components/Premium";
 import { useUser, useMeds, useLogs, takeDose, useRefreshMeds } from "@/lib/meds";
-import { dosesForDay, isLowStock, daysOfStockLeft, ymd, time12, doseText, type Med } from "@/lib/schedule";
+import { dosesForDay, ymd, time12, doseText, type Med } from "@/lib/schedule";
 
 export const Route = createFileRoute("/_authenticated/today")({ staticData: { sitemap: false },
   head: () => ({ meta: [{ title: "Today's doses — ShowMyMeds" }, { name: "description", content: "Your medicines for today." }, { property: "og:title", content: "Today's doses — ShowMyMeds" }, { property: "og:description", content: "Your medicines for today." }, { property: "og:type", content: "website" }, { name: "twitter:card", content: "summary" }] }),
@@ -21,7 +22,6 @@ function TodayPage() {
   const refresh = useRefreshMeds();
 
   const doses = dosesForDay(meds as unknown as Med[], today);
-  const low = meds.filter((m) => isLowStock(m as unknown as Med, today));
   const dateLabel = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" });
 
   const take = async (id: string, time: string, name: string) => {
@@ -42,19 +42,7 @@ function TodayPage() {
       </div>
       <Button asChild variant="outline" size="lg" className="w-full text-base"><Link to="/notifications"><BellRing /> Allow notifications {!premium && <Gem className="h-4 w-4 text-premium" aria-label="Premium" />}</Link></Button>
 
-      {low.length > 0 && (
-        <div role="alert" className="flex gap-3 rounded-xl border-2 border-warning bg-warning/30 p-4 text-warning-foreground">
-          <AlertTriangle className="mt-1 h-8 w-8 shrink-0" />
-          <div>
-            <p className="text-xl font-bold">Running low — please refill soon</p>
-            <ul className="mt-1 text-lg">
-              {low.map((m) => (
-                <li key={m.id}><b>{m.name}</b>: about {daysOfStockLeft(m as unknown as Med)} day(s) left ({Number(m.stock)} left)</li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      )}
+      <LowStockAlert meds={meds as unknown as Med[]} today={today} />
 
       {isLoading ? (
         <p className="text-lg">Loading…</p>

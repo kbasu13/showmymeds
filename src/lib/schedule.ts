@@ -12,6 +12,7 @@ export type Med = {
 export type Log = { medicine_id: string; scheduled_date: string; scheduled_time: string; taken_at: string };
 
 export const LOW_STOCK_DAYS = 7;
+export const CRITICAL_STOCK_DAYS = 2;
 
 export function ymd(d: Date) {
   const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -45,6 +46,21 @@ export function daysOfStockLeft(med: Pick<Med, "times" | "dose_qty" | "stock">) 
 export function isLowStock(med: Med, today: string) {
   if (med.end_date && med.end_date < today) return false;
   return daysOfStockLeft(med) < (med.warn_days ?? LOW_STOCK_DAYS);
+}
+
+export type StockLevel = "empty" | "critical" | "low";
+
+/**
+ * Stock urgency for a medicine still in course:
+ * "empty" = nothing left, "critical" = under 2 days left, "low" = under the warn buffer, null = fine.
+ */
+export function stockLevel(med: Med, today: string): StockLevel | null {
+  if (med.end_date && med.end_date < today) return null;
+  if (Number(med.stock) <= 0) return "empty";
+  const days = daysOfStockLeft(med);
+  if (days < CRITICAL_STOCK_DAYS) return "critical";
+  if (days < (med.warn_days ?? LOW_STOCK_DAYS)) return "low";
+  return null;
 }
 
 /** Adherence % per day: taken scheduled doses / scheduled doses. Null when nothing was scheduled. */

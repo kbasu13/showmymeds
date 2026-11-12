@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { isLowStock, daysOfStockLeft, adherenceByDay, buildIcs, type Med } from "./schedule";
+import { isLowStock, daysOfStockLeft, adherenceByDay, buildIcs, stockLevel, type Med } from "./schedule";
 
 const med = (o: Partial<Med> = {}): Med => ({
   id: "m1", name: "Aspirin", times: ["08:00", "20:00"], start_date: "2026-01-01",
@@ -11,6 +11,17 @@ describe("stock rules", () => {
     expect(daysOfStockLeft(med({ stock: 13 }))).toBe(6);
     expect(isLowStock(med({ stock: 13 }), "2026-02-01")).toBe(true);
     expect(isLowStock(med({ stock: 14 }), "2026-02-01")).toBe(false);
+  });
+
+  it("grades stock as empty, critical, low or fine", () => {
+    // 2 doses/day: 0 left = empty, 2 left = 1 day = critical, 10 left = 5 days = low, 20 left = fine
+    expect(stockLevel(med({ stock: 0 }), "2026-02-01")).toBe("empty");
+    expect(stockLevel(med({ stock: 2 }), "2026-02-01")).toBe("critical");
+    expect(stockLevel(med({ stock: 3 }), "2026-02-01")).toBe("critical");
+    expect(stockLevel(med({ stock: 10 }), "2026-02-01")).toBe("low");
+    expect(stockLevel(med({ stock: 20 }), "2026-02-01")).toBeNull();
+    // finished courses never warn
+    expect(stockLevel(med({ stock: 0, end_date: "2026-01-15" }), "2026-02-01")).toBeNull();
   });
 });
 
