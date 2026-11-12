@@ -135,7 +135,8 @@ function AskPage() {
     const question = q.trim() || "Please look at the attached file.";
     const attached = file;
     const history = [...msgs.slice(1), { role: "user" as const, text: question }];
-    setMsgs((m) => [...m, { role: "user", text: question, att: attached?.name }, { role: "assistant", text: "…" }]);
+    const userMsg: Msg = attached ? { role: "user", text: question, att: attached.name } : { role: "user", text: question };
+    setMsgs((m) => [...m, userMsg, { role: "assistant", text: "…" }]);
     setQ("");
     setFile(null);
     setBusy(true);

@@ -84,7 +84,7 @@ export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false 
           const isPdf = ext === "pdf" || blob.type === "application/pdf";
           const bytes = new Uint8Array(await blob.arrayBuffer());
           const last = messages[messages.length - 1];
-          if (isPdf) {
+          if (last && isPdf) {
             let doc = "";
             try {
               const { extractText, getDocumentProxy } = await import("unpdf");
@@ -96,13 +96,13 @@ export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false 
             const note = doc
               ? `\n\n[Text from the attached PDF]\n${doc.slice(0, 12000)}`
               : "\n\n[The attached PDF had no readable text — it may be a scanned picture. Ask for a clearer photo.]";
-            last.content = `${typeof last?.content === "string" ? last.content : ""}${note}`;
-          } else {
+            last.content = `${typeof last.content === "string" ? last.content : ""}${note}`;
+          } else if (last) {
             const mime = blob.type || IMG_EXT[ext] || "image/jpeg";
             if (!mime.startsWith("image/")) return Response.json({ error: "That attachment is not a photo or PDF." }, { status: 400 });
             if (bytes.length > MAX_IMAGE_BYTES) return Response.json({ error: "That photo is too large. Please attach a smaller one." }, { status: 400 });
             last.content = [
-              { type: "text", text: typeof last?.content === "string" ? last.content : "" },
+              { type: "text", text: typeof last.content === "string" ? last.content : "" },
               { type: "image", image: `data:${mime};base64,${base64(bytes)}`, mediaType: mime },
             ];
           }
