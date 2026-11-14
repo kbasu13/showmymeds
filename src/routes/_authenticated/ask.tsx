@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Send, Plus, Paperclip, Camera, Mic, Square, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser, FORMS, uploadFile } from "@/lib/meds";
 import { joinTimes, doseText } from "@/lib/schedule";
@@ -57,6 +57,14 @@ function AskPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const camRef = useRef<HTMLInputElement>(null);
   const recRef = useRef<MediaRecorder | null>(null);
+  const boxRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    const el = boxRef.current;
+    if (!el) return;
+    el.style.height = "auto";
+    el.style.height = `${Math.min(el.scrollHeight, 160)}px`;
+  }, [q]);
 
   if (isLoading) return <p>Loading…</p>;
   if (!premium) {
@@ -220,14 +228,23 @@ function AskPage() {
               </button>
             </div>
           )}
-          <Button type="button" size="icon" variant="ghost" aria-label="More options" aria-expanded={toolsOpen} onClick={() => setToolsOpen((v) => !v)} className="absolute left-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Plus className={toolsOpen ? "rotate-45 transition-transform" : "transition-transform"} /></Button>
-          <Input className={`h-12 pl-12 text-base ${recording ? "pr-24" : "pr-14"}`} value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setToolsOpen(false)} placeholder="What would you like to know?" />
+          <Button type="button" size="icon" variant="ghost" aria-label="More options" aria-expanded={toolsOpen} onClick={() => setToolsOpen((v) => !v)} className="absolute bottom-1.5 left-1.5 h-9 w-9"><Plus className={toolsOpen ? "rotate-45 transition-transform" : "transition-transform"} /></Button>
+          <Textarea
+            ref={boxRef}
+            rows={1}
+            className={`min-h-12 resize-none overflow-y-auto py-3 pl-12 text-base leading-normal ${recording ? "pr-24" : "pr-14"}`}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            onFocus={() => setToolsOpen(false)}
+            onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
+            placeholder="What would you like to know?"
+          />
           {recording && (
-            <Button type="button" size="icon" variant="destructive" aria-label="Stop recording" onClick={() => recRef.current?.stop()} className="absolute right-12 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full">
+            <Button type="button" size="icon" variant="destructive" aria-label="Stop recording" onClick={() => recRef.current?.stop()} className="absolute bottom-1.5 right-12 h-9 w-9 rounded-full">
               <Square className="h-4 w-4 fill-current" />
             </Button>
           )}
-          <Button type="submit" size="icon" aria-label="Send" disabled={busy} className="absolute right-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Send /></Button>
+          <Button type="submit" size="icon" aria-label="Send" disabled={busy} className="absolute bottom-1.5 right-1.5 h-9 w-9"><Send /></Button>
         </form>
       </div>
     </div>
