@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useRef, useState } from "react";
-import { Send, Plus, Paperclip, Camera, Mic, X } from "lucide-react";
+import { Send, Plus, Paperclip, Camera, Mic, Square, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
