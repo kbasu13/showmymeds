@@ -193,7 +193,7 @@ function AskPage() {
         {(uploading || recording || hearing) && (
           <div className="flex items-center gap-2">
             {uploading && <span className="text-sm text-muted-foreground">Attaching…</span>}
-            {recording && <span className="text-sm font-medium text-destructive">Listening… tap the mic to stop</span>}
+            {recording && <span className="text-sm font-medium text-destructive">Listening… tap stop when you're done</span>}
             {hearing && <span className="text-sm text-muted-foreground">Turning your voice into text…</span>}
           </div>
         )}
@@ -221,7 +221,12 @@ function AskPage() {
             </div>
           )}
           <Button type="button" size="icon" variant="ghost" aria-label="More options" aria-expanded={toolsOpen} onClick={() => setToolsOpen((v) => !v)} className="absolute left-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Plus className={toolsOpen ? "rotate-45 transition-transform" : "transition-transform"} /></Button>
-          <Input className="h-12 pl-12 pr-14 text-lg" value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setToolsOpen(false)} placeholder="What do you want to know today?" />
+          <Input className={`h-12 pl-12 text-base ${recording ? "pr-24" : "pr-14"}`} value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setToolsOpen(false)} placeholder="What would you like to know?" />
+          {recording && (
+            <Button type="button" size="icon" variant="destructive" aria-label="Stop recording" onClick={() => recRef.current?.stop()} className="absolute right-12 top-1/2 h-9 w-9 -translate-y-1/2 rounded-full">
+              <Square className="h-4 w-4 fill-current" />
+            </Button>
+          )}
           <Button type="submit" size="icon" aria-label="Send" disabled={busy} className="absolute right-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Send /></Button>
         </form>
       </div>
