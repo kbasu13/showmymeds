@@ -53,6 +53,7 @@ function AskPage() {
   const [uploading, setUploading] = useState(false);
   const [recording, setRecording] = useState(false);
   const [hearing, setHearing] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const camRef = useRef<HTMLInputElement>(null);
   const recRef = useRef<MediaRecorder | null>(null);
@@ -187,16 +188,15 @@ function AskPage() {
       </div>
 
       <div className="space-y-2">
-        <div className="flex flex-wrap items-center gap-1">
-          <input ref={fileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={pick} />
-          <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick} />
-          <Button type="button" variant="ghost" size="icon" aria-label="Attach a file" title="Attach a file" onClick={() => fileRef.current?.click()}><Paperclip /></Button>
-          <Button type="button" variant="ghost" size="icon" aria-label="Take a photo" title="Take a photo" onClick={() => camRef.current?.click()}><Camera /></Button>
-          <Button type="button" variant={recording ? "destructive" : "ghost"} size="icon" aria-label="Speak your question" title="Speak your question" onClick={toggleRec}><Mic /></Button>
-          {uploading && <span className="text-sm text-muted-foreground">Attaching…</span>}
-          {recording && <span className="text-sm font-medium text-destructive">Listening… tap the mic to stop</span>}
-          {hearing && <span className="text-sm text-muted-foreground">Turning your voice into text…</span>}
-        </div>
+        <input ref={fileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={pick} />
+        <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick} />
+        {(uploading || recording || hearing) && (
+          <div className="flex items-center gap-2">
+            {uploading && <span className="text-sm text-muted-foreground">Attaching…</span>}
+            {recording && <span className="text-sm font-medium text-destructive">Listening… tap the mic to stop</span>}
+            {hearing && <span className="text-sm text-muted-foreground">Turning your voice into text…</span>}
+          </div>
+        )}
 
         {file && (
           <div className="inline-flex max-w-full items-center gap-2 rounded-full border bg-secondary px-3 py-1 text-sm">
@@ -207,7 +207,21 @@ function AskPage() {
         )}
 
         <form className="relative" onSubmit={(e) => { e.preventDefault(); send(); }}>
-          <Input className="h-12 pr-14 text-lg" value={q} onChange={(e) => setQ(e.target.value)} placeholder="What do you want to know today?" />
+          {toolsOpen && (
+            <div className="absolute bottom-full left-0 z-10 mb-2 w-56 rounded-xl border bg-card p-1.5 shadow-lg">
+              <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-base hover:bg-secondary" onClick={() => { setToolsOpen(false); fileRef.current?.click(); }}>
+                <Paperclip className="h-4.5 w-4.5 text-primary" /> Attach a photo or PDF
+              </button>
+              <button type="button" className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-base hover:bg-secondary" onClick={() => { setToolsOpen(false); camRef.current?.click(); }}>
+                <Camera className="h-4.5 w-4.5 text-primary" /> Take a photo
+              </button>
+              <button type="button" className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left text-base hover:bg-secondary ${recording ? "text-destructive" : ""}`} onClick={() => { setToolsOpen(false); toggleRec(); }}>
+                <Mic className={`h-4.5 w-4.5 ${recording ? "text-destructive" : "text-primary"}`} /> {recording ? "Stop recording" : "Speak your question"}
+              </button>
+            </div>
+          )}
+          <Button type="button" size="icon" variant="ghost" aria-label="More options" aria-expanded={toolsOpen} onClick={() => setToolsOpen((v) => !v)} className="absolute left-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Plus className={toolsOpen ? "rotate-45 transition-transform" : "transition-transform"} /></Button>
+          <Input className="h-12 pl-12 pr-14 text-lg" value={q} onChange={(e) => setQ(e.target.value)} onFocus={() => setToolsOpen(false)} placeholder="What do you want to know today?" />
           <Button type="submit" size="icon" aria-label="Send" disabled={busy} className="absolute right-1.5 top-1/2 h-9 w-9 -translate-y-1/2"><Send /></Button>
         </form>
       </div>
