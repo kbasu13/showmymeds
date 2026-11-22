@@ -8,6 +8,10 @@ export type Med = {
   dose_qty: number;
   form?: string;
   warn_days?: number | null;
+  /** 1 = daily, 2 = every 2nd day… counted from start_date. Ignored when week_days is set. */
+  repeat_every?: number | null;
+  /** 0 = Sunday … 6 = Saturday. Null/empty = not weekday-based. */
+  week_days?: number[] | null;
 };
 
 export type Log = { medicine_id: string; scheduled_date: string; scheduled_time: string; taken_at: string };
@@ -25,19 +29,51 @@ export function isActiveOn(med: Pick<Med, "start_date" | "end_date">, date: stri
   return med.start_date <= date && (!med.end_date || med.end_date >= date);
 }
 
+type Freq = Pick<Med, "start_date" | "end_date" | "repeat_every" | "week_days">;
+
+/** Is this medicine scheduled on this date (course range + repeat rule)? */
+export function isDueOn(med: Freq, date: string) {
+  if (!isActiveOn(med, date)) return false;
+  const d = new Date(date + "T00:00");
+  if (med.week_days?.length) return med.week_days.includes(d.getDay());
+  const every = Math.max(1, Number(med.repeat_every) || 1);
+  if (every === 1) return true;
+  const diff = Math.round((d.getTime() - new Date(med.start_date + "T00:00").getTime()) / 864e5);
+  return diff % every === 0;
+}
+
+/** Fraction of days the medicine is taken (1 daily, 0.5 alternate days, 1/7 weekly). */
+export function dayFraction(med: Pick<Med, "repeat_every" | "week_days">) {
+  if (med.week_days?.length) return med.week_days.length / 7;
+  return 1 / Math.max(1, Number(med.repeat_every) || 1);
+}
+
+const WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+/** "Every day", "Every 2nd day", "Every Mon and Thu" */
+export function frequencyText(med: Pick<Med, "repeat_every" | "week_days">) {
+  if (med.week_days?.length) {
+    const t = [...med.week_days].sort().map((i) => WD[i]!);
+    return t.length === 7 ? "Every day" : `Every ${t.length <= 1 ? t[0] : `${t.slice(0, -1).join(", ")} and ${t[t.length - 1]}`}`;
+  }
+  const n = Math.max(1, Number(med.repeat_every) || 1);
+  if (n === 1) return "Every day";
+  const suf = n % 10 === 2 && n !== 12 ? "nd" : n % 10 === 3 && n !== 13 ? "rd" : n % 10 === 1 && n !== 11 ? "st" : "th";
+  return `Every ${n}${suf} day`;
+}
+
 export function dosesForDay(meds: Med[], date: string) {
   return meds
-    .filter((m) => isActiveOn(m, date))
+    .filter((m) => isDueOn(m, date))
     .flatMap((m) => [...m.times].sort().map((time) => ({ med: m, time })))
     .sort((a, b) => a.time.localeCompare(b.time));
 }
 
 /** Units used per day. */
-export function dailyUse(med: Pick<Med, "times" | "dose_qty">) {
-  return med.times.length * Number(med.dose_qty || 1);
+export function dailyUse(med: Pick<Med, "times" | "dose_qty" | "repeat_every" | "week_days">) {
+  return med.times.length * Number(med.dose_qty || 1) * dayFraction(med);
 }
 
-export function daysOfStockLeft(med: Pick<Med, "times" | "dose_qty" | "stock">) {
+export function daysOfStockLeft(med: Pick<Med, "times" | "dose_qty" | "stock" | "repeat_every" | "week_days">) {
   const use = dailyUse(med);
   if (use <= 0) return Infinity;
   return Math.floor(Number(med.stock) / use);
@@ -104,7 +140,7 @@ export function buildIcs(meds: Med[], from: Date = new Date()) {
     while (remaining > 0 && guard < 400) {
       const date = ymd(day);
       if (med.end_date && date > med.end_date) break;
-      if (isActiveOn(med, date)) {
+      if (isDueOn(med, date)) {
         for (const t of [...med.times].sort()) {
           if (remaining <= 0) break;
           const [h = 0, mi = 0] = t.split(":").map(Number);

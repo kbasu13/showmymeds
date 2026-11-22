@@ -34,3 +34,7 @@
 - [x] Profile: Allow notifications shows the full blue Premium pill like Discover; Sign out gets an icon
 - [x] Available stock can never go below 0 (form clamps, database blocks negatives)
 - [x] Ask box: attach a file, open the camera for a photo, and ask a question by voice
+
+- [x] Medicines: every-N-days and weekday schedules
+- [x] Ask: show usage per reply, monthly allowance (100), warn at 80%
+- [ ] Ask: paid top-up pack via UPI + admin approval when allowance runs out — waiting on pack size/price

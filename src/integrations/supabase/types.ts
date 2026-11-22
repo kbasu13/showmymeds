@@ -14,6 +14,33 @@ export type Database = {
   }
   public: {
     Tables: {
+      ask_usage: {
+        Row: {
+          created_at: string
+          credits: number
+          id: string
+          input_tokens: number
+          output_tokens: number
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          credits?: number
+          id?: string
+          input_tokens?: number
+          output_tokens?: number
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          credits?: number
+          id?: string
+          input_tokens?: number
+          output_tokens?: number
+          user_id?: string
+        }
+        Relationships: []
+      }
       caregiver_links: {
         Row: {
           accepted_at: string | null
@@ -170,11 +197,13 @@ export type Database = {
           name: string
           notes: string | null
           prescription_path: string | null
+          repeat_every: number
           start_date: string
           stock: number
           times: string[]
           user_id: string
           warn_days: number
+          week_days: number[] | null
         }
         Insert: {
           composition?: string | null
@@ -189,11 +218,13 @@ export type Database = {
           name: string
           notes?: string | null
           prescription_path?: string | null
+          repeat_every?: number
           start_date?: string
           stock?: number
           times?: string[]
           user_id?: string
           warn_days?: number
+          week_days?: number[] | null
         }
         Update: {
           composition?: string | null
@@ -208,11 +239,13 @@ export type Database = {
           name?: string
           notes?: string | null
           prescription_path?: string | null
+          repeat_every?: number
           start_date?: string
           stock?: number
           times?: string[]
           user_id?: string
           warn_days?: number
+          week_days?: number[] | null
         }
         Relationships: []
       }

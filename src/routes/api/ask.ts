@@ -3,6 +3,7 @@ import { createClient } from "@supabase/supabase-js";
 import { createOpenAI } from "@ai-sdk/openai";
 import { streamText, type ModelMessage } from "ai";
 import type { Database } from "@/integrations/supabase/types";
+import { askAllowanceState, askCredits, monthStartIso, ASK_MONTHLY_LIMIT } from "@/lib/ask-usage";
 import { isValidatedAccountActive } from "@/lib/account-access.server";
 import {
   createLovableAiGatewayRunIdFetch,
@@ -23,7 +24,7 @@ If the user asks to ADD a medicine to their list, collect name, how many each ti
 {"name":"Dolo 650","form":"tablet","dose_qty":1,"times":["08:00","20:00"],"composition":"Paracetamol 650mg","manufacturer":"Micro Labs","stock":0,"start_date":"YYYY-MM-DD","end_date":null,"notes":null}
 \`\`\`
 form must be one of tablet, capsule, syrup, drops, injection, inhaler, cream; times are 24-hour HH:MM. You cannot save it yourself — the app shows an "Add" button to the user.
-Format every answer in Markdown so it is easy to read: a short bold one-line summary first, then "###" headings for sections, bullet points for lists, short paragraphs with blank lines between them. Keep it concise.`;
+Format every answer in Markdown so it is easy to read: a short bold one-line summary first, then "###" headings for sections, bullet points for lists, short paragraphs with blank lines between them. Keep it concise: answer only what was asked, usually under 150 words, no repetition.`;
 
 const IMG_EXT: Record<string, string> = {
   jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", webp: "image/webp",
@@ -67,6 +68,9 @@ export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false 
         if (!await isValidatedAccountActive(u.user.id)) return Response.json({ error: "Account access is suspended." }, { status: 403 });
         const { data: prem } = await db.from("premium_users").select("user_id, expires_at").eq("user_id", u.user.id).maybeSingle();
         if (!prem || (prem.expires_at && new Date(prem.expires_at) <= new Date())) return Response.json({ error: "Ask is a Premium feature." }, { status: 403 });
+
+        const { count: usedThisMonth } = await db.from("ask_usage").select("id", { count: "exact", head: true }).eq("user_id", u.user.id).gte("created_at", monthStartIso());
+        if (askAllowanceState(usedThisMonth ?? 0) === "blocked") return Response.json({ error: `You've used all ${ASK_MONTHLY_LIMIT} Ask replies for this month. It resets on the 1st.` }, { status: 429 });
 
         const body = (await request.json().catch(() => null)) as
           | { messages?: { role: string; text: string }[]; attachment?: { path?: string } }
@@ -112,10 +116,17 @@ export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false 
 
         const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
         const [{ data: meds }, { data: logs }] = await Promise.all([
-          db.from("medicines").select("*").eq("user_id", u.user.id),
-          db.from("dose_logs").select("*").eq("user_id", u.user.id).gte("scheduled_date", since),
+          db.from("medicines").select("id,name,composition,form,dose_qty,times,repeat_every,week_days,start_date,end_date,stock,notes").eq("user_id", u.user.id),
+          db.from("dose_logs").select("medicine_id").eq("user_id", u.user.id).gte("scheduled_date", since),
         ]);
-        const context = `Today is ${new Date().toISOString().slice(0, 10)}.\nMedicines: ${JSON.stringify(meds ?? [])}\nDoses taken in last 30 days: ${JSON.stringify(logs ?? [])}`;
+        // Compact context keeps every question cheap: one line per medicine, taken counts instead of raw logs.
+        const takenBy = new Map<string, number>();
+        for (const l of logs ?? []) takenBy.set(l.medicine_id, (takenBy.get(l.medicine_id) ?? 0) + 1);
+        const medLines = (meds ?? []).map((m) => [m.name, m.composition, `${m.dose_qty} ${m.form}`, m.times.join("/"),
+          m.week_days?.length ? `weekdays ${m.week_days.join(",")}` : (m.repeat_every ?? 1) > 1 ? `every ${m.repeat_every} days` : "daily",
+          `${m.start_date}..${m.end_date ?? "ongoing"}`, `stock ${m.stock}`, `taken ${takenBy.get(m.id) ?? 0}x/30d`, m.notes].filter(Boolean).join("; "));
+        const context = `Today is ${new Date().toISOString().slice(0, 10)}.\nMedicines:\n${medLines.join("\n") || "none"}`;
+        const userId = u.user.id;
 
         const apiKey = process.env['LOVABLE_API_KEY'];
         if (!apiKey) return Response.json({ error: "The assistant is not set up yet." }, { status: 500 });
@@ -131,6 +142,15 @@ export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false 
           instructions: `${INSTRUCTIONS}\n\n${context}`,
           messages,
           abortSignal: request.signal,
+          onFinish: async ({ totalUsage }) => {
+            try {
+              const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+              await supabaseAdmin.from("ask_usage").insert({
+                user_id: userId, input_tokens: totalUsage.inputTokens ?? 0, output_tokens: totalUsage.outputTokens ?? 0,
+                credits: askCredits({ inputTokens: totalUsage.inputTokens ?? 0, cachedInputTokens: (totalUsage as { inputTokenDetails?: { cacheReadTokens?: number } }).inputTokenDetails?.cacheReadTokens ?? 0, outputTokens: totalUsage.outputTokens ?? 0 }),
+              });
+            } catch (e) { console.error("Ask usage not recorded", e); }
+          },
           onError: ({ error }) => {
             console.error("Ask failed", error);
           },

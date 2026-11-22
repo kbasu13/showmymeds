@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from "react";
 import { Send, Plus, Paperclip, Camera, Mic, Square, X } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+import { askAllowanceState, monthStartIso, ASK_MONTHLY_LIMIT } from "@/lib/ask-usage";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { supabase } from "@/integrations/supabase/client";
@@ -15,7 +17,7 @@ export const Route = createFileRoute("/_authenticated/ask")({ staticData: { site
   component: AskPage,
 });
 
-type Msg = { role: "user" | "assistant"; text: string; att?: string };
+type Msg = { role: "user" | "assistant"; text: string; att?: string; credits?: number };
 type Attached = { path: string; name: string };
 
 const MAX_FILE = 8 * 1024 * 1024;
@@ -54,6 +56,14 @@ function AskPage() {
   const [recording, setRecording] = useState(false);
   const [hearing, setHearing] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
+  const { data: usage, refetch: refetchUsage } = useQuery({
+    queryKey: ["ask-usage", user?.id], enabled: !!user,
+    queryFn: async () => {
+      const { data } = await supabase.from("ask_usage").select("credits,created_at").eq("user_id", user!.id).gte("created_at", monthStartIso()).order("created_at", { ascending: false });
+      return { count: data?.length ?? 0, credits: (data ?? []).reduce((a, r) => a + Number(r.credits), 0) };
+    },
+  });
+  const usageState = askAllowanceState(usage?.count ?? 0);
   const fileRef = useRef<HTMLInputElement>(null);
   const camRef = useRef<HTMLInputElement>(null);
   const recRef = useRef<MediaRecorder | null>(null);
@@ -173,6 +183,13 @@ function AskPage() {
         put(text);
       }
       if (!text) put("Sorry, I couldn't answer that right now. Please try again later.");
+      else {
+        // The server records usage when the reply finishes; give it a moment, then show this reply's cost.
+        await new Promise((res) => setTimeout(res, 1200));
+        const { data: last } = await supabase.from("ask_usage").select("credits").eq("user_id", user!.id).order("created_at", { ascending: false }).limit(1).maybeSingle();
+        if (last) setMsgs((m) => m.map((x, i) => (i === m.length - 1 ? { ...x, credits: Number(last.credits) } : x)));
+        refetchUsage();
+      }
     } catch {
       put("Sorry, something went wrong. Please try again later.");
     } finally {
@@ -191,11 +208,19 @@ function AskPage() {
                 {m.att && <p className="mt-1 flex items-center gap-1 text-sm opacity-90"><Paperclip className="h-3.5 w-3.5" />{m.att}</p>}
               </div>
             : <div key={i} className="max-w-[90%] space-y-2"><div className=" space-y-2 rounded-xl bg-secondary p-3 text-base leading-relaxed [&_h3]:mt-3 [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-primary [&_ol]:list-decimal [&_ol]:pl-5 [&_strong]:font-semibold [&_ul]:list-disc [&_ul]:pl-5 [&_li]:mt-1"><ReactMarkdown>{stripBlocks(m.text)}</ReactMarkdown></div>
+                {m.credits !== undefined && <p className="px-1 text-xs text-muted-foreground">Used {m.credits.toFixed(2)} credits</p>}
                 {user && parseBlocks(m.text).map((d, j) => <AddCard key={j} med={d} userId={user.id} />)}</div>
         ))}
       </div>
 
       <div className="space-y-2">
+        {usage && (
+          <p className={`rounded-lg px-3 py-1.5 text-sm ${usageState === "ok" ? "text-muted-foreground" : "bg-warning/15 font-medium text-foreground"}`}>
+            {usageState === "blocked"
+              ? `You've used all ${ASK_MONTHLY_LIMIT} replies this month. Ask resets on the 1st.`
+              : `${usage.count} of ${ASK_MONTHLY_LIMIT} replies used this month · ${usage.credits.toFixed(2)} credits${usageState === "warn" ? " — running low" : ""}`}
+          </p>
+        )}
         <input ref={fileRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={pick} />
         <input ref={camRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={pick} />
         {(uploading || recording || hearing) && (

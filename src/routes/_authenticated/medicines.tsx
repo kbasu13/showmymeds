@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, lookupMedInfo, uploadFile, type Medicine,
 } from "@/lib/meds";
-import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, titleCase, clampStock, type Med } from "@/lib/schedule";
+import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, frequencyText, titleCase, clampStock, type Med } from "@/lib/schedule";
 import type { RxItem } from "@/routes/api/rxscan";
 
 export const Route = createFileRoute("/_authenticated/medicines")({ staticData: { sitemap: false },
@@ -100,7 +100,7 @@ function MedicinesPage() {
                   <p className="mt-1 font-medium">{doseText(Number(m.dose_qty), m.form)} each time</p>
                 </div>
                 <div className="min-w-0 sm:text-right">
-                  <p className="font-medium">at {joinTimes(m.times)}</p>
+                  <p className="font-medium">{frequencyText(m)} at {joinTimes(m.times)}</p>
                   <p className="text-sm">Available stock: {Number(m.stock)} ({daysOfStockLeft(m as unknown as Med)} days)</p>
                   <p className="text-sm text-muted-foreground">Started on {shortDay(m.start_date)}</p>
                   {m.end_date && <p className="text-sm text-muted-foreground">Ends on {shortDay(m.end_date)}</p>}
@@ -138,7 +138,9 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
     stock: String(med?.stock ?? 30), image_url: med?.image_url ?? null as string | null,
     prescription_path: med?.prescription_path ?? null as string | null, notes: med?.notes ?? prefill?.notes ?? "",
     warn_days: med?.warn_days ?? 7,
+    repeat_every: med?.repeat_every ?? 1, week_days: (med?.week_days ?? []) as number[],
   });
+  const freqMode: "daily" | "every" | "week" = f.week_days.length ? "week" : f.repeat_every > 1 ? "every" : "daily";
   const [ongoing, setOngoing] = useState(med ? !med.end_date : !prefill?.days);
   const [scanning, setScanning] = useState(false);
   const [found, setFound] = useState<RxItem[] | null>(null);
@@ -221,7 +223,7 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
     const row = {
       name: f.name.trim(), composition: composition || null, manufacturer: manufacturer.trim() || null, form: f.form, dosage: f.dosage || null,
       dose_qty: Number(f.dose_qty) || 1, times: f.times.filter(Boolean), start_date: f.start_date,
-      end_date: ongoing ? null : f.end_date || null, warn_days: f.warn_days, stock: clampStock(f.stock), image_url,
+      end_date: ongoing ? null : f.end_date || null, warn_days: f.warn_days, repeat_every: f.week_days.length ? 1 : f.repeat_every, week_days: f.week_days.length ? f.week_days : null, stock: clampStock(f.stock), image_url,
       prescription_path: f.prescription_path, notes: f.notes || null,
     };
     const { error } = med
@@ -308,6 +310,34 @@ function MedForm({ userId, med, prefill, remaining, onQueue, onClose, onSaved }:
                 </div>
               ))}
             </div>
+          </Field>
+
+          <Field label="How often?" hint="For alternate days, count starts from the course start date.">
+            <div className="grid grid-cols-3 gap-2">
+              <Button variant={freqMode === "daily" ? "default" : "outline"} onClick={() => setF((p) => ({ ...p, repeat_every: 1, week_days: [] }))}>Every day</Button>
+              <Button variant={freqMode === "every" ? "default" : "outline"} onClick={() => setF((p) => ({ ...p, repeat_every: p.repeat_every > 1 ? p.repeat_every : 2, week_days: [] }))}>Every few days</Button>
+              <Button variant={freqMode === "week" ? "default" : "outline"} onClick={() => setF((p) => ({ ...p, repeat_every: 1, week_days: p.week_days.length ? p.week_days : [new Date(p.start_date + "T00:00").getDay()] }))}>Days of week</Button>
+            </div>
+            {freqMode === "every" && (
+              <div className="flex items-center gap-2 pt-1">
+                <span>Every</span>
+                <Button variant="outline" size="icon" aria-label="Fewer days" onClick={() => set("repeat_every", Math.max(2, f.repeat_every - 1))}>−</Button>
+                <span className="w-8 text-center text-lg font-semibold">{f.repeat_every}</span>
+                <Button variant="outline" size="icon" aria-label="More days" onClick={() => set("repeat_every", Math.min(30, f.repeat_every + 1))}>+</Button>
+                <span>days</span>
+              </div>
+            )}
+            {freqMode === "week" && (
+              <div className="grid grid-cols-7 gap-1 pt-1">
+                {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => {
+                  const on = f.week_days.includes(i);
+                  return <Button key={i} size="sm" className="px-0" variant={on ? "default" : "outline"}
+                    aria-label={["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"][i]} aria-pressed={on}
+                    onClick={() => { const n = on ? f.week_days.filter((x) => x !== i) : [...f.week_days, i].sort(); if (n.length) set("week_days", n); }}>{d}</Button>;
+                })}
+              </div>
+            )}
+            <p className="text-sm text-muted-foreground">{frequencyText(f)}</p>
           </Field>
 
           <Field label="Course starts"><Input type="date" value={f.start_date} onChange={(e) => set("start_date", e.target.value)} /></Field>
