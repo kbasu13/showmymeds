@@ -5,7 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Gem, BellRing, Pencil, Trash2, X, Search, ImageOff } from "lucide-react";
+import { Plus, Mic, Camera, ImagePlus, CalendarPlus, Gem, BellRing, Pencil, Pause, Play, CircleStop, RotateCcw, X, Search, ImageOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,6 +49,7 @@ function MedicinesPage() {
   }, []);
 
   const exportCalendar = () => {
+    const meds = current.filter((m) => m.status !== "paused");
     if (!premium) {
       toast("Adding your schedule to the phone calendar is a Premium feature");
       navigate({ to: "/premium" });
@@ -69,11 +70,20 @@ function MedicinesPage() {
     toast.success("Calendar file ready — open it to add reminders to your phone calendar");
   };
 
-  const remove = async (m: Medicine) => {
-    if (!confirm(`Delete ${m.name}?`)) return;
-    await supabase.from("medicines").delete().eq("id", m.id);
+  const setState = async (m: Medicine, status: "active" | "paused" | "discontinued") => {
+    const today = ymd(new Date());
+    if (status === "discontinued" && !confirm(`Stop ${m.name}? Its past doses stay in your history and reports`)) return;
+    const patch =
+      status === "paused" ? { status, paused_from: today }
+      : status === "discontinued" ? { status, paused_from: null, end_date: m.end_date && m.end_date < today ? m.end_date : today }
+      : { status, paused_from: null, ...(m.status === "discontinued" ? { end_date: null } : {}) };
+    const { error } = await supabase.from("medicines").update(patch).eq("id", m.id);
+    if (error) { toast.error(error.message); return; }
+    toast.success(status === "paused" ? `${m.name} paused` : status === "discontinued" ? `${m.name} stopped — history kept` : `${m.name} is active again`);
     refresh();
   };
+  const current = meds.filter((m) => m.status !== "discontinued");
+  const stopped = meds.filter((m) => m.status === "discontinued");
 
   return (
     <div className="space-y-5">
@@ -88,13 +98,13 @@ function MedicinesPage() {
       )}
       <Button asChild variant="outline" size="lg" className="w-full text-base"><Link to="/notifications"><BellRing /> Allow notifications {!premium && <Gem className="h-4 w-4 text-premium" aria-label="Premium" />}</Link></Button>
       <ul className="space-y-3">
-        {meds.map((m) => (
-          <li key={m.id} className="rounded-xl border bg-card p-4 shadow-soft">
+        {current.map((m) => (
+          <li key={m.id} className={`rounded-xl border bg-card p-4 shadow-soft ${m.status === "paused" ? "opacity-70" : ""}`}>
             <div className="flex gap-3 sm:gap-4">
               <MedImage src={m.image_url} form={m.form} name={m.name} />
               <div className="grid min-w-0 flex-1 gap-x-4 gap-y-1 sm:grid-cols-[minmax(0,1fr)_auto]">
                 <div className="min-w-0">
-                  <p className="break-words text-lg font-semibold leading-tight text-primary">{m.name}</p>
+                  <p className="break-words text-lg font-semibold leading-tight text-primary">{m.name}{m.status === "paused" && <span className="ml-2 rounded-full bg-muted px-2 py-0.5 align-middle text-xs font-medium text-muted-foreground">Paused{m.paused_from ? ` since ${shortDay(m.paused_from)}` : ""}</span>}</p>
                   {m.manufacturer && <p className="text-muted-foreground">By {titleCase(m.manufacturer)}</p>}
                   <p className="break-words text-sm text-muted-foreground">{m.composition || "Composition not added"}</p>
                   <p className="mt-1 font-medium">{doseText(Number(m.dose_qty), m.form)} each time</p>
@@ -109,12 +119,32 @@ function MedicinesPage() {
             </div>
             <div className="mt-3 flex gap-2">
               <Button variant="secondary" className="text-base" onClick={() => setEditing(m)}><Pencil /> Edit</Button>
-              <Button variant="ghost" className="text-base text-destructive" onClick={() => remove(m)}><Trash2 /> Delete</Button>
+              {m.status === "paused"
+                ? <Button variant="outline" className="text-base" onClick={() => setState(m, "active")}><Play /> Resume</Button>
+                : <Button variant="outline" className="text-base" onClick={() => setState(m, "paused")}><Pause /> Pause</Button>}
+              <Button variant="ghost" className="text-base text-destructive" onClick={() => setState(m, "discontinued")}><CircleStop /> Stop</Button>
             </div>
           </li>
         ))}
         {meds.length === 0 && <p className="rounded-xl bg-hero p-8 text-center text-xl">No medicines yet. Tap “Add” to begin.</p>}
       </ul>
+      {stopped.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-lg font-semibold text-muted-foreground">Stopped medicines</h2>
+          <p className="text-sm text-muted-foreground">Kept for your history and doctor reports</p>
+          <ul className="space-y-2">
+            {stopped.map((m) => (
+              <li key={m.id} className="flex items-center gap-3 rounded-xl border bg-muted/40 p-3">
+                <div className="min-w-0 flex-1">
+                  <p className="break-words font-medium">{m.name}</p>
+                  <p className="text-sm text-muted-foreground">{shortDay(m.start_date)}{m.end_date ? ` – ${shortDay(m.end_date)}` : ""}</p>
+                </div>
+                <Button size="sm" variant="outline" onClick={() => setState(m, "active")}><RotateCcw /> Restart</Button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       {editing && user && (
         <MedForm key={formKey} userId={user.id} med={editing === "new" ? null : editing} prefill={editing === "new" ? prefill : null}
           remaining={queue.length}

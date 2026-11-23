@@ -25,7 +25,7 @@ export const Route = createFileRoute("/api/public/jobs/dose-push")({ staticData:
           if (!active.has(userId)) continue; // Premium only: expired users get no reminders
           let tz = devices[0]!.tz; try { localNow(tz); } catch { tz = "Asia/Kolkata"; }
           const { date, minutes } = localNow(tz);
-          const { data: meds } = await db.from("medicines").select("id,name,dosage,image_url,times,start_date,end_date,notes,repeat_every,week_days").eq("user_id", userId).lte("start_date", date);
+          const { data: meds } = await db.from("medicines").select("id,name,dosage,image_url,times,start_date,end_date,notes,repeat_every,week_days").eq("user_id", userId).eq("status", "active").lte("start_date", date);
           for (const med of meds ?? []) {
             if (!isDueOn(med, date)) continue;
             for (const time of med.times ?? []) {

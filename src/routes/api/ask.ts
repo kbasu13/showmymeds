@@ -116,7 +116,7 @@ export const Route = createFileRoute("/api/ask")({ staticData: { sitemap: false 
 
         const since = new Date(Date.now() - 30 * 864e5).toISOString().slice(0, 10);
         const [{ data: meds }, { data: logs }] = await Promise.all([
-          db.from("medicines").select("id,name,composition,form,dose_qty,times,repeat_every,week_days,start_date,end_date,stock,notes").eq("user_id", u.user.id),
+          db.from("medicines").select("id,name,composition,form,dose_qty,times,repeat_every,week_days,start_date,end_date,stock,notes").eq("user_id", u.user.id).eq("status", "active"),
           db.from("dose_logs").select("medicine_id").eq("user_id", u.user.id).gte("scheduled_date", since),
         ]);
         // Compact context keeps every question cheap: one line per medicine, taken counts instead of raw logs.

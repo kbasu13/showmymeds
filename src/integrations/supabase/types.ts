@@ -196,9 +196,11 @@ export type Database = {
           manufacturer: string | null
           name: string
           notes: string | null
+          paused_from: string | null
           prescription_path: string | null
           repeat_every: number
           start_date: string
+          status: string
           stock: number
           times: string[]
           user_id: string
@@ -217,9 +219,11 @@ export type Database = {
           manufacturer?: string | null
           name: string
           notes?: string | null
+          paused_from?: string | null
           prescription_path?: string | null
           repeat_every?: number
           start_date?: string
+          status?: string
           stock?: number
           times?: string[]
           user_id?: string
@@ -238,9 +242,11 @@ export type Database = {
           manufacturer?: string | null
           name?: string
           notes?: string | null
+          paused_from?: string | null
           prescription_path?: string | null
           repeat_every?: number
           start_date?: string
+          status?: string
           stock?: number
           times?: string[]
           user_id?: string

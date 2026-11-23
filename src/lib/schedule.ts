@@ -12,6 +12,9 @@ export type Med = {
   repeat_every?: number | null;
   /** 0 = Sunday … 6 = Saturday. Null/empty = not weekday-based. */
   week_days?: number[] | null;
+  /** active | paused | discontinued */
+  status?: string | null;
+  paused_from?: string | null;
 };
 
 export type Log = { medicine_id: string; scheduled_date: string; scheduled_time: string; taken_at: string };
@@ -29,11 +32,17 @@ export function isActiveOn(med: Pick<Med, "start_date" | "end_date">, date: stri
   return med.start_date <= date && (!med.end_date || med.end_date >= date);
 }
 
-type Freq = Pick<Med, "start_date" | "end_date" | "repeat_every" | "week_days">;
+type Freq = Pick<Med, "start_date" | "end_date" | "repeat_every" | "week_days"> & { status?: string | null; paused_from?: string | null };
+
+/** Only active medicines get reminders, stock alerts and calendar entries. */
+export function isRunning(med: { status?: string | null }) {
+  return !med.status || med.status === "active";
+}
 
 /** Is this medicine scheduled on this date (course range + repeat rule)? */
 export function isDueOn(med: Freq, date: string) {
   if (!isActiveOn(med, date)) return false;
+  if (med.status === "paused" && (!med.paused_from || date >= med.paused_from)) return false;
   const d = new Date(date + "T00:00");
   if (med.week_days?.length) return med.week_days.includes(d.getDay());
   const every = Math.max(1, Number(med.repeat_every) || 1);
@@ -81,6 +90,7 @@ export function daysOfStockLeft(med: Pick<Med, "times" | "dose_qty" | "stock" | 
 
 /** Low stock = less than a 7-day buffer remaining, for medicines still in course. */
 export function isLowStock(med: Med, today: string) {
+  if (!isRunning(med)) return false;
   if (med.end_date && med.end_date < today) return false;
   return daysOfStockLeft(med) < (med.warn_days ?? LOW_STOCK_DAYS);
 }
@@ -92,6 +102,7 @@ export type StockLevel = "empty" | "critical" | "low";
  * "empty" = nothing left, "critical" = under 2 days left, "low" = under the warn buffer, null = fine.
  */
 export function stockLevel(med: Med, today: string): StockLevel | null {
+  if (!isRunning(med)) return null;
   if (med.end_date && med.end_date < today) return null;
   if (Number(med.stock) <= 0) return "empty";
   const days = daysOfStockLeft(med);
@@ -133,6 +144,7 @@ export function buildIcs(meds: Med[], from: Date = new Date()) {
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ShowMyMeds//EN", "CALSCALE:GREGORIAN"];
   const stamp = icsDate(new Date());
   for (const med of meds) {
+    if (!isRunning(med)) continue;
     let remaining = dosesCoveredByStock(med);
     const day = new Date(from);
     day.setHours(0, 0, 0, 0);
