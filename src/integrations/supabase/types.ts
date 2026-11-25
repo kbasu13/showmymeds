@@ -185,6 +185,7 @@ export type Database = {
       }
       medicines: {
         Row: {
+          breaks: Json
           composition: string | null
           created_at: string
           dosage: string | null
@@ -208,6 +209,7 @@ export type Database = {
           week_days: number[] | null
         }
         Insert: {
+          breaks?: Json
           composition?: string | null
           created_at?: string
           dosage?: string | null
@@ -231,6 +233,7 @@ export type Database = {
           week_days?: number[] | null
         }
         Update: {
+          breaks?: Json
           composition?: string | null
           created_at?: string
           dosage?: string | null

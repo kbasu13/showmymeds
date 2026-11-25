@@ -15,6 +15,8 @@ export type Med = {
   /** active | paused | discontinued */
   status?: string | null;
   paused_from?: string | null;
+  /** Finished pause/stop periods, inclusive dates. These days are never due. */
+  breaks?: unknown;
 };
 
 export type Log = { medicine_id: string; scheduled_date: string; scheduled_time: string; taken_at: string };
@@ -32,7 +34,40 @@ export function isActiveOn(med: Pick<Med, "start_date" | "end_date">, date: stri
   return med.start_date <= date && (!med.end_date || med.end_date >= date);
 }
 
-type Freq = Pick<Med, "start_date" | "end_date" | "repeat_every" | "week_days"> & { status?: string | null; paused_from?: string | null };
+type Freq = Pick<Med, "start_date" | "end_date" | "repeat_every" | "week_days"> & { status?: string | null; paused_from?: string | null; breaks?: unknown };
+
+export type Break = { from: string; to: string };
+
+export function breaksOf(med: { breaks?: unknown }): Break[] {
+  return Array.isArray(med.breaks) ? (med.breaks as Break[]).filter((b) => b && typeof b.from === "string" && typeof b.to === "string") : [];
+}
+
+function addDays(date: string, n: number) {
+  const d = new Date(date + "T00:00");
+  d.setDate(d.getDate() + n);
+  return ymd(d);
+}
+
+/** Patch for changing a medicine's state on `today`, keeping finished breaks so they never count as missed. */
+export function lifecyclePatch(
+  med: { status?: string | null; paused_from?: string | null; end_date: string | null; breaks?: unknown },
+  status: "active" | "paused" | "discontinued",
+  today: string,
+) {
+  const breaks = breaksOf(med);
+  if (status === "paused") return { status, paused_from: today };
+  if (status === "discontinued") {
+    // A paused medicine stopped: its last due day was the day before the pause.
+    const last = med.status === "paused" && med.paused_from ? addDays(med.paused_from, -1) : today;
+    return { status, paused_from: null, end_date: med.end_date && med.end_date < last ? med.end_date : last };
+  }
+  const yesterday = addDays(today, -1);
+  let from: string | null = null;
+  if (med.status === "paused" && med.paused_from) from = med.paused_from;
+  if (med.status === "discontinued" && med.end_date) from = addDays(med.end_date, 1);
+  const next = from && from <= yesterday ? [...breaks, { from, to: yesterday }] : breaks;
+  return { status, paused_from: null, breaks: next, ...(med.status === "discontinued" ? { end_date: null } : {}) };
+}
 
 /** Only active medicines get reminders, stock alerts and calendar entries. */
 export function isRunning(med: { status?: string | null }) {
@@ -43,6 +78,7 @@ export function isRunning(med: { status?: string | null }) {
 export function isDueOn(med: Freq, date: string) {
   if (!isActiveOn(med, date)) return false;
   if (med.status === "paused" && (!med.paused_from || date >= med.paused_from)) return false;
+  if (breaksOf(med).some((b) => date >= b.from && date <= b.to)) return false;
   const d = new Date(date + "T00:00");
   if (med.week_days?.length) return med.week_days.includes(d.getDay());
   const every = Math.max(1, Number(med.repeat_every) || 1);

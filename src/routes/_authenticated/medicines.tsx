@@ -16,7 +16,7 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   FORMS, useUser, useMeds, useRefreshMeds, lookupMedicineImage, lookupComposition, lookupMedInfo, uploadFile, type Medicine,
 } from "@/lib/meds";
-import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, frequencyText, titleCase, clampStock, type Med } from "@/lib/schedule";
+import { buildIcs, daysOfStockLeft, ymd, time12, doseText, joinTimes, shortDay, frequencyText, titleCase, clampStock, lifecyclePatch, type Med } from "@/lib/schedule";
 import type { RxItem } from "@/routes/api/rxscan";
 
 export const Route = createFileRoute("/_authenticated/medicines")({ staticData: { sitemap: false },
@@ -73,10 +73,7 @@ function MedicinesPage() {
   const setState = async (m: Medicine, status: "active" | "paused" | "discontinued") => {
     const today = ymd(new Date());
     if (status === "discontinued" && !confirm(`Stop ${m.name}? Its past doses stay in your history and reports`)) return;
-    const patch =
-      status === "paused" ? { status, paused_from: today }
-      : status === "discontinued" ? { status, paused_from: null, end_date: m.end_date && m.end_date < today ? m.end_date : today }
-      : { status, paused_from: null, ...(m.status === "discontinued" ? { end_date: null } : {}) };
+    const patch = lifecyclePatch(m, status, today);
     const { error } = await supabase.from("medicines").update(patch).eq("id", m.id);
     if (error) { toast.error(error.message); return; }
     toast.success(status === "paused" ? `${m.name} paused` : status === "discontinued" ? `${m.name} stopped — history kept` : `${m.name} is active again`);

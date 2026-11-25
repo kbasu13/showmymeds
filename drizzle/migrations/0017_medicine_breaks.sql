@@ -1,0 +1,1 @@
+ALTER TABLE public.medicines ADD COLUMN breaks jsonb NOT NULL DEFAULT '[]'::jsonb;

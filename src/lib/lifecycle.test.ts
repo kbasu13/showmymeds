@@ -20,3 +20,27 @@ describe("medicine pause and stop", () => {
     expect(stockLevel(m, "2026-11-12")).toBeNull();
   });
 });
+
+import { lifecyclePatch } from "./schedule";
+describe("resuming keeps the break out of missed doses", () => {
+  const base2 = { start_date: "2026-11-01", end_date: null, repeat_every: 1, week_days: null };
+  it("pause then resume: break days are not due", () => {
+    const p = lifecyclePatch({ ...base2, status: "paused", paused_from: "2026-11-05" }, "active", "2026-11-20");
+    const m = { ...base2, ...p } as never;
+    expect(isDueOn(m, "2026-11-04")).toBe(true);
+    expect(isDueOn(m, "2026-11-12")).toBe(false);
+    expect(isDueOn(m, "2026-11-19")).toBe(false);
+    expect(isDueOn(m, "2026-11-20")).toBe(true);
+  });
+  it("stop then restart: stopped days are not due", () => {
+    const p = lifecyclePatch({ ...base2, status: "discontinued", paused_from: null, end_date: "2026-11-10" }, "active", "2026-11-20");
+    const m = { ...base2, ...p } as never;
+    expect(isDueOn(m, "2026-11-10")).toBe(true);
+    expect(isDueOn(m, "2026-11-15")).toBe(false);
+    expect(isDueOn(m, "2026-11-20")).toBe(true);
+  });
+  it("stopping a paused medicine ends it the day before the pause", () => {
+    const p = lifecyclePatch({ ...base2, status: "paused", paused_from: "2026-11-05" }, "discontinued", "2026-11-20");
+    expect(p).toMatchObject({ end_date: "2026-11-04" });
+  });
+});
