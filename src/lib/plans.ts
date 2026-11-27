@@ -45,8 +45,18 @@ export const SELLER = {
 export const AUTO_TERMS =
   "By submitting this payment you accept the ShowMyMeds Terms of Use (EULA), Privacy Policy, Refund Policy and Data Rights (DPDP/GDPR) policy. Premium starts after the payment is verified.";
 
+/** Add-on Ask reply packs for Premium users (prices before GST). */
+export const ASK_PACKS = [
+  { id: "ask50", label: "50 Ask replies", price: 49, replies: 50 },
+  { id: "ask100", label: "100 Ask replies", price: 89, replies: 100 },
+] as const;
+
+export function isAskPack(id: string) {
+  return ASK_PACKS.some((p) => p.id === id);
+}
+
 export function planLabel(id: string) {
-  return PREMIUM_PLANS.find((p) => p.id === id)?.label ?? id;
+  return PREMIUM_PLANS.find((p) => p.id === id)?.label ?? ASK_PACKS.find((p) => p.id === id)?.label ?? id;
 }
 
 /** UTR / UPI reference: 8–30 letters or digits, spaces ignored. */

@@ -12,8 +12,9 @@ export function askCredits(u: { inputTokens?: number; cachedInputTokens?: number
   return fresh * PRICE.input + cached * PRICE.cached + (u.outputTokens ?? 0) * PRICE.output;
 }
 
-export function askAllowanceState(used: number) {
-  if (used >= ASK_MONTHLY_LIMIT) return "blocked" as const;
+/** used = replies this month; packLeft = unused replies from bought packs. */
+export function askAllowanceState(used: number, packLeft = 0) {
+  if (used >= ASK_MONTHLY_LIMIT) return packLeft > 0 ? ("pack" as const) : ("blocked" as const);
   if (used >= ASK_MONTHLY_LIMIT * ASK_WARN_SHARE) return "warn" as const;
   return "ok" as const;
 }
