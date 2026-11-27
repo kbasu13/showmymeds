@@ -37,4 +37,4 @@
 
 - [x] Medicines: every-N-days and weekday schedules
 - [x] Ask: show usage per reply, monthly allowance (100), warn at 80%
-- [ ] Ask: paid top-up pack via UPI + admin approval when allowance runs out — waiting on pack size/price
+- [ ] Ask: paid top-up pack via UPI + admin approval when allowance runs out — packs: 50 @ ₹49, 100 @ ₹89; blocked: Cloud paused (out of Cloud credits)
